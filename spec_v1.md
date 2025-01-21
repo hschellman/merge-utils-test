@@ -178,47 +178,74 @@ YAML/json
 What parameters have we used?  * indicates things that are used to make a query.  
 
                         fcl file to use with lar when making tuples, required with --uselar
+                        
  -h, --help            show this help message and exit
+ 
   --detector DETECTOR   detector id [hd-protodune]
+  
   --input_dataset INPUT_DATASET
                         metacat dataset as input
+                        
   --chunk CHUNK         number of files/merge this step, should be < 100
+  
   --nfiles NFILES       number of files to merge total
+  
   --skip SKIP           number of files to skip before doing nfiles
+  
   --run RUN             run number
+  
   --destination DESTINATION
                         destination directory
+                        
   --input_data_tier INPUT_DATA_TIER
                         input data tier [root-tuple-virtual]
+                        
   --output_data_tier OUTPUT_DATA_TIER
                         output data tier
+                        
   --output_file_format OUTPUT_FILE_FORMAT
                         output file_format [None]
+                        
   --output_namespace OUTPUT_NAMESPACE
                         output namespace [None]
+                        
   --file_type FILE_TYPE
                         input detector or mc, default=detector
+                        
   --application APPLICATION
                         merge application name [inherits]
+                        
   --input_version INPUT_VERSION
                         software version of files to merge (required)
+                        
   --merge_version MERGE_VERSION
                         software version for merged file [inherits]
+                        
   --debug               make very verbose
+  
   --maketarball         make a tarball of source
+  
   --usetarball USETARBALL
                         full path for existing tarball
+                        
   --uselar              use lar instead of hadd or tar
+  
   --lar_config LAR_CONFIG
                         fcl file to use with lar when making tuples, required with --uselar
+                        
   --merge_stage MERGE_STAGE
                         stage of merging, final for last step
+                        
   --project_tag PROJECT_TAG
                         tag to describe the project you are doing
+                        
   --direct_parentage    parents are the files you are merging, not their parents
+  
   --inherit_config      inherit config file - use for hadd stype merges
+  
   --output_datasetName OUTPUT_DATASETNAME
                         optional name of output dataset this will go into
+                        
   --campaign CAMPAIGN   campaign for the merge, default is campaign of the parents
 
  --merge_stage MERGE_STAGE
@@ -226,7 +253,8 @@ What parameters have we used?  * indicates things that are used to make a query.
 
 Things to add 
 
-–query METACAT query
+–query METACAT query , overides many of the input metadata fields. 
+
 –output_file_size_goal  - specify this to calculate chunk. 
 –find_nevents - read the file to find the nevents
 
