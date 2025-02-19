@@ -22,7 +22,7 @@
             "level": "DEBUG",
             "formatter": "verbose",
             "filename": "logs/merge-utils.log",
-            "maxBytes": 1048576,
+            "maxBytes": 10240,
             "backupCount": 3
         }
     },

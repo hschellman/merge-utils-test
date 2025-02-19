@@ -1,7 +1,11 @@
 """Utilites for reading and writing files and other I/O operations"""
 
+import os
 import sys
 import logging
+import logging.config
+import json
+import pathlib
 
 logger = logging.getLogger(__name__)
 
@@ -29,3 +33,19 @@ def get_inputs(file_path: str, args: list[str]) -> list[str]:
         inputs.extend([x.strip() for x in entries])
 
     return inputs
+
+def setup_log(name: str) -> None:
+    """Configure logging from a JSON file"""
+    config_file = pathlib.Path("config/logging.json")
+    with open(config_file, encoding="utf-8") as f:
+        config = json.load(f)
+    logging.config.dictConfig(config)
+    with open(config['handlers']['file']['filename'], 'a', encoding="utf-8") as logfile:
+        logfile.write("\n")
+    logger.info("Starting script %s", os.path.basename(name))
+
+def set_log_level(level: str) -> None:
+    """Override the logging level for the console"""
+    for handler in logging.getLogger().handlers:
+        if handler.get_name() == "console":
+            handler.setLevel(level)
