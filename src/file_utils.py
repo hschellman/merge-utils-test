@@ -2,59 +2,117 @@
 
 import collections
 import logging
+import subprocess
+import hashlib
 
 logger = logging.getLogger(__name__)
 
 class DataFile:
     """A generic data file with metadata"""
     def __init__(self, data: dict):
-        self.name = data['name']
-        self.namespace = data['namespace']
+        self._did = data['namespace'] + ':' + data['name']
+        self.fid = data['fid']
         self.size = data['size']
+        self.checksums = data['checksums']
+        if len(self.checksums) == 0:
+            logger.warning("No checksums for %s", self)
+        elif 'adler32' not in self.checksums:
+            logger.warning("No adler32 checksum for %s", self)
         self.metadata = data['metadata']
+        self.has_rucio = False
 
     @property
-    def did(self):
-        """Return the DID (namespace:name) for the file"""
-        return self.namespace + ':' + self.name
-    
+    def did(self) -> str:
+        """Return the DID of the file"""
+        return self._did
+
+    @property
+    def namespace(self) -> str:
+        """Extract the namespace from the file DID"""
+        return self.did.split(':', 1)[0]
+
+    @property
+    def name(self) -> str:
+        """Extract the name from the file DID"""
+        return self.did.split(':', 1)[1]
+
     @property
     def format(self):
         """Return the file format"""
         return self.metadata['core.file_format']
 
-    def __eq__(self, other):
-        return self.did == other.did
+    def __eq__(self, other) -> bool:
+        return self.did == str(other)
 
-    def __hash__(self):
+    def __lt__(self, other) -> bool:
+        return self.did < other.did
+
+    def __hash__(self) -> int:
         return hash(self.did)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.did
 
-class UniqueFileList(collections.UserList):
-    """Class to keep track of unique files"""
+class DataSet(collections.UserDict):
+    """Class to keep track of a set of files"""
+    def __init__(self, files: list[DataFile] = None):
+        super().__init__()
+        for file in files or []:
+            self.add(file)
 
-    def __init__(self, initlist=None):
-        super().__init__(initlist)
-        self.counts = {}
-
-    def add(self, file: dict) -> None:
+    def add(self, file: DataFile | dict) -> None:
         """Add a file to the list if it is not there already"""
-        file = DataFile(file)
+        if isinstance(file, dict):
+            file = DataFile(file)
         did = file.did
 
-        if did not in self.counts:
-            self.counts[did] = 1
-            self.data.append(file)
+        if did not in self.data:
+            self.data[did] = file
+            self.data[did].count = 1
             logger.debug("Added file %s", did)
         else:
-            self.counts[did] += 1
+            self.data[did].count += 1
             logger.debug("Duped file %s", did)
 
     def dupes(self) -> dict:
-        """Get the list of files that are duplicated"""
-        return {did:(count-1) for did, count in self.counts.items() if count > 1}
+        """Return counts of duplicate file DIDs"""
+        return {did:(file.count-1) for did, file in self.data.items() if file.count > 1}
 
-    def __contains__(self, did: str) -> bool:
-        return did in self.counts
+    def rucio_list(self) -> list[dict]:
+        """Return a list of file DIDs in the format expected by Rucio"""
+        return [{'scope':file.namespace, 'name':file.name} for file in self.data.keys()]
+
+    def files(self) -> list[DataFile]:
+        """Return the list of files"""
+        return sorted(self.data.values())
+
+    def __iter__(self):
+        """Iterate over the files"""
+        return iter(self.files())
+
+    def hash(self) -> str:
+        """Get a hash from the list of files"""
+        concat = '/'.join(sorted(self.data.keys()))
+        return hashlib.sha256(concat.encode('utf-8')).hexdigest()
+
+def check_remote_path(path: str, timeout: float = 5) -> bool:
+    """Check if a remote path is accessible via xrootd"""
+    components = path.split('/', 3)
+    url = '/'.join(components[0:3])
+    path = '/'+components[3]
+    cmd = ['xrdfs', url, 'ls', '-l', path]
+    try:
+        ret = subprocess.run(cmd, capture_output=True, text=True, check=False, timeout=timeout)
+    except subprocess.TimeoutExpired:
+        logger.debug("Timeout accessing %s%s", url, path)
+        return False
+    if ret.returncode == 51:
+        logger.debug("Invalid xrootd server %s", url)
+        return False
+    if ret.returncode == 54:
+        logger.debug("No such file %s%s", url, path)
+        return False
+    if ret.returncode != 0:
+        logger.debug("Failed to access %s%s\n  %s", url, path, ret.stderr.strip().split(' ', 1)[1])
+        return False
+    return True

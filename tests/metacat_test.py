@@ -1,14 +1,16 @@
 """Tests for the metacat utils module"""
 
 from src import metacat_utils
-from src.file_utils import DataFile, UniqueFileList
+from src.file_utils import DataFile, DataSet
 
 def fake_file(namespace, name, metadata = None):
     """Create a file dictionary for testing"""
     return {
         'namespace': namespace,
         'name': name,
-        'size': 123,
+        'fid': 123,
+        'size': 456789,
+        'checksums': {},
         'metadata': metadata
     }
 
@@ -20,7 +22,7 @@ def test_uniqueness():
         ['namespace1', 'file1'],
     ]
     input_files = []
-    unique_files = UniqueFileList()
+    unique_files = DataSet()
     for i in inputs:
         file = fake_file(*i)
         input_files.append(DataFile(file))
