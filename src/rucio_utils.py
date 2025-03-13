@@ -70,7 +70,7 @@ class Sites(collections.UserDict):
             #if info['type'] == 'DISK':
             #elif info['type'] == 'TAPE':
 
-            paths.append(priority, rse, pfn)
+            paths.append([priority, rse, pfn])
 
         paths.sort()
         self.data[paths[0][1]].best += 1

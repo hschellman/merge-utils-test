@@ -60,7 +60,7 @@ class DataSet(collections.UserDict):
         for file in files or []:
             self.add(file)
 
-    def add(self, file: DataFile | dict) -> None:
+    def add(self, file) -> None:
         """Add a file to the list if it is not there already"""
         if isinstance(file, dict):
             file = DataFile(file)
@@ -80,7 +80,7 @@ class DataSet(collections.UserDict):
 
     def rucio_list(self) -> list[dict]:
         """Return a list of file DIDs in the format expected by Rucio"""
-        return [{'scope':file.namespace, 'name':file.name} for file in self.data.keys()]
+        return [{'scope':file.namespace, 'name':file.name} for file in self.data.values()]
 
     def files(self) -> list[DataFile]:
         """Return the list of files"""

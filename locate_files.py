@@ -2,23 +2,21 @@
 
 """
 Script to take a metacat query or list of file DIDs, and then:
-1. Find the logical file entries in MetaCat
-2. Remove duplicate files from the list
-3. Ensure that the file metadata is consistent for CHECKED_FIELDS
-4. If strict mode is enabled, additionally check CHECKED_FIELDS_STRICT
+1. Find the logical file entries in MetaCat and validate the metadata
+2. Retrieve the list of physical files from Rucio
 """
 ##
-# @mainpage validate_metadata
+# @mainpage locate_files
 #
 # @section description_main
 #
 #
-# @file validate_metadata.py
+# @file locate_files.py
 
 import argparse
 import logging
 
-from src import io_utils, metacat_utils
+from src import io_utils, metacat_utils, rucio_utils
 
 logger = logging.getLogger(__name__)
 
@@ -47,8 +45,10 @@ def main():
     flist = metacat_utils.find_logical_files(
         query=args.query, filelist=flist, strict=args.strict, allow=args.allow
     )
+
+    flist = rucio_utils.find_physial_files(flist)
     for file in flist:
-        print (file.did)
+        print (file.paths[0])
 
 if __name__ == '__main__':
     main()
