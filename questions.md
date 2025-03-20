@@ -26,4 +26,3 @@ Reusing existing frameworks
     -	Merging needs to map one job to many files instead of one to one, so it might be different from typical analysis jobs
 -	Can we configure the merging to run automatically at the end of existing workflows?
 -	None of the software workshops I have been to so far have said much about job submission.  I applied for the OSG school this summer, but are there any good resources I should look at in the meantime?
-![image](https://github.com/user-attachments/assets/96f6d4ed-7963-4e38-bc00-dcb99de30e59)
