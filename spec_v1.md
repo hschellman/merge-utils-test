@@ -144,16 +144,10 @@ The output file `name` needs to be generated either at the data merging or metad
  
 *         `dune.dataset_name` is an output dataset name that needs to be generated to give rucio/metacat a place to put the * ou tput files. This is currently generated from the merged metadata if not supplied on the command line
  
-*         `dune.dataset_name` is an output dataset name that needs to be generated to give rucio/metacat a place to put the * output files. This is currently generated from the merged metadata if not supplied on the command line
-
-* `dune.output_status` is set to “merged” - should be updated to “confirmed” once actually stored by declaD
+*       `dune.output_status` is set to “merged” - should be updated to “confirmed” once actually stored by declaD
  
-*       `dune.dataset_name` is an output dataset name that needs to be generated to give rucio/metacat a place to put the output files. This is currently generated from the merged metadata if not supplied on the command line
-
 *       `dune.merging_stage` is set to “final” if done, otherwise some intermediate status.  If not “final”, another merging stage will be run. 
  
-*      `dune.dataset_name` is an output dataset name that needs to be generated to give rucio/metacat a place to put the output files. This is currently generated from the merged metadata if not supplied on the command line
-
 *       `dune.merging_range` has the ranges for the files merged in the input list. 
  
 Methods needed:  
