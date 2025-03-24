@@ -46,7 +46,7 @@ scripts that perform the merge of data and generate a checksum for the output.
 -         validate the metadata for those input files is ok
 -         Check that the metadata of the input files is consistent within requirements (see below)
 
-## Where does this run.  
+## Move from Jobsub to Justin for batch running
 
 - the first iteration both ran interactively from a gpvm and via a jobsub script
 - The suggestion is that future runs be done via justin and/or interactively
