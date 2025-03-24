@@ -1,5 +1,5 @@
 H. Schellman and E. Muldoon
-January 7 2025 - updated January 21, 2025
+January 7 2025 - updated January 21, 2025, March 24, 2025
  
 Description of issues for merging files
  
@@ -56,6 +56,11 @@ scripts that perform the merge of data and generate a checksum for the output.
 - needs to be able to take a list of file locations (if the inputs are not declated to metacat yet) or
 - needs to be able to run over a dataset at a particular site that has the data available and enough capacity to run IO intensive activities
 - need to be able to specify an output RSE for merge jobs - how do we do this?
+
+### how do we get Justin to run over chunks of files in a list. 
+
+- possibly - submit a job for each chunk.
+- possibly - submit N parallel jobs which are smart enough to use jobid to choose a chunk. What is jobid. 
 
 ### Methods needed:
 
