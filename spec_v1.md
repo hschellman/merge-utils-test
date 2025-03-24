@@ -46,6 +46,22 @@ scripts that perform the merge of data and generate a checksum for the output.
 -         validate the metadata for those input files is ok
 -         Check that the metadata of the input files is consistent within requirements (see below)
 
+## Where does this run.  
+
+- the first iteration both ran interactively from a gpvm and via a jobsub script
+- The suggestion is that future runs be done via justin and/or interactively
+
+### Justin questions 2025-03-24
+
+- needs to be able to take a list of file locations (if the inputs are not declated to metacat yet) or
+- needs to be able to run over a dataset at a particular site that has the data available and enough capacity to run IO intensive activities
+- need to be able to specify an output RSE for merge jobs - how do we do this?
+
+### Methods needed:
+
+- justin jobscript that can take a list of files and loop over them
+- justin jobscript that can take a dataset and loop over them
+  
 ## Delivery methods  
  
 1)        A rucio or metacat dataset with files declared to metacat
