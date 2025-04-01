@@ -53,6 +53,11 @@ class DataFile:
     def __str__(self) -> str:
         return self.did
 
+    def get_fields(self, fields: list) -> list:
+        """Return a tuple of values for the namespace and specified metadata fields"""
+        values = [self.namespace] + [self.metadata.get(field, "") for field in fields]
+        return tuple(values)
+
 class DataSet(collections.UserDict):
     """Class to keep track of a set of files"""
     def __init__(self, files: list[DataFile] = None):
@@ -94,6 +99,37 @@ class DataSet(collections.UserDict):
         """Get a hash from the list of files"""
         concat = '/'.join(sorted(self.data.keys()))
         return hashlib.sha256(concat.encode('utf-8')).hexdigest()
+
+    def check_consistency(self, fields: list) -> bool:
+        """Check that the files have consistent namespaces and selected metadata fields"""
+        logger.debug("Checking metadata consistency")
+
+        if len(self.data) < 2:
+            return True
+
+        counts = collections.defaultdict(int)
+        for file in self.data.values():
+            counts[file.get_fields(fields)] += 1
+
+        if len(counts) == 1:
+            return True
+
+        mode = max(counts, key=counts.get)
+        n_errs = len(self.data) - counts[mode]
+        s_errs = "s" if n_errs != 1 else ""
+        errs = [f"Found {n_errs} file{s_errs} with inconsistent metadata:"]
+
+        for file in self.files():
+            values = file.get_fields(fields)
+            if values != mode:
+                errs.append(f"\n  {file.did}")
+                for i, key in enumerate(fields):
+                    if values[i] != mode[i]:
+                        errs.append(f"\n    {key}: '{values[i]}' != '{mode[i]}'")
+
+        logger.error("".join(errs))
+        return False
+
 
 def check_remote_path(path: str, timeout: float = 5) -> bool:
     """Check if a remote path is accessible via xrootd"""
