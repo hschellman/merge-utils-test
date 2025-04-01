@@ -1,5 +1,5 @@
 H. Schellman and E. Muldoon
-January 7 2025 - updated January 21, 2025
+January 7 2025 - updated January 21, 2025, March 24, 2025
  
 Description of issues for merging files
  
@@ -46,6 +46,27 @@ scripts that perform the merge of data and generate a checksum for the output.
 -         validate the metadata for those input files is ok
 -         Check that the metadata of the input files is consistent within requirements (see below)
 
+## Move from Jobsub to Justin for batch running
+
+- the first iteration both ran interactively from a gpvm and via a jobsub script
+- The suggestion is that future runs be done via justin and/or interactively
+
+### Justin questions 2025-03-24
+
+- needs to be able to take a list of file locations (if the inputs are not declated to metacat yet) or
+- needs to be able to run over a dataset at a particular site that has the data available and enough capacity to run IO intensive activities
+- need to be able to specify an output RSE for merge jobs - how do we do this?
+
+### how do we get Justin to run over chunks of files in a list. 
+
+- possibly - submit a job for each chunk.
+- possibly - submit N parallel jobs which are smart enough to use jobid to choose a chunk. What is jobid. 
+
+### Methods needed:
+
+- justin jobscript that can take a list of files and loop over them
+- justin jobscript that can take a dataset and loop over them
+  
 ## Delivery methods  
  
 1)        A rucio or metacat dataset with files declared to metacat
@@ -128,16 +149,10 @@ The output file `name` needs to be generated either at the data merging or metad
  
 *         `dune.dataset_name` is an output dataset name that needs to be generated to give rucio/metacat a place to put the * ou tput files. This is currently generated from the merged metadata if not supplied on the command line
  
-*         `dune.dataset_name` is an output dataset name that needs to be generated to give rucio/metacat a place to put the * output files. This is currently generated from the merged metadata if not supplied on the command line
-
-* `dune.output_status` is set to “merged” - should be updated to “confirmed” once actually stored by declaD
+*       `dune.output_status` is set to “merged” - should be updated to “confirmed” once actually stored by declaD
  
-*       `dune.dataset_name` is an output dataset name that needs to be generated to give rucio/metacat a place to put the output files. This is currently generated from the merged metadata if not supplied on the command line
-
 *       `dune.merging_stage` is set to “final” if done, otherwise some intermediate status.  If not “final”, another merging stage will be run. 
  
-*      `dune.dataset_name` is an output dataset name that needs to be generated to give rucio/metacat a place to put the output files. This is currently generated from the merged metadata if not supplied on the command line
-
 *       `dune.merging_range` has the ranges for the files merged in the input list. 
  
 Methods needed:  
