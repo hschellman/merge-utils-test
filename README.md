@@ -1,6 +1,8 @@
 # merge-utils
 Utilities for merging files and metadata
 
+see https://hschellman.github.io/merge-utils-test for documentation
+
 see https://github.com/DUNE/merge-utils/blob/main/spec_v1.md  for specification
 
 Copyright © 2025 FERMI NATIONAL ACCELERATOR LABORATORY
