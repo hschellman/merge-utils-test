@@ -17,3 +17,5 @@ checked_fields = [
     "dune.config_file",         # Not checked in old merging
     "core.application.version", # Not checked in old merging
 ]
+
+[sites]

@@ -4,9 +4,10 @@ from __future__ import annotations
 import collections
 import logging
 import subprocess
-from dataclasses import dataclass
+#from dataclasses import dataclass
 
 from rucio.client.replicaclient import ReplicaClient
+from rucio.client.rseclient import RSEClient
 
 from src.file_utils import DataFile, DataSet
 
@@ -14,26 +15,38 @@ logger = logging.getLogger(__name__)
 
 LOCAL_PING_THRESHOLD = 5
 
-@dataclass
+def check_status(path: str) -> bool:
+    """Check whether a file is on disk or tape"""
+    cmd = ['gfal-xattr', path, 'user.status']
+    ret = subprocess.run(cmd, capture_output=True, text=True, check=False)
+    if 'ONLINE' in ret.stdout:
+        return True
+    return False
+
 class Site:
     """Class to store information about a site"""
-    ping: float
-    count: int = 1
-    best: int = 0
+    def __init__(self, valid: bool):
+        self.valid = valid
+        self.disk = set()
+        self.tape = set()
 
 class Sites(collections.UserDict):
     """Class to keep track of a set of sites"""
-    def __init__(self, prefer_site: str = None, local_only = False):
+    def __init__(self):
         super().__init__()
-        self.prefer_site = prefer_site
-        self.local_only = local_only
+        self.disk = set()
+        self.tape = set()
 
-    def ping(self, rse: str, pfn: str) -> float:
-        """Check the ping time to a site in ms, recording the number of times it is used"""
-        if rse in self.data:
-            self.data[rse].count += 1
-            return self.data[rse].ping
+        # get the list of sites from Rucio
+        rse_client = RSEClient()
+        for rse in rse_client.list_rses():
+            valid = True
+            if rse['deleted'] or not rse['availability_read'] or rse['staging_area']:
+                valid = False
+            self[rse['rse']] = Site(valid)
 
+    def ping(self, pfn: str) -> float:
+        """Get the ping time to a site in ms"""
         url = pfn.split(':', 2)[1][2:] # extract host from 'protocol://host:port/path'
         cmd = ['ping', '-c', '1', url]
         ret = subprocess.run(cmd, capture_output=True, check=False)
@@ -41,53 +54,53 @@ class Sites(collections.UserDict):
             ping = float('inf')
         else:
             ping = float(ret.stdout.split(b'/')[-2]) # average ping time
-        logger.debug("Pinged %s (%s), t = %d ms", rse, url, ping)
-
-        self.data[rse] = Site(ping)
+        logger.debug("Pinged %s, t = %d ms", url, ping)
         return ping
 
-    def get_paths(self, replicas: dict) -> list[str]:
-        """Get the best paths for a file from a list of replicas"""
-        paths = []
+    def get_paths(self, did: str, replicas: dict) -> dict:
+        """Get the physical paths for a file"""
+        paths = {}
+
         for pfn, info in replicas['pfns'].items():
             rse = info['rse']
-            ping = self.ping(rse, pfn)
-            if ping == float('inf'):
+            if rse not in self:
+                logger.warning("RSE %s not found in Rucio", rse)
                 continue
 
-            priority = info['priority']
-            if ping < LOCAL_PING_THRESHOLD:
-                priority = ping - LOCAL_PING_THRESHOLD # prioritize local sites
-            if self.prefer_site and rse == self.prefer_site:
-                priority = -100
+            if not self[rse].valid:
+                logger.warning("RSE %s is not valid", rse)
+                continue
 
-            if self.local_only:
-                if self.prefer_site and rse != self.prefer_site:
-                    continue
-                if not self.prefer_site and ping >= LOCAL_PING_THRESHOLD:
-                    continue
+            paths[rse] = pfn
+            if info['type'] == 'DISK' or check_status(pfn):
+                self[rse].disk.add(did)
+            else:
+                self[rse].tape.add(did)
 
-            #check whether the file is on disk or tape?
-            #if info['type'] == 'DISK':
-            #elif info['type'] == 'TAPE':
+        return paths
 
-            paths.append([priority, rse, pfn])
+    def cleanup(self) -> None:
+        """Cleanup the sites dictionary"""
+        rse_client = RSEClient()
+        # Remove sites with no files
+        self.data = {k: v for k, v in self.items() if len(v.disk) > 0 or len(v.tape) > 0}
 
-        paths.sort()
-        self.data[paths[0][1]].best += 1
-        return [path[2] for path in paths]
-
-    def log_counts(self) -> None:
-        """Log the number of files found from each site"""
+        # Count how many files we found
         msg = [""]
-        n_files = 0
-        n_sites = len(self)
-        for rse, site in sorted(self.items(), key=lambda x: x[1].best, reverse=True):
-            n_files += site.best
-            msg.append(f"\n  {rse}: {site.best} ({site.count}) files")
+        for rse, site in sorted(self.items(), key=lambda x: len(x[1].disk), reverse=True):
+            self.disk |= site.disk
+            self.tape |= site.tape
+            msg.append(f"\n  {rse}: {len(site.disk)} ({len(site.tape)}) files")
+
+            attr = rse_client.list_rse_attributes(rse)
+            site.justin = attr['site']
+        
+        n_files = len(self.disk)
+        n_tape = len(self.tape - self.disk)
+        n_sites = len(self.items())
         s_files = "s" if n_files != 1 else ""
         s_sites = "s" if n_sites != 1 else ""
-        msg[0] = f"Found {n_files} file{s_files} from {n_sites} site{s_sites}:"
+        msg[0] = f"Found {n_files} ({n_tape}) file{s_files} from {n_sites} site{s_sites}:"
         logger.info("".join(msg))
 
 
@@ -133,13 +146,13 @@ def log_bad_files(files: dict, msg: str) -> int:
     logger.warning("".join(msg))
     return total
 
-def find_physial_files(files : DataSet, prefer_site: str = None, local_only = False) -> DataSet:
+def find_physial_files(files : DataSet) -> DataSet:
     """Get the best physical locations for a list of logical files"""
     found_files = DataSet()
     bad_files = []
     inacessible_files = []
 
-    sites = Sites(prefer_site, local_only)
+    sites = Sites()
     replica_client = ReplicaClient()
     for replicas in replica_client.list_replicas(files.rucio_list(), ignore_availability=False):
         did = replicas['scope'] + ':' + replicas['name']
@@ -150,7 +163,7 @@ def find_physial_files(files : DataSet, prefer_site: str = None, local_only = Fa
             bad_files.append(did)
             continue
 
-        file.paths = sites.get_paths(replicas)
+        file.paths = sites.get_paths(did, replicas)
         if len(file.paths) == 0:
             inacessible_files.append(did)
             #logger.error("No valid replicas found for %s", did)
@@ -158,7 +171,8 @@ def find_physial_files(files : DataSet, prefer_site: str = None, local_only = Fa
 
         found_files.add(file)
 
-    sites.log_counts()
+    sites.cleanup()
+
     missing_files = [file.did for file in files if not file.has_rucio]
     log_bad_files(missing_files, "No Rucio entry for {count} {files}:")
     log_bad_files(inacessible_files, "No valid replicas for {count} {files}:")
