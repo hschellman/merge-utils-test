@@ -23,6 +23,7 @@ Contents
 --------
 
 .. toctree::
-
+   
+    code
     related
     Notes

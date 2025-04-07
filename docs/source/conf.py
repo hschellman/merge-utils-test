@@ -31,12 +31,12 @@ print ("PATH",sys.path)
 
 # -- Project information -----------------------------------------------------
 
-project = 'DataCatalogDocs'
-copyright = '2023, Fermi National Accelerator Laboratory'
-author = 'Heidi Schellman and Jacob Calcutt'
+project = 'merge-utils'
+copyright = '2025, Fermi National Accelerator Laboratory'
+author = 'Heidi Schellman and Ethan Muldoon'
 
 # The full version, including alpha/beta/rc tags
-release = '0.2'
+release = '0.0'
 
 
 # -- General configuration ---------------------------------------------------
@@ -59,7 +59,7 @@ extensions = [
 
 autoclass_content = "both"  # from ivmfnal
 
-html_baseurl = 'https://dune.github.io/DataCatalogDocs/'
+html_baseurl = 'https://hschellman.github.io/merge-utils/'
 
 autosectionlabel_prefix_document = True
 
@@ -71,7 +71,7 @@ templates_path = ['_templates']
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
-autodoc_mock_imports = ["metacat","samweb_client","data_dispatcher"]
+autodoc_mock_imports = ["metacat","samweb_client","data_dispatcher","DataSet"]
 # -- Options for HTML output -------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
