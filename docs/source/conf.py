@@ -61,7 +61,7 @@ extensions = [
 
 autoclass_content = "both"  # from ivmfnal
 
-html_baseurl = 'https://hschellman.github.io/merge-utils/'
+html_baseurl = 'https://hschellman.github.io/merge-utils-test/'
 
 autosectionlabel_prefix_document = True
 
