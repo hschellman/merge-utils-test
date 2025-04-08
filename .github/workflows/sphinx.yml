@@ -11,9 +11,9 @@ jobs:
       with:
         python-version: '3.9' 
     - name: whereami
-      run: env
+      run: pwd
     - name: Install Dependencies
-      run: pip install -r requirements.txt
+      run: pip install -r docs/requirements.txt
       shell: bash
     - name: Build HTML
       uses: ammaraskar/sphinx-action@master
