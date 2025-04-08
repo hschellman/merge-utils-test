@@ -11,7 +11,7 @@ jobs:
       run: sudo chown -R $(whoami) /github/home
       uses: actions/setup-python@v5
       with:
-        python-version: '3.9.21'  
+        python-version: '3.9'  
     - name: Build HTML
       uses: ammaraskar/sphinx-action@master
     - name: Upload artifacts
