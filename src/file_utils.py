@@ -1,10 +1,10 @@
 """Utilities for working with data files"""
-
+from __future__ import annotations
 import collections
 import logging
 import subprocess
 import hashlib
-from __future__ import annotations
+
 
 logger = logging.getLogger(__name__)
 
