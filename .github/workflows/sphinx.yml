@@ -5,9 +5,12 @@ on: push
 jobs:
   build:
     runs-on: ubuntu-latest
-    tools:
-      python: "3.9"
+
     steps:
+    - name: Setup python
+    - uses: actions/setup-python@v5
+      with:  
+        python-version: '3.9'
     - uses: actions/checkout@v3
     - name: Build HTML
       uses: ammaraskar/sphinx-action@master
