@@ -60,7 +60,7 @@ class DataFile:
 
 class DataSet(collections.UserDict):
     """Class to keep track of a set of files"""
-    def __init__(self, files: list[DataFile] = None):
+    def __init__(self, files = None):
         super().__init__()
         for file in files or []:
             self.add(file)
