@@ -8,7 +8,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Change ownership of /github/home
-      run: sudo chown -R $(whoami) /github/home
+      #run: sudo chown -R $(whoami) /github/home
       uses: actions/setup-python@v5
       with:
         python-version: '3.9'  
