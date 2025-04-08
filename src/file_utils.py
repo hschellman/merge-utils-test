@@ -1,5 +1,4 @@
 """Utilities for working with data files"""
-"""Utilities for working with data files"""
 from __future__ import annotations
 import collections
 import logging
