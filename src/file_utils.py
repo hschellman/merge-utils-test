@@ -1,10 +1,10 @@
 """Utilities for working with data files"""
+"""Utilities for working with data files"""
 from __future__ import annotations
 import collections
 import logging
 import subprocess
 import hashlib
-
 
 logger = logging.getLogger(__name__)
 
@@ -61,7 +61,7 @@ class DataFile:
 
 class DataSet(collections.UserDict):
     """Class to keep track of a set of files"""
-    def __init__(self, files = None):
+    def __init__(self, files: list[DataFile] = None):
         super().__init__()
         for file in files or []:
             self.add(file)
