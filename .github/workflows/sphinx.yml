@@ -7,6 +7,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
+    - name: Change ownership of /github/home
+      run: sudo chown -R $(whoami) /github/home
     - name: Build HTML
       uses: ammaraskar/sphinx-action@master
     - name: Upload artifacts
