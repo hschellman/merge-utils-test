@@ -1,4 +1,5 @@
 """Utility functions for interacting with the MetaCat web API."""
+from __future__ import annotations
 
 import collections
 import logging

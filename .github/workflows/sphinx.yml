@@ -1,0 +1,42 @@
+name: Sphinx build
+
+on: push
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout 
+      uses: actions/checkout@v4
+    - name: Update python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.9' 
+    - name: whereami
+      run: pwd
+    - name: directory structure
+      run: ls -lR
+    - name: Install Dependencies (the build file seems to overwrite this
+      run: python3 -m pip install -r docs/requirements.txt 
+      shell: bash
+    - name: check env 
+      run: env
+    - name: directly build sphinx
+      run: |
+        pip install -r docs/requirements.txt
+        cd docs
+        make html
+        cd ..
+    - name: check env again
+      run: env
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: html-docs
+        path: docs/build/html/
+    - name: Deploy
+      uses: peaceiris/actions-gh-pages@v3
+      if: github.ref == 'refs/heads/main'
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: docs/build/html
