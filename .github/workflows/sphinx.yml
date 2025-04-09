@@ -14,11 +14,15 @@ jobs:
         python-version: '3.9' 
     - name: whereami
       run: pwd
-    - name: Install Dependencies
+    - name: Install Dependencies (the build file seems to overwrite this
       run: python3 -m pip install -r docs/requirements.txt 
       shell: bash
+    - name: check env 
+      run: env
     - name: Build HTML
       uses: ammaraskar/sphinx-action@master
+    - name: check env again
+      run: env
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
