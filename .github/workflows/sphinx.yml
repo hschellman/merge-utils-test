@@ -14,6 +14,7 @@ jobs:
         python-version: '3.9' 
     - name: whereami
       run: pwd
+    - name: directory structure
       run: ls -lR
     - name: Install Dependencies (the build file seems to overwrite this
       run: python3 -m pip install -r docs/requirements.txt 
