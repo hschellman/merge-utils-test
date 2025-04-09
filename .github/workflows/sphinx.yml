@@ -6,10 +6,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - name: Change ownership of /github/home
-      run: ls -lrta /github/home/.cache
-    - name: Try to access cache
-      run: sudo chown -R $(whoami) /github/home
+    - name: make a pip area I can access
+      run: pip config --user set global.cache-dir $HOME/.pipcache
     - name: Checkout 
       uses: actions/checkout@v4
     - name: Update python
