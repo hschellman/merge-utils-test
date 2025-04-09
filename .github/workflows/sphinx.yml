@@ -7,6 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Change ownership of /github/home
+      run: ls -lrta /github/home/.cache
       run: sudo chown -R $(whoami) /github/home
     - name: Checkout 
       uses: actions/checkout@v4
