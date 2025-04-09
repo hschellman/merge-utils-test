@@ -1,20 +1,17 @@
-
 <!DOCTYPE html>
 
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
     <title>rucio_utils &#8212; merge-utils 0.0 documentation</title>
-    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="_static/nature.css" />
-    <link rel="stylesheet" type="text/css" href="_static/graphviz.css" />
-    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-    <script src="_static/jquery.js"></script>
-    <script src="_static/underscore.js"></script>
-    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="_static/doctools.js"></script>
-    <script src="_static/sphinx_highlight.js"></script>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="_static/nature.css?v=8fc2db88" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=eafc0fe6" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=44496db0"></script>
+    <script src="_static/doctools.js?v=888ff710"></script>
+    <script src="_static/sphinx_highlight.js?v=4825356b"></script>
     <link rel="canonical" href="https://hschellman.github.io/merge-utils-test/rucio_utils.html" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -46,7 +43,7 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="module-rucio_utils">
+  <section id="module-rucio_utils">
 <span id="rucio-utils"></span><h1>rucio_utils<a class="headerlink" href="#module-rucio_utils" title="Permalink to this heading">¶</a></h1>
 <p>Utility functions for interacting with the Rucio web API.</p>
 <dl class="py class">
@@ -57,7 +54,7 @@
 
 <dl class="py class">
 <dt class="sig sig-object py" id="rucio_utils.Sites">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rucio_utils.</span></span><span class="sig-name descname"><span class="pre">Sites</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prefer_site</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">local_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rucio_utils.html#Sites"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rucio_utils.Sites" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rucio_utils.</span></span><span class="sig-name descname"><span class="pre">Sites</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prefer_site</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">local_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rucio_utils.html#Sites"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rucio_utils.Sites" title="Permalink to this definition">¶</a></dt>
 <dd><p>Class to keep track of a set of sites</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="rucio_utils.Sites.get_paths">
@@ -87,7 +84,7 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="rucio_utils.find_physial_files">
-<span class="sig-prename descclassname"><span class="pre">rucio_utils.</span></span><span class="sig-name descname"><span class="pre">find_physial_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">files</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataSet</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefer_site</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">local_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataSet</span></span></span><a class="reference internal" href="_modules/rucio_utils.html#find_physial_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rucio_utils.find_physial_files" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">rucio_utils.</span></span><span class="sig-name descname"><span class="pre">find_physial_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">files</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataSet</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefer_site</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">local_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataSet</span></span></span><a class="reference internal" href="_modules/rucio_utils.html#find_physial_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rucio_utils.find_physial_files" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the best physical locations for a list of logical files</p>
 </dd></dl>
 
@@ -97,7 +94,7 @@
 <dd><p>Log a message for files without valid replicas</p>
 </dd></dl>
 
-</div>
+</section>
 
 
             <div class="clearer"></div>
@@ -176,8 +173,8 @@
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2025, Fermi National Accelerator Laboratory.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.3.0.
+    &#169; Copyright 2025, Fermi National Accelerator Laboratory.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.1.2.
     </div>
   </body>
 </html>
