@@ -6,7 +6,11 @@ jobs:
   build:
     runs-on: ubuntu-22.04
     steps:
+    - name: Change ownership of /github/home
+      run: sudo chown -R $(whoami) /github/home
+    - name: Checkout 
     - uses: actions/checkout@v4
+    - name: Update python
     - uses: actions/setup-python@v5
       with:
         python-version: '3.9' 
