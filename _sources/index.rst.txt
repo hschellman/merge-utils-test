@@ -24,6 +24,8 @@ Contents
 
 .. toctree::
    
-    code
+    file_utils
+    rucio_utils
+    io_utils
     related
     Notes
