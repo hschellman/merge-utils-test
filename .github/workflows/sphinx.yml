@@ -6,8 +6,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - name: make a pip area I can access
-      run: pip config --user set global.cache-dir $HOME/.pipcache
     - name: Checkout 
       uses: actions/checkout@v4
     - name: Update python
@@ -17,7 +15,7 @@ jobs:
     - name: whereami
       run: pwd
     - name: Install Dependencies
-      run: pip install -r docs/requirements.txt
+      run: python3 -m pip install -r docs/requirements.txt 
       shell: bash
     - name: Build HTML
       uses: ammaraskar/sphinx-action@master
