@@ -6,8 +6,8 @@ import logging
 
 import metacat.webapi as metacat
 
-from src import io_utils
-from src.file_utils import DataSet
+import io_utils
+from merge_set import MergeSet
 
 logger = logging.getLogger(__name__)
 
@@ -24,10 +24,10 @@ def log_bad_files(files: dict, msg: str) -> int:
     logger.warning("".join(msg))
     return total
 
-def find_logical_files(query: str = None, filelist: list = None, config: dict = None) -> DataSet:
+def find_logical_files(query: str = None, filelist: list = None, config: dict = None) -> MergeSet:
     """
     Retrieve logical file information from MetaCat based on an MQL query or a list of DIDs.
-    Returns a DataSet of unique files if the metadata is consistent, otherwise an empty DataSet.
+    Returns a MergeSet of unique files if the metadata is consistent, otherwise an empty MergeSet.
     The config dictionary can be used to set the following options:
     - allow_missing: allow missing files
     - allow_duplicates: allow duplicate files
@@ -42,7 +42,7 @@ def find_logical_files(query: str = None, filelist: list = None, config: dict = 
         logger.warning("Both query and file list provided, was this intended?")
 
     mc_client = metacat.MetaCatClient()
-    files = DataSet()
+    files = MergeSet()
     missing = collections.defaultdict(int)
 
     if query is not None:
@@ -50,7 +50,7 @@ def find_logical_files(query: str = None, filelist: list = None, config: dict = 
             res = mc_client.query(query, with_metadata = True)
         except metacat.webapi.BadRequestError as err:
             logger.error("Malformed MetaCat query:\n  %s\n%s", query, err)
-            return DataSet()
+            return MergeSet()
         for file in res:
             files.add(file)
 
@@ -60,7 +60,7 @@ def find_logical_files(query: str = None, filelist: list = None, config: dict = 
             res = mc_client.get_files(didlist, with_metadata = True)
         except (ValueError, metacat.webapi.BadRequestError) as err:
             logger.error("%s", err)
-            return DataSet()
+            return MergeSet()
         for file in res:
             files.add(file)
         for did in (x for x in filelist if x not in files):
@@ -70,13 +70,13 @@ def find_logical_files(query: str = None, filelist: list = None, config: dict = 
     n_dupes = log_bad_files(files.dupes(), "Found {count} duplicate {files}:")
     if n_missing and not config['allow_missing']:
         logger.error("Validation failed due to missing files")
-        return DataSet()
+        return MergeSet()
     if n_dupes and not config['allow_duplicates']:
         logger.error("Validation failed due to duplicate files")
-        return DataSet()
+        return MergeSet()
 
     if not files.check_consistency(config['checked_fields']):
         logger.error("Validation failed due to inconsistent metadata")
-        return DataSet()
+        return MergeSet()
 
     return files

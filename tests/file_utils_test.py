@@ -1,7 +1,7 @@
 """Tests for the metacat utils module"""
 
 #import pytest
-from src.file_utils import DataFile, DataSet
+from merge_utils.merge_set import MergeFile, MergeSet
 
 def fake_file(namespace, name, metadata = None):
     """Create a file dictionary for testing"""
@@ -14,9 +14,9 @@ def fake_file(namespace, name, metadata = None):
         'metadata': metadata
     }
 
-def test_datafile():
-    """Test the DataFile class behavior"""
-    file = DataFile(fake_file('test_namespace', 'test_name', {
+def test_merge_file():
+    """Test the MergeFile class behavior"""
+    file = MergeFile(fake_file('test_namespace', 'test_name', {
         'checked.field1': 'value1',
         'checked.field2': 'value2',
         'other.field': 'other_value'
@@ -29,18 +29,18 @@ def test_datafile():
     assert str(file) == 'test_namespace:test_name'
     assert file.get_fields(['checked.field1', 'checked.field2']) == ('test_namespace', 'value1', 'value2')
 
-def test_dataset_uniqueness():
-    """Test dataset uniqueness criteria"""
+def test_merge_set_uniqueness():
+    """Test MergeSet uniqueness criteria"""
     inputs = [
         ['namespace1', 'file1'],
         ['namespace1', 'file2'],
         ['namespace1', 'file1'],
     ]
     input_files = []
-    unique_files = DataSet()
+    unique_files = MergeSet()
     for i in inputs:
         file = fake_file(*i)
-        input_files.append(DataFile(file))
+        input_files.append(MergeFile(file))
         unique_files.add(file)
 
     assert list(unique_files) == [input_files[0], input_files[1]]
@@ -48,9 +48,9 @@ def test_dataset_uniqueness():
     assert 'namespace1:file1' in unique_files
     assert 'namespace1:file2' in unique_files
 
-def test_dataset_consistency():
-    """Test dataset consistency checks"""
-    files = DataSet()
+def test_merge_set_consistency():
+    """Test MergeSet consistency checks"""
+    files = MergeSet()
     files.add(fake_file('namespace1', 'file1', {
         'checked.field1': 'value1',
         'checked.field2': 'value2',

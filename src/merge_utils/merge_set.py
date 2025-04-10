@@ -7,7 +7,7 @@ import hashlib
 
 logger = logging.getLogger(__name__)
 
-class DataFile:
+class MergeFile:
     """A generic data file with metadata"""
     def __init__(self, data: dict):
         self._did = data['namespace'] + ':' + data['name']
@@ -58,9 +58,9 @@ class DataFile:
         values = [self.namespace] + [self.metadata.get(field, "") for field in fields]
         return tuple(values)
 
-class DataSet(collections.UserDict):
+class MergeSet(collections.UserDict):
     """Class to keep track of a set of files"""
-    def __init__(self, files: list[DataFile] = None):
+    def __init__(self, files: list[MergeFile] = None):
         super().__init__()
         for file in files or []:
             self.add(file)
@@ -68,7 +68,7 @@ class DataSet(collections.UserDict):
     def add(self, file) -> None:
         """Add a file to the list if it is not there already"""
         if isinstance(file, dict):
-            file = DataFile(file)
+            file = MergeFile(file)
         did = file.did
 
         if did not in self.data:
@@ -87,7 +87,7 @@ class DataSet(collections.UserDict):
         """Return a list of file DIDs in the format expected by Rucio"""
         return [{'scope':file.namespace, 'name':file.name} for file in self.data.values()]
 
-    def files(self) -> list[DataFile]:
+    def files(self) -> list[MergeFile]:
         """Return the list of files"""
         return sorted(self.data.values())
 

@@ -9,7 +9,7 @@ import subprocess
 from rucio.client.replicaclient import ReplicaClient
 from rucio.client.rseclient import RSEClient
 
-from src.file_utils import DataFile, DataSet
+from merge_set import MergeFile, MergeSet
 
 logger = logging.getLogger(__name__)
 
@@ -104,7 +104,7 @@ class Sites(collections.UserDict):
         logger.info("".join(msg))
 
 
-def check_consistency(file: DataFile, rucio: dict) -> bool:
+def check_consistency(file: MergeFile, rucio: dict) -> bool:
     """Ensure consistency between MetaCat and Rucio"""
     # Check the file size
     if file.size != rucio['bytes']:
@@ -146,9 +146,9 @@ def log_bad_files(files: dict, msg: str) -> int:
     logger.warning("".join(msg))
     return total
 
-def find_physial_files(files : DataSet) -> DataSet:
+def find_physial_files(files : MergeSet) -> MergeSet:
     """Get the best physical locations for a list of logical files"""
-    found_files = DataSet()
+    found_files = MergeSet()
     bad_files = []
     inacessible_files = []
 
