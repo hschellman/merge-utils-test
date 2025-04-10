@@ -18,7 +18,7 @@ Script to take a metacat query or list of file DIDs, and then:
 import argparse
 import logging
 
-from src import io_utils, metacat_utils
+from merge_utils import io_utils, metacat_utils
 
 logger = logging.getLogger(__name__)
 

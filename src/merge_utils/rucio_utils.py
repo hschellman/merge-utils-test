@@ -9,7 +9,7 @@ import subprocess
 from rucio.client.replicaclient import ReplicaClient
 from rucio.client.rseclient import RSEClient
 
-from merge_set import MergeFile, MergeSet
+from .merge_set import MergeFile, MergeSet
 
 logger = logging.getLogger(__name__)
 
@@ -23,30 +23,30 @@ def check_status(path: str) -> bool:
         return True
     return False
 
-class Site:
-    """Class to store information about a site"""
+class RSE:
+    """Class to store information about an RSE"""
     def __init__(self, valid: bool):
         self.valid = valid
         self.disk = set()
         self.tape = set()
 
-class Sites(collections.UserDict):
-    """Class to keep track of a set of sites"""
+class RSEs(collections.UserDict):
+    """Class to keep track of a set of RSEs"""
     def __init__(self):
         super().__init__()
         self.disk = set()
         self.tape = set()
 
-        # get the list of sites from Rucio
+        # get the list of RSEs from Rucio
         rse_client = RSEClient()
         for rse in rse_client.list_rses():
             valid = True
             if rse['deleted'] or not rse['availability_read'] or rse['staging_area']:
                 valid = False
-            self[rse['rse']] = Site(valid)
+            self[rse['rse']] = RSE(valid)
 
     def ping(self, pfn: str) -> float:
-        """Get the ping time to a site in ms"""
+        """Get the ping time to an RSE in ms"""
         url = pfn.split(':', 2)[1][2:] # extract host from 'protocol://host:port/path'
         cmd = ['ping', '-c', '1', url]
         ret = subprocess.run(cmd, capture_output=True, check=False)
@@ -80,27 +80,27 @@ class Sites(collections.UserDict):
         return paths
 
     def cleanup(self) -> None:
-        """Cleanup the sites dictionary"""
+        """Cleanup the RSE dictionary"""
         rse_client = RSEClient()
-        # Remove sites with no files
+        # Remove RSEs with no files
         self.data = {k: v for k, v in self.items() if len(v.disk) > 0 or len(v.tape) > 0}
 
         # Count how many files we found
         msg = [""]
-        for rse, site in sorted(self.items(), key=lambda x: len(x[1].disk), reverse=True):
-            self.disk |= site.disk
-            self.tape |= site.tape
-            msg.append(f"\n  {rse}: {len(site.disk)} ({len(site.tape)}) files")
+        for name, rse in sorted(self.items(), key=lambda x: len(x[1].disk), reverse=True):
+            self.disk |= rse.disk
+            self.tape |= rse.tape
+            msg.append(f"\n  {name}: {len(rse.disk)} ({len(rse.tape)}) files")
 
-            attr = rse_client.list_rse_attributes(rse)
-            site.justin = attr['site']
-        
+            attr = rse_client.list_rse_attributes(name)
+            rse.site = attr['site']
+
         n_files = len(self.disk)
         n_tape = len(self.tape - self.disk)
-        n_sites = len(self.items())
+        n_rses = len(self.items())
         s_files = "s" if n_files != 1 else ""
-        s_sites = "s" if n_sites != 1 else ""
-        msg[0] = f"Found {n_files} ({n_tape}) file{s_files} from {n_sites} site{s_sites}:"
+        s_rses = "s" if n_rses != 1 else ""
+        msg[0] = f"Found {n_files} ({n_tape}) file{s_files} from {n_rses} RSE{s_rses}:"
         logger.info("".join(msg))
 
 
@@ -152,7 +152,7 @@ def find_physial_files(files : MergeSet) -> MergeSet:
     bad_files = []
     inacessible_files = []
 
-    sites = Sites()
+    rses = RSEs()
     replica_client = ReplicaClient()
     for replicas in replica_client.list_replicas(files.rucio_list(), ignore_availability=False):
         did = replicas['scope'] + ':' + replicas['name']
@@ -163,7 +163,7 @@ def find_physial_files(files : MergeSet) -> MergeSet:
             bad_files.append(did)
             continue
 
-        file.paths = sites.get_paths(did, replicas)
+        file.paths = rses.get_paths(did, replicas)
         if len(file.paths) == 0:
             inacessible_files.append(did)
             #logger.error("No valid replicas found for %s", did)
@@ -171,7 +171,7 @@ def find_physial_files(files : MergeSet) -> MergeSet:
 
         found_files.add(file)
 
-    sites.cleanup()
+    rses.cleanup()
 
     missing_files = [file.did for file in files if not file.has_rucio]
     log_bad_files(missing_files, "No Rucio entry for {count} {files}:")

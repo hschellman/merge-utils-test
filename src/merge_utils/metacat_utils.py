@@ -6,8 +6,8 @@ import logging
 
 import metacat.webapi as metacat
 
-import io_utils
-from merge_set import MergeSet
+from . import io_utils
+from .merge_set import MergeSet
 
 logger = logging.getLogger(__name__)
 
