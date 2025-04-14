@@ -1,0 +1,25 @@
+# Default configuration settings for merging
+# Please create your own config files instead of modifying this one directly!
+
+validation:
+    allow_missing: false
+    allow_duplicates: false
+    checked_fields:
+      - "core.run_type"
+      - "core.file_type"
+      - "core.file_format"
+      - "core.data_tier"
+      - "core.data_stream"
+      - "core.application.name"
+      - "dune.campaign"
+      - "dune.requestid"
+      - "DUNE.requestid"
+      - "dune.config_file"          # Not checked in old merging
+      - "core.application.version"  # Not checked in old merging
+
+sites:
+    max_distance: 30
+    nearline_distance: 100
+    allowed_sites:
+      - "US_FNAL-FermiGrid"
+      - "CERN"

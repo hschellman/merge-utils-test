@@ -1,16 +1,36 @@
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
 [project]
 name = "merge-utils"
-version = "0.1.0"
+description = "Utilities for merging DUNE data"
+readme = "README.md"
+authors = [
+  { name="Ethan Muldoon", email="muldoone@oregonstate.edu" },
+  { name="Heidi Schellman", email="heidi.schellman@oregonstate.edu" },
+]
 dependencies = [
   "metacat",
   "rucio",
   "pyyaml",
-  "tomli"
+  "tomli",
 ]
+requires-python = ">=3.9"
+license = {file = "LICENSE"}
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+    "Private :: Do Not Upload",
+]
+dynamic = ["version"]
 
 [project.optional-dependencies]
 test = ["pytest"]
+
+[project.urls]
+"Homepage" = "https://DUNE.github.io/merge-utils"
+"Source Code" = "https://github.com/DUNE/merge-utils"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch]
+version.path = "src/example_package_YOUR_USERNAME_HERE/__init__.py"

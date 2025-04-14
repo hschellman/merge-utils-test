@@ -15,13 +15,15 @@ logger = logging.getLogger(__name__)
 
 LOCAL_PING_THRESHOLD = 5
 
-def check_status(path: str) -> bool:
+def check_status(path: str) -> str:
     """Check whether a file is on disk or tape"""
     cmd = ['gfal-xattr', path, 'user.status']
     ret = subprocess.run(cmd, capture_output=True, text=True, check=False)
     if 'ONLINE' in ret.stdout:
-        return True
-    return False
+        return 'ONLINE'
+    if 'NEARLINE' in ret.stdout:
+        return 'NEARLINE'
+    return 'OFFLINE'
 
 class RSE:
     """Class to store information about an RSE"""
@@ -29,6 +31,13 @@ class RSE:
         self.valid = valid
         self.disk = set()
         self.tape = set()
+
+    def add(self, status: str, did: str) -> None:
+        """Add a file to the RSE"""
+        if status == 'ONLINE':
+            self.disk.add(did)
+        elif status == 'NEARLINE':
+            self.tape.add(did)
 
 class RSEs(collections.UserDict):
     """Class to keep track of a set of RSEs"""
@@ -71,11 +80,17 @@ class RSEs(collections.UserDict):
                 logger.warning("RSE %s is not valid", rse)
                 continue
 
-            paths[rse] = pfn
-            if info['type'] == 'DISK' or check_status(pfn):
-                self[rse].disk.add(did)
+            if info['type'] == 'DISK':
+                status = 'ONLINE'
             else:
-                self[rse].tape.add(did)
+                status = check_status(pfn)
+
+            if status == 'OFFLINE':
+                logger.warning("File %s is offline", pfn)
+                continue
+
+            paths[rse] = pfn
+            self[rse].add(status, did)
 
         return paths
 

@@ -49,8 +49,8 @@ def read_config(file_path: str = None) -> dict:
     Read a configuration file in JSON, TOML, or YAML format
     Any missing keys will be filled in with the defaults in DEFAULT_CONFIG
     """
-    with open(DEFAULT_CONFIG, mode="rb") as f:
-        config = tomllib.load(f)
+    with open(DEFAULT_CONFIG, encoding="utf-8") as f:
+        config = yaml.safe_load(f)
     if file_path is None:
         return config
 
