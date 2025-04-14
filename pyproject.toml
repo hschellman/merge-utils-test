@@ -33,4 +33,4 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch]
-version.path = "src/example_package_YOUR_USERNAME_HERE/__init__.py"
+version.path = "src/merge_utils/__init__.py"
