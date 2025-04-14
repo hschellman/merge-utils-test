@@ -1,0 +1,54 @@
+#!/bin/sh
+: <<'EOF'
+
+Hello World jobscript for justIN
+
+Submit a workflow like this to run 10 jobs:
+
+justin simple-workflow --monte-carlo 10 --jobscript hello-world.jobscript
+
+
+Or like this to run jobs and put the output file into Rucio-managed storage:
+
+justin simple-workflow \
+     --monte-carlo 10 \
+     --jobscript hello-world.jobscript \
+     --description 'Hello World!!!' \
+     --scope usertests \
+     --output-pattern 'hello-world-*.txt:output-test-01'
+
+EOF
+
+DUNE_VERSION=${DUNE_VERSION:-v09_75_00d00}
+DUNE_QUALIFIER=${DUNE_QUALIFIER:-e20:prof}
+
+# Try to get an unprocessed file from this stage
+did_pfn_rse=`$JUSTIN_PATH/justin-get-file`
+if [ "$did_pfn_rse" == "" ]; then
+  echo "Nothing to process - exit jobscript"
+  exit 0
+fi
+# extract job key from the did_pfn_rse string, which is of the form:
+# monte-carlo-000001-000001 000001 MONTECARLO
+jobkey=`echo $did_pfn_rse | cut -f2 -d' '`
+config="${MERGE_CONFIG}_${jobkey}.json"
+echo "Config file: $config"
+
+# Setup DUNE environment
+source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
+setup dunesw "$DUNE_VERSION" -q "$DUNE_QUALIFIER"
+
+while [ ! -d $CONFIG_DIR ]; do
+  echo "Waiting for config directory $CONFIG_DIR to be created"
+  sleep 5
+done
+cat $CONFIG_DIR/$config
+
+python3 $CONFIG_DIR/do_merge.py $CONFIG_DIR/$config
+
+echo "$jobkey" > justin-processed-pfns.txt
+
+echo "merged $jobkey"
+echo "merged $jobkey" >merge-`date +%s.%N.txt`
+
+exit 0

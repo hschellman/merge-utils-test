@@ -1,0 +1,15 @@
+{
+    "output" : "test_merge_000001.root",
+    "inputs" : [
+        "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/dune/persistent/staging/hd-protodune-det-reco/df/d2/np04hd_run29006_calibana_merged_267.root",
+        "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/dune/persistent/staging/hd-protodune-det-reco/87/17/np04hd_run29006_calibana_merged_268.root",
+        "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/dune/persistent/staging/hd-protodune-det-reco/09/62/np04hd_run29006_calibana_merged_269.root",
+        "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/dune/persistent/staging/hd-protodune-det-reco/5a/bb/np04hd_run29006_calibana_merged_270.root",
+        "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/dune/persistent/staging/hd-protodune-det-reco/47/97/np04hd_run29006_calibana_merged_271.root",
+        "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/dune/persistent/staging/hd-protodune-det-reco/74/8b/np04hd_run29006_calibana_merged_272.root",
+        "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/dune/persistent/staging/hd-protodune-det-reco/b6/93/np04hd_run29006_calibana_merged_273.root",
+        "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/dune/persistent/staging/hd-protodune-det-reco/23/ef/np04hd_run29006_calibana_merged_274.root",
+        "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/dune/persistent/staging/hd-protodune-det-reco/86/f3/np04hd_run29006_calibana_merged_275.root",
+        "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/dune/persistent/staging/hd-protodune-det-reco/fa/82/np04hd_run29006_calibana_merged_276.root"
+    ]
+}
