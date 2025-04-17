@@ -56,6 +56,7 @@ class MergeFile:
     def get_fields(self, fields: list) -> tuple:
         """
         Get the namespace and specified metadata values from the file
+
         :param fields: list of metadata fields to extract
         :return: tuple of values for each field
         """
@@ -72,6 +73,7 @@ class MergeSet(collections.UserDict):
     def add(self, file: MergeFile | dict) -> None:
         """
         Add a file to the set
+
         :param file: A MergeFile object or a dictionary with file metadata
         """
         if isinstance(file, dict):
@@ -119,6 +121,7 @@ class MergeSet(collections.UserDict):
     def check_consistency(self, fields: list) -> bool:
         """
         Check that the files have consistent namespaces and selected metadata fields
+        
         :param fields: list of metadata fields to check
         :return: True if all files have matching metadata, False otherwise
         """
