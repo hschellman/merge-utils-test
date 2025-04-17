@@ -21,7 +21,7 @@ LOCAL_PING_THRESHOLD = 5
 
 def check_status(path: str) -> str:
     """Check whether a file is on disk or tape"""
-    if path.startswith("root://"):
+    if "://" in path:
         # remote site
         cmd = ['gfal-xattr', path, 'user.status']
         ret = subprocess.run(cmd, capture_output=True, text=True, check=False)
@@ -238,8 +238,14 @@ class RSEs(collections.UserDict):
         logger.info("No site found with access to all files")
         site_pfns[None] = {}
         for did in self.disk | self.tape:
-            best_site, best_distance = min(
-                ((site, pfns[did][1]) for (site, pfns) in site_pfns.items()), key=lambda x: x[1])
+            best_site = None
+            best_distance = float('inf')
+            for site in sites:
+                if site_pfns[site][did][1] < best_distance:
+                    best_site = site
+                    best_distance = site_pfns[site][did][1]
+            #best_site, best_distance = min(
+                #((site, pfns[did][1]) for (site, pfns) in site_pfns.items()), key=lambda x: x[1])
             if best_distance > max_distance:
                 best_site = None
                 site_pfns[None][did] = (None, float('inf'))
