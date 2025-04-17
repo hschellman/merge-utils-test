@@ -53,20 +53,27 @@ class MergeFile:
     def __str__(self) -> str:
         return self.did
 
-    def get_fields(self, fields: list) -> list:
-        """Return a tuple of values for the namespace and specified metadata fields"""
+    def get_fields(self, fields: list) -> tuple:
+        """
+        Get the namespace and specified metadata values from the file
+        :param fields: list of metadata fields to extract
+        :return: tuple of values for each field
+        """
         values = [self.namespace] + [self.metadata.get(field, "") for field in fields]
         return tuple(values)
 
 class MergeSet(collections.UserDict):
-    """Class to keep track of a set of files"""
+    """Class to keep track of a set of files for merging"""
     def __init__(self, files: list[MergeFile] = None):
         super().__init__()
         for file in files or []:
             self.add(file)
 
-    def add(self, file) -> None:
-        """Add a file to the list if it is not there already"""
+    def add(self, file: MergeFile | dict) -> None:
+        """
+        Add a file to the set
+        :param file: A MergeFile object or a dictionary with file metadata
+        """
         if isinstance(file, dict):
             file = MergeFile(file)
         did = file.did
@@ -110,7 +117,11 @@ class MergeSet(collections.UserDict):
         return sum(file.size for file in self.data.values())
 
     def check_consistency(self, fields: list) -> bool:
-        """Check that the files have consistent namespaces and selected metadata fields"""
+        """
+        Check that the files have consistent namespaces and selected metadata fields
+        :param fields: list of metadata fields to check
+        :return: True if all files have matching metadata, False otherwise
+        """
         logger.debug("Checking metadata consistency")
 
         if len(self.data) < 2:
