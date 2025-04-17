@@ -67,7 +67,7 @@ def find_logical_files(query: str = None, filelist: list = None, config: dict = 
             missing[did] += 1
 
     n_missing = log_bad_files(missing, "No MetaCat entry found for {count} {files}:")
-    n_dupes = log_bad_files(files.dupes(), "Found {count} duplicate {files}:")
+    n_dupes = log_bad_files(files.dupes, "Found {count} duplicate {files}:")
     if n_missing and not config['allow_missing']:
         logger.error("Validation failed due to missing files")
         return MergeSet()

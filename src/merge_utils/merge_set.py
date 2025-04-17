@@ -79,14 +79,17 @@ class MergeSet(collections.UserDict):
             self.data[did].count += 1
             logger.debug("Duped file %s", did)
 
+    @property
     def dupes(self) -> dict:
         """Return counts of duplicate file DIDs"""
         return {did:(file.count-1) for did, file in self.data.items() if file.count > 1}
 
-    def rucio_list(self) -> list[dict]:
+    @property
+    def rucio(self) -> list[dict]:
         """Return a list of file DIDs in the format expected by Rucio"""
         return [{'scope':file.namespace, 'name':file.name} for file in self.data.values()]
 
+    @property
     def files(self) -> list[MergeFile]:
         """Return the list of files"""
         return sorted(self.data.values())
@@ -95,10 +98,16 @@ class MergeSet(collections.UserDict):
         """Iterate over the files"""
         return iter(self.files())
 
+    @property
     def hash(self) -> str:
         """Get a hash from the list of files"""
         concat = '/'.join(sorted(self.data.keys()))
         return hashlib.sha256(concat.encode('utf-8')).hexdigest()
+
+    @property
+    def size(self) -> int:
+        """Get the total size of the files"""
+        return sum(file.size for file in self.data.values())
 
     def check_consistency(self, fields: list) -> bool:
         """Check that the files have consistent namespaces and selected metadata fields"""

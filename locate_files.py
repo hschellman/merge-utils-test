@@ -45,9 +45,11 @@ def main():
         query=args.query, filelist=flist, config=config['validation']
     )
 
-    flist = rucio_utils.find_physial_files(flist)
-    for file in flist:
-        print (file.paths)
+    site_pfns = rucio_utils.find_physical_files(flist, config['sites'])
+    for site, pfns in site_pfns.items():
+        print(f"site {site}:")
+        for pfn in pfns.values():
+            print(f"  {pfn}")
 
 if __name__ == '__main__':
     main()

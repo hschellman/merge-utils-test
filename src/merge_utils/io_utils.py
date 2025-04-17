@@ -17,7 +17,7 @@ import yaml
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_CONFIG = "config/defaults.toml"
+DEFAULT_CONFIG = "config/defaults.yaml"
 
 def get_inputs(file_path: str, args: list[str]) -> list[str]:
     """
