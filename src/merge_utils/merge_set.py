@@ -23,22 +23,22 @@ class MergeFile:
 
     @property
     def did(self) -> str:
-        """Return the DID of the file"""
+        """The file DID (namespace:name)"""
         return self._did
 
     @property
     def namespace(self) -> str:
-        """Extract the namespace from the file DID"""
+        """The file namespace"""
         return self.did.split(':', 1)[0]
 
     @property
     def name(self) -> str:
-        """Extract the name from the file DID"""
+        """The file name"""
         return self.did.split(':', 1)[1]
 
     @property
     def format(self):
-        """Return the file format"""
+        """The file format (core.file_format)"""
         return self.metadata['core.file_format']
 
     def __eq__(self, other) -> bool:
@@ -105,7 +105,7 @@ class MergeSet(collections.UserDict):
 
     def __iter__(self):
         """Iterate over the files"""
-        return iter(self.files())
+        return iter(self.files)
 
     @property
     def hash(self) -> str:
@@ -121,7 +121,7 @@ class MergeSet(collections.UserDict):
     def check_consistency(self, fields: list) -> bool:
         """
         Check that the files have consistent namespaces and selected metadata fields
-        
+
         :param fields: list of metadata fields to check
         :return: True if all files have matching metadata, False otherwise
         """
@@ -142,7 +142,7 @@ class MergeSet(collections.UserDict):
         s_errs = "s" if n_errs != 1 else ""
         errs = [f"Found {n_errs} file{s_errs} with inconsistent metadata:"]
 
-        for file in self.files():
+        for file in self.files:
             values = file.get_fields(fields)
             if values != mode:
                 errs.append(f"\n  {file.did}")

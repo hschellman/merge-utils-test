@@ -49,7 +49,7 @@ def main():
     for site, pfns in site_pfns.items():
         print(f"site {site}:")
         for pfn in pfns.values():
-            print(f"  {pfn}")
+            print(f"  {pfn[0]}")
 
 if __name__ == '__main__':
     main()

@@ -226,7 +226,7 @@ class RSEs(collections.UserDict):
         best_distance = float('inf')
         for site in sites:
             site_pfns[site] = self.site_pfns(site, max_distance, nearline_distance)
-            total_distance = sum(site_pfns[site].values()[1])
+            total_distance = sum(t[1] for t in site_pfns[site].values())
             if total_distance < best_distance:
                 best_distance = total_distance
                 best_site = site
@@ -314,8 +314,7 @@ def find_physical_files(files: MergeSet, config: dict) -> MergeSet:
             continue
 
     site_pfns = rses.get_pfns(config)
-    distant_files = [did for did in site_pfns.get(None, {}).keys()]
-
+    distant_files = list(site_pfns.get(None, {}).keys())
     missing_files = [file.did for file in files if not file.has_rucio]
     errs = log_bad_files(missing_files, "No Rucio entry for {count} {files}:")
     errs += log_bad_files(inacessible_files, "No valid replicas for {count} {files}:")
