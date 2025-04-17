@@ -161,7 +161,7 @@ def log_bad_files(files: dict, msg: str) -> int:
     logger.warning("".join(msg))
     return total
 
-def find_physial_files(files : MergeSet) -> MergeSet:
+def find_physical_files(files : MergeSet) -> MergeSet:
     """Get the best physical locations for a list of logical files"""
     found_files = MergeSet()
     bad_files = []

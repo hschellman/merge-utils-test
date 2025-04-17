@@ -21,6 +21,9 @@ DEFAULT_CONFIG = "config/defaults.toml"
 
 def get_inputs(file_path: str, args: list[str]) -> list[str]:
     """
+    :param file_path: full path to a file containing a list of entries
+    :param args: Arguments from command line
+    
     Get a list of inputs from various sources, including
     1. A file containing a list of entries
     2. entries passed as command line arguments
