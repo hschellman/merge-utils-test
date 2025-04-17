@@ -24,7 +24,7 @@ Contents
 
 .. toctree::
    
-     
+    startup 
     rucio_utils
     io_utils
     merge_set
