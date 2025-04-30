@@ -12,7 +12,7 @@ import requests
 from rucio.client.replicaclient import ReplicaClient
 from rucio.client.rseclient import RSEClient
 
-from .merge_set import MergeFile, MergeSet
+from merge_utils.merge_set import MergeFile, MergeSet
 
 logger = logging.getLogger(__name__)
 
