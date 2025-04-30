@@ -2,3 +2,4 @@ furo==2024.8.6
 tomli>=2
 pyyaml
 sphinx>=7.1
+myst_parser 
