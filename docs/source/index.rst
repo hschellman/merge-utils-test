@@ -44,10 +44,13 @@ utilities
    
     scripts
 
+
+
 references
 ----------
 
 .. toctree::
+    design_docs
     Notes
     related
     
