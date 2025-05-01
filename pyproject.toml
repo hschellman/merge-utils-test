@@ -28,6 +28,9 @@ test = ["pytest"]
 "Homepage" = "https://DUNE.github.io/merge-utils"
 "Source Code" = "https://github.com/DUNE/merge-utils"
 
+[project.scripts]
+merge = "merge_utils.__main__:main"
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
