@@ -44,7 +44,7 @@ def test_merge_set_uniqueness():
         unique_files.add(file)
 
     assert list(unique_files) == [input_files[0], input_files[1]]
-    assert unique_files.dupes() == {'namespace1:file1': 1}
+    assert unique_files.dupes == {'namespace1:file1': 1}
     assert 'namespace1:file1' in unique_files
     assert 'namespace1:file2' in unique_files
 
