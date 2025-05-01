@@ -8,7 +8,7 @@ from rucio.client.replicaclient import ReplicaClient
 
 from merge_utils.merge_set import MergeFile, MergeSet, FileRetriever
 from merge_utils.merge_rse import MergeRSEs
-from merge_utils import io_utils
+from merge_utils import io_utils, config
 from merge_utils import metacat_utils
 
 logger = logging.getLogger(__name__)
@@ -16,16 +16,10 @@ logger = logging.getLogger(__name__)
 class RucioRetriever:
     """Class for managing asynchronous queries to the Rucio web API."""
 
-    def __init__(self, source: FileRetriever, config: dict = None):
-        """
-        Initialize the RucioRetriever with a configuration file.
-
-        :param config: configuration dictionary
-        """
-        if config is None:
-            config = io_utils.read_config()
-        self.checksums = config['validation']['checksums']
-        self.rses = MergeRSEs(config=config)
+    def __init__(self, source: FileRetriever):
+        """Initialize the RucioRetriever with a source of file metadata."""
+        self.checksums = config.validation['checksums']
+        self.rses = MergeRSEs()
         self.source = source
 
         self.client = None
@@ -152,14 +146,11 @@ class RucioRetriever:
 
 
 
-def find_physical_files(query: str = None, filelist: list = None, config: dict = None) -> MergeRSEs:
+def find_physical_files(query: str = None, filelist: list = None) -> MergeRSEs:
     """Get the best physical locations for a list of logical files"""
     logger.debug("Retrieving physical file paths from Rucio")
 
-    retriever = RucioRetriever(
-        source = metacat_utils.MetaCatRetriever(query, filelist, config),
-        config = config
-    )
+    retriever = RucioRetriever(metacat_utils.MetaCatRetriever(query, filelist))
 
     rses = retriever.run()
     return rses

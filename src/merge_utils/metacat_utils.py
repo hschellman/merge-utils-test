@@ -14,14 +14,14 @@ logger = logging.getLogger(__name__)
 class MetaCatRetriever(FileRetriever):
     """Class for managing asynchronous queries to the MetaCat web API."""
 
-    def __init__(self, query: str = None, filelist: list = None, config: dict = None):
+    def __init__(self, query: str = None, filelist: list = None):
         """
         Initialize the MetaCatWrapper with a query or a list of files.
 
         :param query: MQL query to find files
         :param filelist: list of file DIDs to find
         """
-        self.load_config(config)
+        super().__init__()
 
         self.query = query
         self.filelist = filelist
@@ -121,14 +121,13 @@ class MetaCatRetriever(FileRetriever):
             logger.debug("yielding last query batch")
             yield added
 
-def find_logical_files(query: str = None, filelist: list = None, config: dict = None) -> MergeSet:
+def find_logical_files(query: str = None, filelist: list = None) -> MergeSet:
     """
     Retrieve logical file information from MetaCat based on an MQL query or a list of DIDs.
 
     :param query: MQL query to find files
     :param filelist: list of file DIDs to find
-    :param config: configuration dictionary
     :return: MergeSet of unique files.
     """
-    retriever = MetaCatRetriever(query, filelist, config)
+    retriever = MetaCatRetriever(query, filelist)
     return retriever.run()

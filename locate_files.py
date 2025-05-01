@@ -16,7 +16,7 @@ Script to take a metacat query or list of file DIDs, and then:
 import argparse
 import logging
 
-from merge_utils import io_utils, rucio_utils
+from merge_utils import io_utils, config, rucio_utils
 
 logger = logging.getLogger(__name__)
 
@@ -37,13 +37,11 @@ def main():
     if args.debug:
         io_utils.set_log_level("DEBUG")
 
-    config = io_utils.read_config(args.config)
+    config.load(args.config)
 
     flist = io_utils.get_inputs(args.filelist, args.files)
 
-    rses = rucio_utils.find_physical_files(
-        query=args.query, filelist=flist, config=config
-    )
+    rses = rucio_utils.find_physical_files(query=args.query, filelist=flist)
 
     for name, rse in rses.items():
         print(f"RSE {name}:")

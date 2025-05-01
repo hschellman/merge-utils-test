@@ -9,7 +9,7 @@ import asyncio
 from typing import Iterable, AsyncGenerator
 from abc import ABC, abstractmethod
 
-from merge_utils import io_utils
+from merge_utils import io_utils, config
 
 logger = logging.getLogger(__name__)
 
@@ -20,20 +20,12 @@ class FileRetriever(ABC):
     missing: dict
     files: MergeSet
 
-    def load_config(self, config: dict = None) -> dict:
-        """
-        Initialize the metadata retriever with a configuration.
-
-        :param config: configuration dictionary
-        """
-        if config is None:
-            config = io_utils.read_config()
-        self.step = config['validation']['batch_size']
-        self.allow_missing = config['validation']['allow_missing']
+    def __init__(self) -> dict:
+        """Initialize the file retriever"""
+        self.step = config.validation['batch_size']
+        self.allow_missing = config.validation['allow_missing']
         self.missing = collections.defaultdict(int)
-        self.files = MergeSet(config=config)
-
-        return config
+        self.files = MergeSet()
 
     @property
     def dupes(self) -> dict:
@@ -161,13 +153,11 @@ class MergeFile:
 
 class MergeSet(collections.UserDict):
     """Class to keep track of a set of files for merging"""
-    def __init__(self, files: list[MergeFile] = None, config: dict = None):
+    def __init__(self, files: list[MergeFile] = None):
         super().__init__()
 
-        if config is None:
-            config = io_utils.read_config()
-        self.allow_duplicates = config['validation']['allow_duplicates']
-        self.checked_fields = config['validation']['metadata_fields']
+        self.allow_duplicates = config.validation['allow_duplicates']
+        self.checked_fields = config.validation['metadata_fields']
         self.field_values = None
 
         if files:
@@ -254,6 +244,11 @@ class MergeSet(collections.UserDict):
     def size(self) -> int:
         """Get the total size of the files"""
         return sum(file.size for file in self.data.values())
+
+    def batches(self) -> list[dict]:
+        """Split the files into batches for merging"""
+
+
 
     def check_consistency(self, fields: list) -> bool:
         """

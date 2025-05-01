@@ -33,4 +33,5 @@ merging:
     method: auto        # Manual options: tar, targz, hadd, lar, hdf5
     target_mode: size   # Options: size, count
     target_size: 10     # Target size in GB
-    batch_size: 100     # Number of files to merge at once
+    equalize: true      # Try to equalize the size of the merged files
+    batch_size: 100     # Maxiumum number of files to merge at once

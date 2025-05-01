@@ -19,17 +19,20 @@ import yaml
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_CONFIG = "config/defaults.yaml"
+def pkg_dir() -> str:
+    """Get the base directory of the package"""
+    return os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 
 def get_inputs(file_path: str, args: list[str]) -> list[str]:
     """
-    :param file_path: full path to a file containing a list of entries
-    :param args: Arguments from command line
-    
     Get a list of inputs from various sources, including
     1. A file containing a list of entries
     2. entries passed as command line arguments
     3. entries piped in from standard input
+
+    :param file_path: full path to a file containing a list of entries
+    :param args: Arguments from command line
+    :return: combined list of entries
     """
 
     if len(args) > 0:
@@ -49,50 +52,54 @@ def get_inputs(file_path: str, args: list[str]) -> list[str]:
 
     return inputs
 
-def read_config(file_path: str = None) -> dict:
+def read_config_file(file_path: str = None) -> dict:
     """
     Read a configuration file in JSON, TOML, or YAML format
-    Any missing keys will be filled in with the defaults in DEFAULT_CONFIG
-    """
-    with open(DEFAULT_CONFIG, encoding="utf-8") as f:
-        config = yaml.safe_load(f)
-    if file_path is None:
-        return config
 
+    :param file_path: Path to the configuration file
+    :return: Dictionary containing the configuration settings
+    :raises FileNotFoundError: If the file does not exist
+    :raises ValueError: If the file type is not supported
+    """
+    if not os.path.exists(file_path):
+        # See if we can find the file in the config directory
+        file_path = os.path.join(pkg_dir(), "config", file_path)
     if not os.path.exists(file_path):
         logger.error("Could not open %s", file_path)
-        return config
+        raise FileNotFoundError(f"Could not open {file_path}")
 
     suffix = pathlib.Path(file_path).suffix
     if suffix in [".json"]:
         logger.debug("Reading JSON file %s", file_path)
         with open(file_path, encoding="utf-8") as f:
-            config.update(json.load(f))
+            cfg = json.load(f)
     elif suffix in [".toml"]:
         logger.debug("Reading TOML file %s", file_path)
         with open(file_path, mode="rb") as f:
-            config.update(tomllib.load(f))
+            cfg = tomllib.load(f)
     elif suffix in [".yaml", ".yml"]:
         logger.debug("Reading YAML file %s", file_path)
         with open(file_path, encoding="utf-8") as f:
-            config.update(yaml.safe_load(f))
+            cfg = yaml.safe_load(f)
     else:
         logger.error("Unknown file type: %s", suffix)
-    return config
+        raise ValueError(f"Unknown file type: {suffix}")
+    return cfg
 
 def setup_log(name: str) -> None:
     """Configure logging"""
-    config_file = pathlib.Path("config/logging.json")
-    with open(config_file, encoding="utf-8") as f:
-        config = json.load(f)
-    logging.config.dictConfig(config)
+    logger_config = read_config_file("logging.json")
+    log_file = logger_config['handlers']['file']['filename']
+    if not os.path.isabs(log_file):
+        log_file = os.path.join(pkg_dir(), "logs", log_file)
+        logger_config['handlers']['file']['filename'] = log_file
 
     # If we're appending to an existing log file, add a newline before the new log
-    log_file = config['handlers']['file']['filename']
     if os.path.exists(log_file):
-        with open(config['handlers']['file']['filename'], 'a', encoding="utf-8") as logfile:
+        with open(logger_config['handlers']['file']['filename'], 'a', encoding="utf-8") as logfile:
             logfile.write("\n")
 
+    logging.config.dictConfig(logger_config)
     logger.info("Starting script %s", os.path.basename(name))
 
 def set_log_level(level: str) -> None:

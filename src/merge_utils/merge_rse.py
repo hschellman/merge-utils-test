@@ -12,7 +12,7 @@ import requests
 
 from rucio.client.rseclient import RSEClient
 
-from merge_utils import io_utils
+from merge_utils import io_utils, config
 
 logger = logging.getLogger(__name__)
 
@@ -115,13 +115,11 @@ class MergeRSE:
 
 class MergeRSEs(collections.UserDict):
     """Class to keep track of a set of RSEs"""
-    def __init__(self, config: dict = None):
+    def __init__(self):
         super().__init__()
-        if config is None:
-            config = io_utils.read_config()
-        self.sites = config['sites']['allowed_sites']
-        self.max_distance = config['sites']['max_distance']
-        self.nearline_distances = config['sites']['nearline_distance']
+        self.sites = config.sites['allowed_sites']
+        self.max_distance = config.sites['max_distance']
+        self.nearline_distances = config.sites['nearline_distance']
 
         self.disk = set()
         self.tape = set()
