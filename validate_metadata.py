@@ -44,7 +44,7 @@ def main():
     flist = io_utils.get_inputs(args.filelist, args.files)
 
     flist = metacat_utils.find_logical_files(
-        query=args.query, filelist=flist, config=config['validation']
+        query=args.query, filelist=flist, config=config
     )
     for file in flist:
         print (file.did)

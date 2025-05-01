@@ -2,9 +2,10 @@
 # Please create your own config files instead of modifying this one directly!
 
 validation:
+    batch_size: 2 # Number of files to query metacat about at once
     allow_missing: false
     allow_duplicates: false
-    checked_fields:
+    metadata_fields:
       - "core.run_type"
       - "core.file_type"
       - "core.file_format"
@@ -16,10 +17,20 @@ validation:
       - "DUNE.requestid"
       - "dune.config_file"          # Not checked in old merging
       - "core.application.version"  # Not checked in old merging
+    checksums:      
+      - "adler32"   # Adler32 should be the default checksum
 
 sites:
-    max_distance: 30
-    nearline_distance: 100
+    max_distance: 1000        # Distances range from 0 to 101
+    nearline_distance:        # Extra distance to account for staging
+        default:        100   # Default distance for all RSEs
+        "FNAL_DCACHE":  10
     allowed_sites:
       - "US_FNAL-FermiGrid"
       - "CERN"
+
+merging:
+    method: auto        # Manual options: tar, targz, hadd, lar, hdf5
+    target_mode: size   # Options: size, count
+    target_size: 10     # Target size in GB
+    batch_size: 100     # Number of files to merge at once

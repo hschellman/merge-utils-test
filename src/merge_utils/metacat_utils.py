@@ -1,82 +1,134 @@
 """Utility functions for interacting with the MetaCat web API."""
-from __future__ import annotations
 
-import collections
 import logging
+import itertools
+import asyncio
+from typing import AsyncGenerator
 
 import metacat.webapi as metacat
 
-from merge_utils import io_utils
-from merge_utils.merge_set import MergeSet
+from merge_utils.merge_set import MergeSet, FileRetriever
 
 logger = logging.getLogger(__name__)
 
-def log_bad_files(files: dict, msg: str) -> int:
-    """Log a message for missing or duplicate files"""
-    total = sum(files.values())
-    if total == 0:
-        return 0
-    if total == 1:
-        msg = [msg.format(count=1, files="file")]
-    else:
-        msg = [msg.format(count=total, files="files")]
-    msg += [f"\n  ({count}) {file}" for file, count in sorted(files.items())]
-    logger.warning("".join(msg))
-    return total
+class MetaCatRetriever(FileRetriever):
+    """Class for managing asynchronous queries to the MetaCat web API."""
+
+    def __init__(self, query: str = None, filelist: list = None, config: dict = None):
+        """
+        Initialize the MetaCatWrapper with a query or a list of files.
+
+        :param query: MQL query to find files
+        :param filelist: list of file DIDs to find
+        """
+        self.load_config(config)
+
+        self.query = query
+        self.filelist = filelist
+        if query and filelist:
+            logger.warning("Both query and file list provided, was this intended?")
+        if not self.filelist:
+            self.filelist = []
+
+        self.client = None
+
+    async def connect(self) -> None:
+        """Connect to the MetaCat web API"""
+        if not self.client:
+            logger.debug("Connecting to MetaCat")
+            self.client = await asyncio.to_thread(metacat.MetaCatClient)
+        else:
+            logger.debug("Already connected to MetaCat")
+
+    async def _files(self, idx: int, dids: list) -> list:
+        """
+        Asynchronously request file data from MetaCat
+        
+        :param idx: batch number (for logging)
+        :param dids: list of DIDs to request
+        :return: list of results from the request
+        """
+        if len(dids) == 0:
+            return []
+        logger.debug("Retrieving files from MetaCat for batch %d", idx)
+        dictlist = [{'did':did} for did in dids]
+        try:
+            res = await asyncio.to_thread(self.client.get_files,
+                                          dictlist, with_metadata = True, with_provenance = True)
+        except (ValueError, metacat.webapi.BadRequestError) as err:
+            logger.error("%s", err)
+            return []
+        return list(res)
+
+    async def _query(self, idx: int) -> list:
+        """
+        Asynchronously query MetaCat
+        
+        :param idx: batch number to query
+        :return: list of results from the query
+        """
+        if not self.query:
+            return []
+        logger.debug("Querying MetaCat for batch %d", idx)
+        query_batch = self.query + f" skip {idx*self.step} limit {self.step}"
+        try:
+            # async_query exists but does not seem to be compatible with asyncIO
+            res = await asyncio.to_thread(self.client.query,
+                                          query_batch, with_metadata = True, with_provenance = True)
+        except metacat.webapi.BadRequestError as err:
+            logger.error("Malformed MetaCat query:\n  %s\n%s", self.query, err)
+            return []
+        return list(res)
+
+    async def next_batch(self) -> AsyncGenerator[dict, None]:
+        """
+        Asynchronously retrieve metadata for the next batch of files.
+
+        :return: dict of MergeFile objects that were added
+        """
+        # request first batch from filelist
+        dids = self.filelist[0:self.step]
+        task = asyncio.create_task(self._files(0, dids))
+        # loop over batches from filelist
+        for idx in range(1, len(self.filelist)//self.step + 1):
+            old_dids = dids
+            dids = self.filelist[idx*self.step:(idx+1)*self.step]
+            res = await task
+            task = asyncio.create_task(self._files(idx, dids))
+            added = await self.add(res, old_dids)
+            logger.debug("yielding file batch %d", idx-1)
+            yield added
+        res = await task
+        # request first batch from query
+        task = asyncio.create_task(self._query(0))
+        # finish processing last batch from filelist
+        if res:
+            added = await self.add(res, dids)
+            logger.debug("yielding last file batch")
+            yield added
+        # loop over batches from query
+        for idx in itertools.count(1):
+            res = await task
+            if len(res) < self.step:
+                break
+            task = asyncio.create_task(self._query(idx))
+            added = await self.add(res)
+            logger.debug("yielding query batch %d", idx-1)
+            yield added
+        # yield last partial batch from query
+        if res:
+            added = await self.add(res)
+            logger.debug("yielding last query batch")
+            yield added
 
 def find_logical_files(query: str = None, filelist: list = None, config: dict = None) -> MergeSet:
     """
     Retrieve logical file information from MetaCat based on an MQL query or a list of DIDs.
-    Returns a MergeSet of unique files if the metadata is consistent, otherwise an empty MergeSet.
-    The config dictionary can be used to set the following options:
-    - allow_missing: allow missing files
-    - allow_duplicates: allow duplicate files
-    - checked_fields: list of metadata fields to check for consistency
+
+    :param query: MQL query to find files
+    :param filelist: list of file DIDs to find
+    :param config: configuration dictionary
+    :return: MergeSet of unique files.
     """
-    logger.debug("Retrieving logical files from MetaCat")
-
-    if config is None:
-        config = io_utils.read_config()['validation']
-
-    if query is not None and filelist is not None and len(filelist) > 0:
-        logger.warning("Both query and file list provided, was this intended?")
-
-    mc_client = metacat.MetaCatClient()
-    files = MergeSet()
-    missing = collections.defaultdict(int)
-
-    if query is not None:
-        try:
-            res = mc_client.query(query, with_metadata = True)
-        except metacat.webapi.BadRequestError as err:
-            logger.error("Malformed MetaCat query:\n  %s\n%s", query, err)
-            return MergeSet()
-        for file in res:
-            files.add(file)
-
-    if filelist is not None and len(filelist) > 0:
-        didlist = [{'did':did} for did in filelist]
-        try:
-            res = mc_client.get_files(didlist, with_metadata = True)
-        except (ValueError, metacat.webapi.BadRequestError) as err:
-            logger.error("%s", err)
-            return MergeSet()
-        for file in res:
-            files.add(file)
-        for did in (x for x in filelist if x not in files):
-            missing[did] += 1
-
-    n_missing = log_bad_files(missing, "No MetaCat entry found for {count} {files}:")
-    n_dupes = log_bad_files(files.dupes, "Found {count} duplicate {files}:")
-    if n_missing and not config['allow_missing']:
-        logger.error("Validation failed due to missing files")
-        return MergeSet()
-    if n_dupes and not config['allow_duplicates']:
-        logger.error("Validation failed due to duplicate files")
-        return MergeSet()
-
-    if not files.check_consistency(config['checked_fields']):
-        logger.error("Validation failed due to inconsistent metadata")
-        return MergeSet()
-
-    return files
+    retriever = MetaCatRetriever(query, filelist, config)
+    return retriever.run()

@@ -6,6 +6,8 @@ import logging
 import logging.config
 import json
 import pathlib
+import math
+from collections.abc import Iterable
 
 # tomllib was added to the standard library in Python 3.10, need tomli for DUNE
 try:
@@ -98,3 +100,36 @@ def set_log_level(level: str) -> None:
     for handler in logging.getLogger().handlers:
         if handler.get_name() == "console":
             handler.setLevel(level)
+
+def log_list(msg: str, items: Iterable, level=logging.WARNING) -> int:
+    """Log a message for a list of items"""
+    total = len(items)
+    if total == 0:
+        return 0
+    if total == 1:
+        msg = [msg.format(n=1, s="")]
+    else:
+        msg = [msg.format(n=total, s="s")]
+
+    msg += [f"\n  {item}" for item in sorted(items)]
+    logger.log(level, "".join(msg), stacklevel=2)
+    return total
+
+def log_dict(msg: str, items: dict, level=logging.WARNING) -> int:
+    """Log a message for a dictionary of items with counts"""
+    total = sum(items.values())
+    if total == 0:
+        return 0
+    if total == 1:
+        msg = [msg.format(n=1, s="")]
+    else:
+        msg = [msg.format(n=total, s="s")]
+
+    mult = max(items.values())
+    if mult == 1:
+        msg += [f"\n  {item}" for item in sorted(items)]
+    else:
+        pad = int(math.log10(mult)+1)
+        msg += [f"\n  ({count:{pad}}) {item}" for item, count in sorted(items.items())]
+    logger.log(level, "".join(msg), stacklevel=2)
+    return total

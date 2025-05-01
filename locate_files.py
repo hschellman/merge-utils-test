@@ -16,7 +16,7 @@ Script to take a metacat query or list of file DIDs, and then:
 import argparse
 import logging
 
-from merge_utils import io_utils, metacat_utils, rucio_utils
+from merge_utils import io_utils, rucio_utils
 
 logger = logging.getLogger(__name__)
 
@@ -41,15 +41,20 @@ def main():
 
     flist = io_utils.get_inputs(args.filelist, args.files)
 
-    flist = metacat_utils.find_logical_files(
-        query=args.query, filelist=flist, config=config['validation']
+    rses = rucio_utils.find_physical_files(
+        query=args.query, filelist=flist, config=config
     )
 
-    site_pfns = rucio_utils.find_physical_files(flist, config['sites'])
-    for site, pfns in site_pfns.items():
-        print(f"site {site}:")
-        for pfn in pfns.values():
-            print(f"  {pfn[0]}")
+    for name, rse in rses.items():
+        print(f"RSE {name}:")
+        for pfn in rse.pfns.values():
+            print(f"  {pfn}")
+
+    #site_pfns = rses.best_pfns()
+    #for site, pfns in site_pfns.items():
+    #    print(f"site {site}:")
+    #    for pfn in pfns.values():
+    #        print(f"  {pfn[0]}")
 
 if __name__ == '__main__':
     main()
