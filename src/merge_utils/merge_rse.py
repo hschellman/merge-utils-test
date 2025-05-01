@@ -12,7 +12,7 @@ import requests
 
 from rucio.client.rseclient import RSEClient
 
-from . import io_utils
+from merge_utils import io_utils
 
 logger = logging.getLogger(__name__)
 

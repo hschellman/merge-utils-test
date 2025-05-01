@@ -9,7 +9,7 @@ import asyncio
 from typing import Iterable, AsyncGenerator
 from abc import ABC, abstractmethod
 
-from . import io_utils
+from merge_utils import io_utils
 
 logger = logging.getLogger(__name__)
 
