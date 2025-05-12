@@ -57,7 +57,8 @@ extensions = [
     'sphinx.ext.autosectionlabel',
     'sphinx.ext.viewcode',
     'sphinx.ext.inheritance_diagram',
-    'myst_parser'
+    'myst_parser',
+    'sphinxcontrib.programoutput'
     #'sphinx_sitemap',  had to back it out as not available
     #'sphinxcontrib.programoutput',  # not available to github
 ]
