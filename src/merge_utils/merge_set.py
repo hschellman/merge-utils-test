@@ -5,100 +5,19 @@ import collections
 import logging
 import subprocess
 import hashlib
-import asyncio
-from typing import Iterable, AsyncGenerator
-from abc import ABC, abstractmethod
+import copy
+import math
+from typing import Iterable, Generator
 
-from merge_utils import io_utils, config
+from merge_utils import config, merge_meta
 
 logger = logging.getLogger(__name__)
 
-class FileRetriever(ABC):
-    """Base class for retrieving metadata from a source"""
-    step: int
-    allow_missing: bool
-    missing: dict
-    files: MergeSet
-
-    def __init__(self) -> dict:
-        """Initialize the file retriever"""
-        self.step = config.validation['batch_size']
-        self.allow_missing = config.validation['allow_missing']
-        self.missing = collections.defaultdict(int)
-        self.files = MergeSet()
-
-    @property
-    def dupes(self) -> dict:
-        """Return the set of duplicate files from the source"""
-        return self.files.dupes
-
-    @abstractmethod
-    async def connect(self) -> None:
-        """Connect to the metadata source"""
-        # connect to source
-
-    async def add(self, files: list, dids: list = None) -> dict:
-        """
-        Add the metadata for a list of files to the set.
-        
-        :param files: list of dictionaries with file metadata
-        :param dids: optional list of DIDs requested, used to check for missing files
-        :return: dict of MergeFile objects that were added
-        """
-        # check for missing files
-        if dids and len(files) < len(dids):
-            res_set = {x['namespace'] + ':' + x['name'] for x in files}
-            for did in set(dids) - res_set:
-                self.missing[did] += 1
-            if not self.allow_missing:
-                io_utils.log_dict("No metadata found for {n} file{s}:", self.missing, logging.ERROR)
-                raise ValueError("Missing file metadata")
-
-        # add files to merge set
-        added = await asyncio.to_thread(self.files.add_files, files)
-        return added
-
-    @abstractmethod
-    async def next_batch(self) -> AsyncGenerator[dict, None]:
-        """
-        Asynchronously retrieve metadata for the next batch of files.
-
-        :return: dict of MergeFile objects that were added
-        """
-        # yield batch
-
-    async def _loop(self) -> None:
-        """Repeatedly call next_batch() until all files are retrieved."""
-        # connect to source
-        await self.connect()
-        # loop over batches
-        async for _ in self.next_batch():
-            pass # do nothing
-
-    def run(self) -> MergeSet:
-        """
-        Retrieve metadata for all files.
-
-        :return: MergeSet of all files
-        """
-        logger.debug("Retrieving logical file metadata from MetaCat")
-        # run the loop
-        try:
-            asyncio.run(self._loop())
-        except ValueError as err:
-            logger.error("%s", err)
-            return MergeSet()
-
-        # log any missing or duplicated files
-        io_utils.log_dict("Missing metadata for {n} file{s}:", self.missing)
-        io_utils.log_dict("Found {n} duplicate file{s}:", self.dupes)
-
-        return self.files
-
 class MergeFile:
     """A generic data file with metadata"""
-    def __init__(self, data: dict):
+    def __init__(self, data: dict, path: str = None):
         self._did = data['namespace'] + ':' + data['name']
+        self.path = path
         self.fid = data['fid']
         self.size = data['size']
         self.checksums = data['checksums']
@@ -107,7 +26,7 @@ class MergeFile:
         elif 'adler32' not in self.checksums:
             logger.warning("No adler32 checksum for %s", self)
         self.metadata = data['metadata']
-        self.parents = data['parents']
+        self.parents = data.get('parents', [])
 
     @property
     def did(self) -> str:
@@ -245,10 +164,95 @@ class MergeSet(collections.UserDict):
         """Get the total size of the files"""
         return sum(file.size for file in self.data.values())
 
-    def batches(self) -> list[dict]:
-        """Split the files into batches for merging"""
+    def group_count(self) -> list[int]:
+        """Group input files by count"""
+        target_size = config.merging['target_size']
+        total_size = len(self.data)
+        if total_size < target_size:
+            logger.info("Merging %d inputs into 1 group", len(self.data))
+            return [len(self.data)]
 
+        if config.merging['equalize']:
+            n_groups = math.ceil(total_size / target_size)
+            target_size = total_size / n_groups
+            divs = [round(i*target_size) for i in range(1, n_groups)]
+        else:
+            divs = list(range(target_size, total_size, target_size))
+        divs.append(len(self.data))
+        logger.info("Merging %d inputs into %d groups of %d files",
+                        len(self.data), len(divs), target_size)
+        return divs
 
+    def group_size(self) -> list[int]:
+        """Group input files by size"""
+        target_size = config.merging['target_size'] * 1024**3
+        total_size = self.size
+        if total_size < target_size:
+            logger.info("Merging %d inputs into 1 group", len(self.data))
+            return [len(self.data)]
+
+        avg_size = total_size / len(self.data)
+        if avg_size > target_size / config.merging['chunk_min']:
+            logger.error("%.2f GB input files are too large to merge into %.2f GB groups",
+                            avg_size/1024**3, target_size/1024**3)
+            return []
+
+        size = 0
+        divs = []
+        if config.merging['equalize']:
+            max_size = target_size
+            n_groups = math.ceil(total_size / target_size)
+            target_size = total_size / n_groups
+            err = 0
+            for idx, file in enumerate(self.files):
+                # Try to get just above target_size without exceeding max_size
+                if size >= target_size - err or size + file.size > max_size:
+                    divs.append(idx)
+                    err += size - target_size # distribute error across groups
+                    size = 0
+                size += file.size
+        else:
+            for idx, file in enumerate(self.files):
+                if size + file.size > target_size:
+                    divs.append(idx)
+                    size = 0
+                size += file.size
+
+        divs.append(len(self.data))
+        logger.info("Merging %d inputs into %d groups of %.2f GB",
+                        len(self.data), len(divs), target_size)
+        return divs
+
+    def groups(self) -> Generator[dict, None, None]:
+        """Split the files into groups for merging"""
+        new_meta = merge_meta.merged_keys(self.data)
+        new_meta['merge.hash'] = self.hash
+        new_name = merge_meta.make_name(new_meta)
+
+        # Get the group divisions
+        if config.merging['target_mode'] == 'count':
+            divs = self.group_count()
+        elif config.merging['target_mode'] == 'size':
+            divs = self.group_size()
+        else:
+            logger.error("Unknown target mode: %s", config.merging['target_mode'])
+            return
+        if len(divs) == 0:
+            return
+
+        # Actually output the groups
+        group_id = 0
+        group = MergeChunk(name=new_name, metadata=new_meta)
+        if len(divs) > 1:
+            group.group_id = group_id
+        for i, file in enumerate(self.files):
+            group.add(file)
+            # Check if we need to yield the group
+            if i+1 == divs[group_id]:
+                logger.debug("Yielding group %d with %d files", group_id, len(group))
+                yield group
+                group_id += 1
+                group = MergeChunk(name=new_name, metadata=new_meta, idx=group_id)
 
     def check_consistency(self, fields: list) -> bool:
         """
@@ -286,6 +290,40 @@ class MergeSet(collections.UserDict):
 
         logger.error("".join(errs))
         return False
+
+
+class MergeChunk(collections.UserDict):
+    """Class to keep track of a chunk of files for merging"""
+    def __init__(self, name: str, metadata: dict, idx: int = -1):
+        super().__init__()
+        self._name = name
+        self.metadata = copy.deepcopy(metadata)
+        self.site = None
+        self.group_id = idx
+        self.chunk_id = -1
+        self.chunks = 0
+
+    @property
+    def name(self) -> str:
+        """The name of the chunk"""
+        the_name = self._name
+        if self.group_id >= 0:
+            the_name = f"{the_name}_f{self.group_id}"
+        if self.chunk_id >= 0:
+            the_name = f"{the_name}_c{self.chunk_id}"
+        return the_name
+
+    def add(self, file: MergeFile) -> None:
+        """Add a file to the chunk"""
+        self.data[file.did] = file
+
+    def chunk(self) -> MergeChunk:
+        """Create a subset of the chunk with the same metadata"""
+        chunk = MergeChunk(metadata=self.metadata, name=self.name, idx=self.group_id)
+        chunk.site = self.site
+        chunk.chunk_id = self.chunks
+        self.chunks += 1
+        return chunk
 
 
 def check_remote_path(path: str, timeout: float = 5) -> bool:

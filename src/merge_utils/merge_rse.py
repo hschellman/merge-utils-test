@@ -1,8 +1,10 @@
 """Keep track of RSEs where files are stored"""
 
 import os
-import collections
 import logging
+import collections
+import itertools
+import math
 import subprocess
 import csv
 import asyncio
@@ -12,7 +14,7 @@ import requests
 
 from rucio.client.rseclient import RSEClient
 
-from merge_utils import io_utils, config
+from merge_utils import config
 
 logger = logging.getLogger(__name__)
 
@@ -105,12 +107,21 @@ class MergeRSE:
         """Get the distance to a site"""
         return self.distances.get(site, float('inf'))
 
-    def nearest_site(self) -> tuple:
-        """Get the nearest site for this RSE"""
+    def nearest_site(self, sites: list = None) -> tuple:
+        """
+        Get the nearest merging site to this RSE
+        
+        :param sites: list of merging sites to consider (default: all sites)
+        :return: tuple of (site, distance)
+        """
         if len(self.distances) == 0:
             return None, float('inf')
-        site = min(self.distances, key=self.distances.get)
-        distance = self.distances[site]
+        if sites is None:
+            sites = self.distances.keys()
+        site = min(sites, key=self.distance)
+        distance = self.distance(site)
+        if distance == float('inf'):
+            return None, float('inf')
         return site, distance
 
 class MergeRSEs(collections.UserDict):
@@ -224,20 +235,22 @@ class MergeRSEs(collections.UserDict):
             raise ValueError("File exceeds max distance")
         return sum(1 for dist in results if dist <= self.max_distance)
 
-    def cleanup(self) -> None:
-        """Remove RSEs with no files"""
+    def set_rse_sites(self) -> None:
+        """Query Rucio for the site associated with each RSE"""
         rse_client = RSEClient()
-        # Remove RSEs with no files
-        self.data = {k: v for k, v in self.items() if len(v.disk) > 0 or len(v.tape) > 0}
-
-        # Count how many files we found
-        msg = [""]
-        for name, rse in sorted(self.items(), key=lambda x: len(x[1].disk), reverse=True):
-            msg.append(f"\n  {name}: {len(rse.disk)} ({len(rse.tape)}) files")
-
+        for name, rse in self.items():
             attr = rse_client.list_rse_attributes(name)
             rse.site = attr['site']
 
+    def cleanup(self) -> None:
+        """Remove RSEs with no files"""
+        # Remove RSEs with no files
+        self.data = {k: v for k, v in self.items() if len(v.disk) > 0 or len(v.tape) > 0}
+
+        # Log how many files we found
+        msg = [""]
+        for name, rse in sorted(self.items(), key=lambda x: len(x[1].disk), reverse=True):
+            msg.append(f"\n  {name}: {len(rse.disk)} ({len(rse.tape)}) files")
         n_files = len(self.disk)
         n_tape = len(self.tape - self.disk)
         n_rses = len(self.items())
@@ -247,10 +260,16 @@ class MergeRSEs(collections.UserDict):
                   f"from {n_rses} RSE{s_rses}:")
         logger.info("".join(msg))
 
-    def site_pfns(self, site: str, dids: Iterable) -> dict:
-        """Get the shortest distance pfns for a given site"""
+    def site_pfns(self, site: str, files: Iterable) -> dict:
+        """
+        Find the file replicas with the shortest distance to a given merging site.
+        
+        :param site: merging site name
+        :param files: collection of files to process
+        :return: dictionary of PFNs for the site
+        """
         pfns = {}
-        for did in dids:
+        for did in files:
             pfns[did] = (None, float('inf'))
 
         for name, rse in self.items():
@@ -260,7 +279,7 @@ class MergeRSEs(collections.UserDict):
                             name, site, distance, self.max_distance)
                 continue
             for did, pfn in rse.disk.items():
-                if did not in dids:
+                if did not in files:
                     continue
                 if distance < pfns[did][1]:
                     pfns[did] = (pfn, distance)
@@ -271,56 +290,93 @@ class MergeRSEs(collections.UserDict):
                             name, site, distance, self.max_distance)
                 continue
             for did, pfn in rse.tape.items():
-                if did not in dids:
+                if did not in files:
                     continue
                 if distance < pfns[did][1]:
                     pfns[did] = (pfn, distance)
         return pfns
 
-    def best_pfns(self, dids: Iterable = None) -> dict:
-        """Determine the best RSE for each file"""
+    def optimize_pfns(self, pfns: dict, files: Iterable, sites: list) -> dict:
+        """
+        Find the best PFNs for a set of sites.
+        
+        :param pfns: dictionary of PFNs for all sites
+        :param files: collection of files to process
+        :param sites: list of sites to consider
+        :return: dictionary of best PFNs for each site
+        """
+        if len(sites) == 1:
+            return {sites[0]: pfns[sites[0]]}
+        best_pfns = {site: {} for site in sites}
 
-        if dids is None:
-            dids = self.disk | self.tape
-
-        site_pfns = {}
-        best_site = None
-        best_distance = float('inf')
-        for site in self.sites:
-            site_pfns[site] = self.site_pfns(site, dids)
-            total_distance = sum(t[1] for t in site_pfns[site].values())
-            if total_distance < best_distance:
-                best_distance = total_distance
-                best_site = site
-
-        if best_site:
-            logger.info("Site %s has the shortest distance to all files", best_site)
-            return {best_site: site_pfns[best_site]}
-
-        logger.info("No site found with access to all files")
-        print(dids)
-        print(site_pfns)
-        site_pfns[None] = {}
-        for did in dids:
-            best_site = None
-            best_distance = float('inf')
-            for site in self.sites:
-                if site_pfns[site][did][1] < best_distance:
-                    best_site = site
-                    best_distance = site_pfns[site][did][1]
-            #best_site, best_distance = min(
-                #((site, pfns[did][1]) for (site, pfns) in site_pfns.items()), key=lambda x: x[1])
-            if best_distance > self.max_distance:
-                best_site = None
-                site_pfns[None][did] = (None, float('inf'))
-            # remove all but the best pfn
-            for site in self.sites:
-                if site == best_site:
+        chunk_max = config.merging['chunk_max']
+        def chunk_err(counts):
+            """Calculate how far we are from optimal chunk sizes"""
+            total_err = 0
+            for count in counts:
+                if count == 0:
                     continue
-                del site_pfns[site][did]
+                n_chunks = count / chunk_max
+                err = (math.ceil(n_chunks) - n_chunks) / math.ceil(n_chunks)
+                total_err += err**2
+            return total_err
 
-        if io_utils.log_list("Excessive distance for {n} file{s}:", site_pfns[None].keys()):
-            logger.error("Consider adjusting site distance limits!")
-            return {}
+        def delta(did) -> float:
+            """Calculate the difference between the best and second-best distances"""
+            dists = [pfns[site][did][1] for site in sites]
+            dists.sort()
+            return dists[1] - dists[0]
 
-        return {site: pfns for (site, pfns) in site_pfns.items() if len(pfns) > 0}
+        # Add files with largest distance difference first
+        for did in sorted(files, key=delta, reverse=True):
+            # Break ties by trying to optimize chunk sizes
+            counts = [len(best_pfns[site]) for site in best_pfns]
+            err = chunk_err(counts)
+            best_site = None
+            best_priority = float('inf')
+            for i, site in enumerate(best_pfns):
+                priority = pfns[site][did][1] \
+                         + chunk_err(counts[:i] + [counts[i] + 1] + counts[i+1:]) - err
+                if priority < best_priority:
+                    best_priority = priority
+                    best_site = site
+            best_pfns[best_site][did] = pfns[best_site][did]
+
+        return best_pfns
+
+    def get_pfns(self, files: Iterable = None) -> dict:
+        """Determine the best RSE for each file"""
+        if files is None:
+            files = self.disk | self.tape
+        pfns = {site: self.site_pfns(site, files) for site in self.sites}
+        if len(self.sites) == 1:
+            return pfns
+
+        # Find a minimal set of sites with access to all files
+        for n_sites in range(1, len(self.sites) + 1):
+            best_sites = (None,) * n_sites
+            best_distance = float('inf')
+            for sites in itertools.combinations(self.sites, n_sites):
+                total_distance = 0
+                for did in files:
+                    total_distance += min(pfns[site][did][1] for site in sites)
+                if total_distance < best_distance:
+                    best_distance = total_distance
+                    best_sites = sites
+            if best_distance < float('inf'):
+                break
+        if n_sites == 1:
+            logger.info("Site %s has the shortest distance to all files", best_sites[0])
+        elif n_sites < len(self.sites):
+            logger.debug("Sites %s have the shortest distance to all files", (best_sites,))
+        else:
+            logger.debug("All sites required to access all files")
+
+        # Collect the PFNs for the best sites
+        best_pfns = self.optimize_pfns(pfns, files, best_sites)
+        #if max(len(best_pfns[site]) for site in best_pfns) <= config.merging['chunk_max']:
+        #    return best_pfns
+
+        # See if we can do better with more sites?
+        #for n_sites in range(n_sites + 1, len(self.sites) + 1):
+        return best_pfns

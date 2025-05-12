@@ -9,6 +9,8 @@ DEFAULT_CONFIG = "defaults.yaml"
 validation: dict = {}
 sites: dict = {}
 merging: dict = {}
+output: dict = {}
+abbreviations: dict = {}
 
 logger = logging.getLogger(__name__)
 
@@ -27,8 +29,10 @@ def load(file: str = None) -> None:
     else:
         logger.info("Loaded default configuration file %s", DEFAULT_CONFIG)
 
-    global validation, sites, merging # pylint: disable=global-statement
+    global validation, sites, merging, output, abbreviations # pylint: disable=global-statement
 
     validation = cfg.get("validation", {})
     sites = cfg.get("sites", {})
     merging = cfg.get("merging", {})
+    output = cfg.get("output", {})
+    abbreviations = cfg.get("abbreviations", {})

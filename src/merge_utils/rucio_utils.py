@@ -2,22 +2,30 @@
 from __future__ import annotations
 
 import logging
+import math
 import asyncio
+from typing import AsyncGenerator, Generator
 
 from rucio.client.replicaclient import ReplicaClient
 
-from merge_utils.merge_set import MergeFile, MergeSet, FileRetriever
+from merge_utils.merge_set import MergeFile, MergeSet, MergeChunk
+from merge_utils.retriever import FileRetriever
 from merge_utils.merge_rse import MergeRSEs
 from merge_utils import io_utils, config
-from merge_utils import metacat_utils
 
 logger = logging.getLogger(__name__)
 
-class RucioRetriever:
+class RucioRetriever (FileRetriever):
     """Class for managing asynchronous queries to the Rucio web API."""
 
     def __init__(self, source: FileRetriever):
-        """Initialize the RucioRetriever with a source of file metadata."""
+        """
+        Initialize the RucioRetriever with a source of file metadata.
+        
+        :param source: FileRetriever object to use as the source of file metadata
+        """
+        super().__init__()
+
         self.checksums = config.validation['checksums']
         self.rses = MergeRSEs()
         self.source = source
@@ -53,11 +61,11 @@ class RucioRetriever:
 
     async def checksum(self, file: MergeFile, rucio: dict) -> bool:
         """
-        Ensure file sizes and checksums from MetaCat and Rucio agree
+        Ensure file sizes and checksums from Rucio agree with the input metadata.
         
         :param file: MergeFile object to check
         :param rucio: Rucio replicas dictionary
-        :return: True if checksums match, False otherwise
+        :return: True if files match, False otherwise
         """
         # Check the file size
         if file.size != rucio['bytes']:
@@ -115,42 +123,51 @@ class RucioRetriever:
         if errs:
             raise ValueError("Failed to find all files in Rucio!")
 
-    async def _loop(self) -> None:
-        """Repeatedly process batches from the source until all files are retrieved."""
-        # connect to source
-        await self.connect()
-        # loop over batches
-        async for files in self.source.next_batch():
-            await self.process(files)
-
-    def run(self) -> MergeRSEs:
+    async def input_batches(self) -> AsyncGenerator[dict, None]:
         """
-        Retrieve metadata for all files.
+        Asynchronously retrieve metadata for the next batch of files.
 
-        :return: MergeSet of all files
+        :return: dict of MergeFile objects that were added
         """
-        logger.debug("Retrieving physical file paths from Rucio")
-        try:
-            asyncio.run(self._loop())
-        except ValueError as err:
-            logger.error("%s", err)
-            return MergeRSEs()
+        async for batch in self.source.input_batches():
+            await self.process(batch)
+            yield batch
 
-        # log any missing or duplicated files
-        io_utils.log_dict("Missing metadata for {n} file{s}:", self.missing)
-        io_utils.log_dict("Found {n} duplicate file{s}:", self.dupes)
-
+    def run(self) -> None:
+        """Retrieve metadata for all files."""
+        super().run()
         self.rses.cleanup()
-        return self.rses
 
+    def output_chunks(self) -> Generator[MergeChunk, None, None]:
+        """
+        Yield chunks of files for merging.
+        
+        :return: yeilds a series of MergeChunk objects
+        """
+        for group in self.files.groups():
+            pfns = self.rses.get_pfns(group)
+            for site in pfns:
+                for did, pfn in pfns[site].items():
+                    group[did].path = pfn[0]
 
+            if len(pfns) == 1:
+                site = next(iter(pfns))
+                if len(pfns[site]) <= config.merging['chunk_max']:
+                    group.site = site
+                    yield group
+                    continue
 
-
-def find_physical_files(query: str = None, filelist: list = None) -> MergeRSEs:
-    """Get the best physical locations for a list of logical files"""
-    logger.debug("Retrieving physical file paths from Rucio")
-
-    retriever = RucioRetriever(metacat_utils.MetaCatRetriever(query, filelist))
-
-    rses = retriever.run()
-    return rses
+            for site in pfns:
+                n_chunks = math.ceil(len(group) / config.merging['chunk_max'])
+                target_size = len(group) / n_chunks
+                chunk = group.chunk()
+                chunk.site = site
+                for did in pfns[site]:
+                    chunk.add(group[did])
+                    if len(chunk) >= target_size:
+                        yield chunk
+                        chunk = group.chunk()
+                        chunk.site = site
+                if chunk:
+                    yield chunk
+            yield group

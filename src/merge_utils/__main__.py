@@ -45,8 +45,8 @@ def list_dids(arg_list: list = None):
     flist = io_utils.get_inputs(args.filelist, args.files)
 
     retriever = metacat_utils.MetaCatRetriever(query=args.query, filelist=flist)
-    files = retriever.run()
-    for file in files:
+    retriever.run()
+    for file in retriever.files:
         print (file.did)
 
 def list_pfns(arg_list: list = None):
@@ -58,7 +58,7 @@ def list_pfns(arg_list: list = None):
     parser.add_argument('-f', '--filelist', help='a file containing a list of file DIDs')
     parser.add_argument('-a', '--all', action='store_true', help='list replicas from all RSEs')
     parser.add_argument('files', nargs=argparse.REMAINDER, help='individual file DIDs')
-    
+
     if arg_list:
         args = parser.parse_args(arg_list)
     else:
@@ -69,16 +69,17 @@ def list_pfns(arg_list: list = None):
     retriever = rucio_utils.RucioRetriever(
         metacat_utils.MetaCatRetriever(query=args.query, filelist=flist)
     )
-    rses = retriever.run()
+    retriever.run()
 
     if args.all:
+        rses = retriever.rses
         for name, rse in rses.items():
             print(f"RSE {name}:")
             for pfn in rse.pfns.values():
                 print(f"  {pfn}")
     else:
-        site_pfns = rses.best_pfns()
-        for site, pfns in site_pfns.items():
-            print(f"site {site}:")
-            for pfn in pfns.values():
-                print(f"  {pfn[0]}")
+        for chunk in retriever.output_chunks():
+            print(f"Output file {chunk.name}:")
+            print(f"site {chunk.site}")
+            for pfn in chunk.values():
+                print(f"  {pfn.path}")

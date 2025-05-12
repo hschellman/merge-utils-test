@@ -32,6 +32,17 @@ sites:
 merging:
     method: auto        # Manual options: tar, targz, hadd, lar, hdf5
     target_mode: size   # Options: size, count
-    target_size: 10     # Target size in GB
+    target_size: 20     # Target size (in GB) or number of files
     equalize: true      # Try to equalize the size of the merged files
-    batch_size: 100     # Maxiumum number of files to merge at once
+    chunk_min: 5        # Minimum number of files to merge at once
+    chunk_max: 100      # Maxiumum number of files to merge at once
+
+output:
+    name: "{core.run_type}_{dune.campaign}_{dune.config_file}_{core.application.name}_merged_{timestamp}"
+    #name: "{core.run_type}_{core.file_type}_{dune.campaign}_{core.data_stream}_{dune.config_file}_{core.data_tier}_merged_{timestamp}"
+    grandparents: false # List the parents of the input files as the parents of the merged file
+    metadata_overrides: # Metadata to override in the output files
+        "retention.status": "active"
+
+abbreviations:
+    "root-tuple": "rtuple"
