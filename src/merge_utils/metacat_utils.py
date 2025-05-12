@@ -7,7 +7,8 @@ from typing import AsyncGenerator
 
 import metacat.webapi as metacat
 
-from merge_utils.merge_set import MergeSet, FileRetriever
+from merge_utils import config
+from merge_utils.retriever import FileRetriever
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +17,7 @@ class MetaCatRetriever(FileRetriever):
 
     def __init__(self, query: str = None, filelist: list = None):
         """
-        Initialize the MetaCatWrapper with a query or a list of files.
+        Initialize the MetaCatRetriever with a query or a list of files.
 
         :param query: MQL query to find files
         :param filelist: list of file DIDs to find
@@ -25,6 +26,7 @@ class MetaCatRetriever(FileRetriever):
 
         self.query = query
         self.filelist = filelist
+        self.parents = config.output['grandparents']
         if query and filelist:
             logger.warning("Both query and file list provided, was this intended?")
         if not self.filelist:
@@ -40,7 +42,7 @@ class MetaCatRetriever(FileRetriever):
         else:
             logger.debug("Already connected to MetaCat")
 
-    async def _files(self, idx: int, dids: list) -> list:
+    async def _get_files(self, idx: int, dids: list) -> list:
         """
         Asynchronously request file data from MetaCat
         
@@ -53,14 +55,14 @@ class MetaCatRetriever(FileRetriever):
         logger.debug("Retrieving files from MetaCat for batch %d", idx)
         dictlist = [{'did':did} for did in dids]
         try:
-            res = await asyncio.to_thread(self.client.get_files,
-                                          dictlist, with_metadata = True, with_provenance = True)
+            res = await asyncio.to_thread(self.client.get_files, dictlist,
+                                          with_metadata = True, with_provenance = self.parents)
         except (ValueError, metacat.webapi.BadRequestError) as err:
             logger.error("%s", err)
             return []
         return list(res)
 
-    async def _query(self, idx: int) -> list:
+    async def _get_query(self, idx: int) -> list:
         """
         Asynchronously query MetaCat
         
@@ -73,14 +75,14 @@ class MetaCatRetriever(FileRetriever):
         query_batch = self.query + f" skip {idx*self.step} limit {self.step}"
         try:
             # async_query exists but does not seem to be compatible with asyncIO
-            res = await asyncio.to_thread(self.client.query,
-                                          query_batch, with_metadata = True, with_provenance = True)
+            res = await asyncio.to_thread(self.client.query, query_batch,
+                                          with_metadata = True, with_provenance = self.parents)
         except metacat.webapi.BadRequestError as err:
             logger.error("Malformed MetaCat query:\n  %s\n%s", self.query, err)
             return []
         return list(res)
 
-    async def next_batch(self) -> AsyncGenerator[dict, None]:
+    async def input_batches(self) -> AsyncGenerator[dict, None]:
         """
         Asynchronously retrieve metadata for the next batch of files.
 
@@ -88,19 +90,19 @@ class MetaCatRetriever(FileRetriever):
         """
         # request first batch from filelist
         dids = self.filelist[0:self.step]
-        task = asyncio.create_task(self._files(0, dids))
+        task = asyncio.create_task(self._get_files(0, dids))
         # loop over batches from filelist
         for idx in range(1, len(self.filelist)//self.step + 1):
             old_dids = dids
             dids = self.filelist[idx*self.step:(idx+1)*self.step]
             res = await task
-            task = asyncio.create_task(self._files(idx, dids))
+            task = asyncio.create_task(self._get_files(idx, dids))
             added = await self.add(res, old_dids)
             logger.debug("yielding file batch %d", idx-1)
             yield added
         res = await task
         # request first batch from query
-        task = asyncio.create_task(self._query(0))
+        task = asyncio.create_task(self._get_query(0))
         # finish processing last batch from filelist
         if res:
             added = await self.add(res, dids)
@@ -111,7 +113,7 @@ class MetaCatRetriever(FileRetriever):
             res = await task
             if len(res) < self.step:
                 break
-            task = asyncio.create_task(self._query(idx))
+            task = asyncio.create_task(self._get_query(idx))
             added = await self.add(res)
             logger.debug("yielding query batch %d", idx-1)
             yield added
@@ -120,14 +122,3 @@ class MetaCatRetriever(FileRetriever):
             added = await self.add(res)
             logger.debug("yielding last query batch")
             yield added
-
-def find_logical_files(query: str = None, filelist: list = None) -> MergeSet:
-    """
-    Retrieve logical file information from MetaCat based on an MQL query or a list of DIDs.
-
-    :param query: MQL query to find files
-    :param filelist: list of file DIDs to find
-    :return: MergeSet of unique files.
-    """
-    retriever = MetaCatRetriever(query, filelist)
-    return retriever.run()

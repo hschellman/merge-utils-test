@@ -7,6 +7,7 @@ import logging.config
 import json
 import pathlib
 import math
+from datetime import datetime, timezone
 from collections.abc import Iterable
 
 # tomllib was added to the standard library in Python 3.10, need tomli for DUNE
@@ -22,6 +23,10 @@ logger = logging.getLogger(__name__)
 def pkg_dir() -> str:
     """Get the base directory of the package"""
     return os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+
+def get_timestamp() -> str:
+    """Get the current timestamp as a string"""
+    return datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
 
 def get_inputs(file_path: str, args: list[str]) -> list[str]:
     """
