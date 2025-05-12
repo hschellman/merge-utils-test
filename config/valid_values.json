@@ -1,0 +1,57 @@
+{"comments":["v0 - empty info "],
+    "run_type":{ 
+        "test":" ",
+        "neardet":" ",
+        "protodune-sp":" ",
+        "protodune-dp":" ",
+        "iceberg":" ",
+        "np04_vst":" ",
+        "vd-coldbox-bottom":" ",
+        "vd-coldbox-top":" ",
+        "hd-coldbox":" ",
+        "vd-protodune-pds":" ",
+        "dc4-vd-coldbox-bottom":" ",
+        "dc4-vd-coldbox-top":"",
+        "hd-protodune":"",
+        "neardet-lar":"",
+        "neardet-2x2-lar-charge":"",
+        "neardet-2x2-lar-light":"",
+        "vd-protodune":"",
+        "vd-coldbox":""
+    },
+    "file_type":{
+        "mc":" ",
+        "detector":" "
+    },
+    "data_stream":{
+        "root":" ",
+        "artroot":" ",
+        "binary":" ",
+        "rootntuple":" ",
+        "hdf5":" "
+    },
+    "data_tier":{
+        "simulated":" ",
+        "raw":" ",
+        "hit-reconstructed":" ",
+        "full-reconstructed":" ",
+        "generated":" ",
+        "detector-simulated":" ",
+        "root-tuple":" ",
+        "root-hist":" ",
+        "decoded-raw":" ",
+        "pandora_info":" ",
+        "reco-recalibrated":" ",
+        "root-tuple-virtual":" ",
+        "trigprim":" ",
+        "pandora-info":" "
+    },
+    "file_format":{
+        "root":" ",
+        "artroot":" ",
+        "binary":" ",
+        "rootntuple":" ",
+        "hdf5":" ",
+        "tar":" "
+    }
+}
