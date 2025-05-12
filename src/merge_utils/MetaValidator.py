@@ -1,11 +1,14 @@
 """Check metadata against a template"""
 import os,sys,json
 
-from CheckConfiguration import known_fields
+#from CheckConfiguration import known_fields
  
 
 def MetaValidator(filemd=None, errfile=None, verbose=False):
     " check for type and missing required fields in metadata"
+    f = open("../../config/valid_values.json")
+    known_fields = json.load(f)
+    f.close()
     DEBUG=False
     # define types
     STRING = type("")
@@ -87,8 +90,9 @@ def MetaValidator(filemd=None, errfile=None, verbose=False):
 
     # loop over default md keys
 
-    for x, xtype in basetypes.items():
+    for xkey, xtype in basetypes.items():
         if verbose: print (x,xtype)
+        x = "core."+xkey
         if x in optional["all"]: continue
         # check required
         if x not in filemd.keys():
@@ -138,7 +142,7 @@ def MetaValidator(filemd=None, errfile=None, verbose=False):
             print (error)
             if errfile is not None: errfile.write(error+"\n")
             valid *= False
-    for x,core in known_fields().items():
+    for x,core in known_fields.items():
         if x not in md: 
             print ("required field",x,"not present")
             valid *=False      
