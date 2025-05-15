@@ -116,6 +116,42 @@ def get_parents(files: dict) -> set:
         parents.update(file.parents)
     return parents
 
+class NameMetaDict(collections.UserDict):
+    """Class to inject metadata into a name template."""
+
+    def __init__(self, value: str = None):
+        """
+        Initialize the NameMetaFormatter with a value.
+
+        :param value: value to insert
+        """
+        super().__init__()
+        self._str = value or ""
+
+    def __str__(self):
+        return self._str
+
+    def __repr__(self):
+        if not self._str:
+            return f"{self.data}"
+        if not self.data:
+            return f"'{self._str}'"
+        return f"'{self._str}'{self.data}"
+
+    def __getitem__(self, name):
+        name_list = name.split('.', 1)
+        if name_list[0] not in self.data:
+            self.data[name_list[0]] = NameMetaDict(name_list[0])
+        if len(name_list) == 1:
+            return self.data[name_list[0]]
+        return self.data[name_list[0]][name_list[1]]
+
+    def __setitem__(self, name, value):
+        self[name]._str = value
+
+    def __getattr__(self, name):
+        return self[name]
+
 def make_name(metadata: dict) -> str:
     """
     Create a name for the merged file based on the metadata.
@@ -123,15 +159,15 @@ def make_name(metadata: dict) -> str:
     :param metadata: metadata dictionary
     :return: merged file name
     """
-    name = config.output['name']
+    inserts = NameMetaDict()
     for key, value in metadata.items():
         if not isinstance(value, str):
             value = str(value)
         value = value.split('.', 1)[0]
         if value in config.abbreviations:
             value = config.abbreviations[value]
+        inserts[key] = value
+    inserts['timestamp'] = io_utils.get_timestamp()
 
-        name = name.replace(f"{{{key}}}", value)
-    name = name.replace("{timestamp}", io_utils.get_timestamp())
-    #return name.format_map(inserts)
-    return name
+    name = config.output['name']
+    return name.format_map(inserts)
