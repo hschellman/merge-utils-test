@@ -3,6 +3,7 @@
 import logging
 import itertools
 import asyncio
+import time
 from typing import AsyncGenerator
 
 import metacat.webapi as metacat
@@ -122,3 +123,24 @@ class MetaCatRetriever(FileRetriever):
             added = await self.add(res)
             logger.debug("yielding last query batch")
             yield added
+
+def list_field_values(field: str) -> list:
+    """
+    Get a list of all values for a given field in the MetaCat database.
+
+    :param field: field to query
+    :return: list of values for the field
+    """
+    client = metacat.MetaCatClient()
+    query = f"files where {field} present limit 1"
+    values = []
+    while True:
+        res = client.query(query, with_metadata=True)
+        data = next(res, None)
+        if not data:
+            break
+        value = data['metadata'][field]
+        print(value)
+        values.append(value)
+        query = f"""files where {field} present and {field} not in ('{"','".join(values)}') limit 1"""
+        #time.sleep(1)
