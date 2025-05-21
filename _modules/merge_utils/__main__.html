@@ -52,38 +52,43 @@
 
     <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span>
         <span class="n">description</span><span class="o">=</span><span class="s1">&#39;Command line interface for merge_utils&#39;</span><span class="p">)</span>
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;function&quot;</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;list_dids&quot;</span><span class="p">,</span> <span class="s2">&quot;list_pfns&quot;</span><span class="p">],</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Function to execute&quot;</span><span class="p">)</span>
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-c&#39;</span><span class="p">,</span> <span class="s1">&#39;--config&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;a configuration file&#39;</span><span class="p">)</span>
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-d&#39;</span><span class="p">,</span> <span class="s1">&#39;--debug&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;print debug information&#39;</span><span class="p">)</span>
+    <span class="c1">#parser.add_argument(&quot;function&quot;, choices=[&quot;list_dids&quot;, &quot;list_pfns&quot;], help=&quot;Function to execute&quot;)</span>
 
-    <span class="n">args</span><span class="p">,</span> <span class="n">rest</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_known_args</span><span class="p">()</span>
+    <span class="n">subparsers</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">add_subparsers</span><span class="p">(</span><span class="n">metavar</span><span class="o">=</span><span class="s1">&#39;FUNCTION&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;function&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;function to execute&quot;</span><span class="p">)</span>
+
+    <span class="n">did_parser</span> <span class="o">=</span> <span class="n">subparsers</span><span class="o">.</span><span class="n">add_parser</span><span class="p">(</span><span class="s1">&#39;dids&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;list the DIDs of files from MetaCat&#39;</span><span class="p">)</span>
+    <span class="n">did_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-q&#39;</span><span class="p">,</span> <span class="s1">&#39;--query&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;MetaCat query to find files&#39;</span><span class="p">)</span>
+    <span class="n">did_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-f&#39;</span><span class="p">,</span> <span class="s1">&#39;--filelist&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;a file containing a list of file DIDs&#39;</span><span class="p">)</span>
+    <span class="n">did_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;files&#39;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="n">argparse</span><span class="o">.</span><span class="n">REMAINDER</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;individual file DIDs&#39;</span><span class="p">)</span>
+
+    <span class="n">pfn_parser</span> <span class="o">=</span> <span class="n">subparsers</span><span class="o">.</span><span class="n">add_parser</span><span class="p">(</span><span class="s1">&#39;pfns&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;list the PFNs of files from Rucio&#39;</span><span class="p">)</span>
+    <span class="n">pfn_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-q&#39;</span><span class="p">,</span> <span class="s1">&#39;--query&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;MetaCat query to find files&#39;</span><span class="p">)</span>
+    <span class="n">pfn_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-f&#39;</span><span class="p">,</span> <span class="s1">&#39;--filelist&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;a file containing a list of file DIDs&#39;</span><span class="p">)</span>
+    <span class="n">pfn_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-a&#39;</span><span class="p">,</span> <span class="s1">&#39;--all&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;list replicas from all RSEs&#39;</span><span class="p">)</span>
+    <span class="n">pfn_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;files&#39;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="n">argparse</span><span class="o">.</span><span class="n">REMAINDER</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;individual file DIDs&#39;</span><span class="p">)</span>
+
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-c&#39;</span><span class="p">,</span> <span class="s1">&#39;--config&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;a configuration file&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-v&#39;</span><span class="p">,</span> <span class="s1">&#39;--verbose&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;count&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;print more verbose output&#39;</span><span class="p">)</span>
+
+    <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
     <span class="n">io_utils</span><span class="o">.</span><span class="n">setup_log</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">function</span><span class="p">)</span>
     <span class="n">config</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">debug</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">verbose</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">io_utils</span><span class="o">.</span><span class="n">set_log_level</span><span class="p">(</span><span class="s2">&quot;INFO&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">args</span><span class="o">.</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
         <span class="n">io_utils</span><span class="o">.</span><span class="n">set_log_level</span><span class="p">(</span><span class="s2">&quot;DEBUG&quot;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">function</span> <span class="o">==</span> <span class="s2">&quot;list_dids&quot;</span><span class="p">:</span>
-        <span class="n">list_dids</span><span class="p">(</span><span class="n">rest</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">args</span><span class="o">.</span><span class="n">function</span> <span class="o">==</span> <span class="s2">&quot;list_pfns&quot;</span><span class="p">:</span>
-        <span class="n">list_pfns</span><span class="p">(</span><span class="n">rest</span><span class="p">)</span></div>
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">function</span> <span class="o">==</span> <span class="s2">&quot;dids&quot;</span><span class="p">:</span>
+        <span class="n">list_dids</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">args</span><span class="o">.</span><span class="n">function</span> <span class="o">==</span> <span class="s2">&quot;pfns&quot;</span><span class="p">:</span>
+        <span class="n">list_pfns</span><span class="p">(</span><span class="n">args</span><span class="p">)</span></div>
 
 
 
 <div class="viewcode-block" id="list_dids">
 <a class="viewcode-back" href="../../scripts.html#merge_utils.__main__.list_dids">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">list_dids</span><span class="p">(</span><span class="n">arg_list</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">list_dids</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;List the DIDs of files from MetaCat&quot;&quot;&quot;</span>
-
-    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span>
-        <span class="n">description</span><span class="o">=</span><span class="s1">&#39;validate metadata consistency and return a list of unique file DIDs&#39;</span><span class="p">)</span>
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-q&#39;</span><span class="p">,</span> <span class="s1">&#39;--query&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;MetaCat query to find files&#39;</span><span class="p">)</span>
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-f&#39;</span><span class="p">,</span> <span class="s1">&#39;--filelist&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;a file containing a list of file DIDs&#39;</span><span class="p">)</span>
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;files&#39;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="n">argparse</span><span class="o">.</span><span class="n">REMAINDER</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;individual file DIDs&#39;</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">arg_list</span><span class="p">:</span>
-        <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">(</span><span class="n">arg_list</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
 
     <span class="n">flist</span> <span class="o">=</span> <span class="n">io_utils</span><span class="o">.</span><span class="n">get_inputs</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">filelist</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">files</span><span class="p">)</span>
 
@@ -95,21 +100,8 @@
 
 <div class="viewcode-block" id="list_pfns">
 <a class="viewcode-back" href="../../scripts.html#merge_utils.__main__.list_pfns">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">list_pfns</span><span class="p">(</span><span class="n">arg_list</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">list_pfns</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;List the PFNs of files from Rucio&quot;&quot;&quot;</span>
-
-    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span>
-        <span class="n">description</span><span class="o">=</span><span class="s1">&#39;validate metadata consistency and return a list of unique file DIDs&#39;</span><span class="p">)</span>
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-q&#39;</span><span class="p">,</span> <span class="s1">&#39;--query&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;MetaCat query to find files&#39;</span><span class="p">)</span>
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-f&#39;</span><span class="p">,</span> <span class="s1">&#39;--filelist&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;a file containing a list of file DIDs&#39;</span><span class="p">)</span>
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-a&#39;</span><span class="p">,</span> <span class="s1">&#39;--all&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;list replicas from all RSEs&#39;</span><span class="p">)</span>
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;files&#39;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="n">argparse</span><span class="o">.</span><span class="n">REMAINDER</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;individual file DIDs&#39;</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">arg_list</span><span class="p">:</span>
-        <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">(</span><span class="n">arg_list</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
-
     <span class="n">flist</span> <span class="o">=</span> <span class="n">io_utils</span><span class="o">.</span><span class="n">get_inputs</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">filelist</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">files</span><span class="p">)</span>
 
     <span class="n">retriever</span> <span class="o">=</span> <span class="n">rucio_utils</span><span class="o">.</span><span class="n">RucioRetriever</span><span class="p">(</span>
