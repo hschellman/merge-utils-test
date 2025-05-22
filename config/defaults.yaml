@@ -153,6 +153,27 @@ validation:
         # Other keys from metacat
         # - "tfile"
         # - "unknown"
+    optional:
+        "all":  # These keys are optional for all files
+            - "core.events"
+            - "dune.daq_test"
+        "mc":  # These keys are specific to MC files
+            - "dune_mc.gen_fcl_filename"
+            - "dune_mc.geometry_version"
+        "root-tuple": &tuple_optionals
+            - "core.event_count"
+            - "core.first_event_number"
+            - "core.last_event_number"
+        "root-tuple-virtual": *tuple_optionals
+        "raw": &raw_optionals
+            - "dune.config_file"
+            - "dune_mc.gen_fcl_filename"
+            - "dune_mc.geometry_version"
+            - "core.application.family"
+            - "core.application.name"
+            - "core.application.version"
+        "binary-raw": *raw_optionals
+        "trigprim": *raw_optionals
     fixes:  # Fix common issues with the metadata
         keys:       # Misspelled keys
             "DUNE.requestid": "dune.requestid"
@@ -178,19 +199,60 @@ sites:
       - "CERN"
 
 merging:
-    method: auto        # Manual options: tar, targz, hadd, lar, hdf5
+    method: auto        # Can be auto or a specific method from the list below
     target_mode: size   # Options: size, count
     target_size: 20     # Target size (in GB) or number of files
     equalize: true      # Try to equalize the size of the merged files
     chunk_min: 5        # Minimum number of files to merge at once
     chunk_max: 100      # Maxiumum number of files to merge at once
+    metadata:   # Special handling for metadata keys, options are:
+        # unique   only save key if all values are the same
+        # all      save a list of all values
+        # min      save the minimum value
+        # max      save the maximum value
+        # sum      save the sum of all values
+        # union    save the union of all values
+        # ~        ignore the key
+        default:                    unique
+        "core.first_event_number":  min
+        "core.last_event_number":   max
+        "core.event_count":         sum
+        "core.events":              union
+        "core.runs":                union
+        "core.runs_subruns":        union
+        "core.start_time":          ~
+        "core.end_time":            ~
+        "Offline.options":          ~
+        "Offline.machine":          ~
+        overrides: # Set keys to specific values
+            "retention.status":     "active"
+    methods:
+        "hadd":
+            file_format:
+              - "root"
+              - "rootntuple"
+              - "tfile"
+            ext: ".root"
+        "lar":
+            file_format:
+              - "artroot"
+            ext: ".root"
+        "hdf5":
+            file_format:
+              - "hdf5"
+            ext: ".hdf5"
+        "tar":
+            file_format:
+              - "binary"
+              - "tar"
+              - "unknown"
+            output_format: "tar"
+            ext: ".tar"
 
 output:
     name: "{core.run_type}_{dune.campaign}_{dune.config_file}_{core.application.name}_merged_{timestamp}"
     #name: "{core.run_type}_{core.file_type}_{dune.campaign}_{core.data_stream}_{dune.config_file}_{core.data_tier}_merged_{timestamp}"
     grandparents: false # List the parents of the input files as the parents of the merged file
-    metadata_overrides: # Metadata to override in the output files
-        "retention.status": "active"
     abbreviations:
         "core.run_type":
             "protodune-sp":             "sp-pd"
