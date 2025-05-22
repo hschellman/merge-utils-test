@@ -24,6 +24,7 @@ jobs:
     - name: directly build sphinx
       run: |
         pip install -r docs/requirements.txt
+        pip install logging
         pip install .
         cd docs
         make html
