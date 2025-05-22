@@ -1,5 +1,4 @@
-#!/Users/schellma/miniforge3/envs/oldpython/bin/python
-# -*- coding: utf-8 -*-
+# hacked from the binary area so it can be called in a github workflow
 import re
 import sys
 from merge_utils.__main__ import main
