@@ -3,7 +3,6 @@
 import argparse
 import logging
 
-from merge_utils import io_utils, config, metacat_utils, rucio_utils
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +30,11 @@ def main():
     parser.add_argument('-v', '--verbose', action='count', default=0, help='print more verbose output')
 
     args = parser.parse_args()
+
+    print (args)
+
+    from merge_utils import io_utils, config, metacat_utils, rucio_utils
+
     io_utils.setup_log(args.function)
     config.load(args.config)
     if args.verbose == 1:

@@ -27,9 +27,9 @@ jobs:
         cd docs
         make html
         cd ..
-    # - name: install myself
-    #   run: |
-    #     pip install . 
+    - name: install myself
+       run: |
+         pip install . 
     - name: check env again
       run: env
     - name: Upload artifacts
