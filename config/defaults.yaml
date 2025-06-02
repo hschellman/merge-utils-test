@@ -24,7 +24,7 @@ validation:
         "core.application.version": 'str'
         "core.data_stream":         'str'
         "core.data_tier":           'str'
-        "core.end_time":            'float'
+        #"core.end_time":            'float'
         "core.event_count":         'int'
         "core.events":              'list'
         "core.file_content_status": 'str'
@@ -35,9 +35,9 @@ validation:
         "core.run_type":            'str'
         "core.runs":                'list'
         "core.runs_subruns":        'list'
-        "core.start_time":          'float'
+        #"core.start_time":          'float'
         "dune.daq_test":            'str'
-        "dune.config_file":         'str'
+        #"dune.config_file":         'str'
         "dune_mc.gen_fcl_filename": 'str'
         "dune_mc.geometry_version": 'str'
         "retention.status":         'str'
@@ -74,16 +74,9 @@ validation:
           - "311"                   # old script
           - "311_dp_light"          # old script
         # Other keys from metacat
-        # - "physics"
+          - "physics"
         # - "ehn1-beam-np04"
         # - "justin-tutorial"
-        # Keys from old script that are not in metacat
-        # - "protodune"
-        # - "35ton"
-        # - "fardet-dp"
-        # - "fardet-moo"
-        # - "vd-protodune-arapucas"
-        # - "protodune-vst"
         "core.file_type":
           - "mc"
           - "detector"
@@ -137,12 +130,6 @@ validation:
         # - "test"
         # - "stage1"
         # - "stage2"
-        # Keys from old script that are not in metacat
-        # - "reconstructed-2d"
-        # - "reconstructed-3d"
-        # - "dc1output"
-        # - "dqm"
-        # - "storage-testing"
         "core.file_format":
           - "root"
           - "artroot"
@@ -150,9 +137,6 @@ validation:
           - "rootntuple"
           - "hdf5"
           - "tar"
-        # Other keys from metacat
-        # - "tfile"
-        # - "unknown"
     optional:
         "all":  # These keys are optional for all files
             - "core.events"
@@ -187,7 +171,9 @@ validation:
         "core.data_stream":
             "Test": "test"
             "Cosmics": "cosmics"
-            #"pdstl": "pedestal"
+            "pdstl": "pedestal" # Not completely sure about this one
+        "core.file_format":
+            "tfile": "root"     # 
 
 sites:
     max_distance: 1000        # Distances range from 0 to 101
@@ -255,20 +241,20 @@ output:
     grandparents: false # List the parents of the input files as the parents of the merged file
     abbreviations:
         "core.run_type":
-            "protodune-sp":             "sp-pd"
-            "protodune-dp":             "dp-pd"
-            "hd-coldbox":               "hd-cb"
-            "vd-coldbox":               "vd-cb"
-            "vd-coldbox-bottom":        "vd-cb-b"
-            "vd-coldbox-top":           "vd-cb-t"
-            "protodune-hd":             "hd-pd"
-            "hd-protodune":             "hd-pd"
-            "vd-protodune":             "vd-pd"
-            "vd-protodune-pds":         "vd-pd-pds"
-            "vd-protodune-arapucas":    "vd-pd-arapucas"
-            "dc4-vd-coldbox-bottom":    "dc4-vd-cb-b"
-            "dc4-vd-coldbox-top":       "dc4-vd-cb-t"
-            "dc4-hd-protodune":         "dc4-hd-pd"
+            "protodune-sp":             "pd-sp"
+            "protodune-dp":             "pd-dp"
+            "hd-coldbox":               "cb-hd"
+            "vd-coldbox":               "cb-vd"
+            "vd-coldbox-bottom":        "cb-vd-b"
+            "vd-coldbox-top":           "cb-vd-t"
+            "protodune-hd":             "pd-hd"
+            "hd-protodune":             "pd-hd"
+            "vd-protodune":             "pd-vd"
+            "vd-protodune-pds":         "pd-vd-pds"
+            "vd-protodune-arapucas":    "pd-vd-arapucas"
+            "dc4-vd-coldbox-bottom":    "cb-dc4-vd-b"
+            "dc4-vd-coldbox-top":       "cb-dc4-vd-t"
+            "dc4-hd-protodune":         "pd-dc4-hd"
             "neardet":                  "nd"
             "neardet-lar":              "nd-lar"
             "neardet-2x2":              "nd-2x2"

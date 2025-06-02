@@ -7,22 +7,23 @@ from merge_utils import config, io_utils
 
 logger = logging.getLogger(__name__)
 
-def fix(metadata: dict) -> dict:
+def fix(name: str, metadata: dict) -> dict:
     """
     Fix the metadata dictionary.
 
+    :param name: name of the file (for logging)
     :param metadata: metadata dictionary
     :return: fixed metadata dictionary
     """
     # Fix misspelled keys
     for bad_key, good_key in config.validation['fixes']['keys'].items():
         if bad_key in metadata:
-            logger.warning("Replacing metadata key %s with %s", bad_key, good_key)
+            logger.warning("File %s replacing metadata key %s with %s", name, bad_key, good_key)
             metadata[good_key] = metadata.pop(bad_key)
     # Fix missing keys
     for key, value in config.validation['fixes']['missing'].items():
         if key not in metadata:
-            logger.warning("Metadata key %s is missing, setting to %s", key, value)
+            logger.warning("File %s metadata key %s is missing, setting to %s", name, key, value)
             metadata[key] = value
     # Fix misspelled values
     for key in config.validation['fixes']:
@@ -31,23 +32,24 @@ def fix(metadata: dict) -> dict:
         value = metadata[key]
         if value in config.validation['fixes'][key]:
             new_value = config.validation['fixes'][key][value]
-            logger.warning("Replacing %s value %s with %s", key, value, new_value)
+            logger.warning("File %s replacing %s value %s with %s", name, key, value, new_value)
             metadata[key] = new_value
     return metadata
 
-def validate(metadata: dict) -> dict:
+def validate(name: str, metadata: dict) -> dict:
     """
     Validate the metadata dictionary.
 
+    :param name: name of the file (for logging)
     :param metadata: metadata dictionary
     :raises ValueError: if the metadata is invalid
     """
     # Fix metadata
-    metadata = fix(metadata)
+    metadata = fix(name, metadata)
     # Always require run_type and data_tier
     for key in ["core.run_type", "core.data_tier"]:
         if key not in metadata:
-            raise ValueError(f"Metadata missing required key: {key}")
+            raise ValueError(f"File {name} metadata missing required key: {key}")
     # Get optional keys
     optionals = config.validation['optional']['all']
     optionals += config.validation['optional'].get(metadata["core.data_tier"], {})
@@ -58,20 +60,21 @@ def validate(metadata: dict) -> dict:
         if key in optionals:
             continue
         if key not in metadata:
-            raise ValueError(f"Metadata missing required key: {key}")
+            raise ValueError(f"File {name} metadata missing required key: {key}")
         value = metadata[key]
         if value not in values:
-            raise ValueError(f"Invalid value for {key}: {value}")
+            raise ValueError(f"File {name} invalid value for {key}: {value}")
     # Check value types
     for key, expected_type in config.validation['types'].items():
         if key in optionals:
             continue
         if key not in metadata:
-            raise ValueError(f"Metadata missing required key: {key}")
+            raise ValueError(f"File {name} metadata missing required key: {key}")
         value = metadata[key]
         type_name = type(value).__name__
-        if type_name != expected_type:
-            raise ValueError(f"Invalid type for {key}: {value} (expected {expected_type})")
+        if (type_name == expected_type) or (expected_type == 'float' and type_name == 'int'):
+            continue
+        raise ValueError(f"File {name} invalid type for {key}: {value} (expected {expected_type})")
     return metadata
 
 class MergeMetaMin:
@@ -234,12 +237,13 @@ def merged_keys(files: dict, warn: bool = False) -> dict:
     for file in files.values():
         for key, value in file.metadata.items():
             metadata[key].add(value)
+
     if warn:
         io_utils.log_list("Omitting {n} inconsistent metadata key{s}:",
             [k for k, v in metadata.items() if v.warn]
         )
     metadata = {k: v.value for k, v in metadata.items() if v.valid}
-    return validate(metadata)
+    return validate("output", metadata)
 
 def parents(files: dict) -> list[str]:
     """
@@ -249,7 +253,7 @@ def parents(files: dict) -> list[str]:
     :return: set of parents
     """
     if not config.output['grandparents']:
-        return files.keys()
+        return list(files.keys())
     grandparents = set()
     for file in files.values():
         grandparents.update(file.parents)
@@ -307,5 +311,6 @@ def make_name(metadata: dict) -> str:
         inserts[key] = value
     inserts['timestamp'] = io_utils.get_timestamp()
 
-    name = config.output['name']
-    return name.format_map(inserts)
+    name = config.output['name'].format_map(inserts)
+    ext = config.merging['methods'][config.merging['method']]['ext']
+    return name + ext

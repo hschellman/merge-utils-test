@@ -118,7 +118,7 @@ class RucioRetriever (FileRetriever):
 
             logger.debug("Added %d replicas for %s", added, did)
 
-        missing = [file.did for file in files if file not in found]
+        missing = [did for did in files if did not in found]
         errs = io_utils.log_list("No Rucio entry for {n} file{s}:", missing, logging.ERROR)
         if errs:
             raise ValueError("Failed to find all files in Rucio!")

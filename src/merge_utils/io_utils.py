@@ -20,9 +20,13 @@ import yaml
 
 logger = logging.getLogger(__name__)
 
+def src_dir() -> str:
+    """Get the source directory of the package"""
+    return os.path.dirname(__file__)
+
 def pkg_dir() -> str:
     """Get the base directory of the package"""
-    return os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+    return os.path.dirname(os.path.dirname(src_dir()))
 
 def get_timestamp() -> str:
     """Get the current timestamp as a string"""
