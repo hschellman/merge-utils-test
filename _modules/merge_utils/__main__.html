@@ -41,7 +41,6 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">argparse</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
 
-
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 <div class="viewcode-block" id="main">
@@ -66,6 +65,11 @@
     <span class="n">pfn_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-a&#39;</span><span class="p">,</span> <span class="s1">&#39;--all&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;list replicas from all RSEs&#39;</span><span class="p">)</span>
     <span class="n">pfn_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;files&#39;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="n">argparse</span><span class="o">.</span><span class="n">REMAINDER</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;individual file DIDs&#39;</span><span class="p">)</span>
 
+    <span class="n">merge_parser</span> <span class="o">=</span> <span class="n">subparsers</span><span class="o">.</span><span class="n">add_parser</span><span class="p">(</span><span class="s1">&#39;merge&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;actualy merge files&#39;</span><span class="p">)</span>
+    <span class="n">merge_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-q&#39;</span><span class="p">,</span> <span class="s1">&#39;--query&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;MetaCat query to find files&#39;</span><span class="p">)</span>
+    <span class="n">merge_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-f&#39;</span><span class="p">,</span> <span class="s1">&#39;--filelist&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;a file containing a list of file DIDs&#39;</span><span class="p">)</span>
+    <span class="n">merge_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;files&#39;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="n">argparse</span><span class="o">.</span><span class="n">REMAINDER</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;individual file DIDs&#39;</span><span class="p">)</span>
+
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-c&#39;</span><span class="p">,</span> <span class="s1">&#39;--config&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;a configuration file&#39;</span><span class="p">)</span>
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-v&#39;</span><span class="p">,</span> <span class="s1">&#39;--verbose&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;count&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;print more verbose output&#39;</span><span class="p">)</span>
 
@@ -87,7 +91,9 @@
     <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">function</span> <span class="o">==</span> <span class="s2">&quot;dids&quot;</span><span class="p">:</span>
         <span class="n">list_dids</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">args</span><span class="o">.</span><span class="n">function</span> <span class="o">==</span> <span class="s2">&quot;pfns&quot;</span><span class="p">:</span>
-        <span class="n">list_pfns</span><span class="p">(</span><span class="n">args</span><span class="p">)</span></div>
+        <span class="n">list_pfns</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">args</span><span class="o">.</span><span class="n">function</span> <span class="o">==</span> <span class="s2">&quot;merge&quot;</span><span class="p">:</span>
+        <span class="n">merge</span><span class="p">(</span><span class="n">args</span><span class="p">)</span></div>
 
 
 
@@ -127,6 +133,18 @@
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;site </span><span class="si">{</span><span class="n">chunk</span><span class="o">.</span><span class="n">site</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">pfn</span> <span class="ow">in</span> <span class="n">chunk</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
                 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">pfn</span><span class="o">.</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="merge">
+<a class="viewcode-back" href="../../scripts.html#merge_utils.__main__.merge">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">merge</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;List the PFNs of files from Rucio&quot;&quot;&quot;</span>
+    <span class="n">flist</span> <span class="o">=</span> <span class="n">io_utils</span><span class="o">.</span><span class="n">get_inputs</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">filelist</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">files</span><span class="p">)</span>
+
+    <span class="n">sched</span> <span class="o">=</span> <span class="n">scheduler</span><span class="o">.</span><span class="n">JustinScheduler</span><span class="p">(</span><span class="n">rucio_utils</span><span class="o">.</span><span class="n">RucioRetriever</span><span class="p">(</span>
+        <span class="n">metacat_utils</span><span class="o">.</span><span class="n">MetaCatRetriever</span><span class="p">(</span><span class="n">query</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">query</span><span class="p">,</span> <span class="n">filelist</span><span class="o">=</span><span class="n">flist</span><span class="p">)</span>
+    <span class="p">))</span>
+    <span class="n">sched</span><span class="o">.</span><span class="n">run</span><span class="p">()</span></div>
 
 </pre></div>
 

@@ -74,7 +74,7 @@
         <span class="s2">&quot;core.application.version&quot;</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span>
         <span class="s2">&quot;core.data_stream&quot;</span><span class="p">:</span>         <span class="s1">&#39;str&#39;</span>
         <span class="s2">&quot;core.data_tier&quot;</span><span class="p">:</span>           <span class="s1">&#39;str&#39;</span>
-        <span class="s2">&quot;core.end_time&quot;</span><span class="p">:</span>            <span class="s1">&#39;float&#39;</span>
+        <span class="c1">#&quot;core.end_time&quot;:            &#39;float&#39;</span>
         <span class="s2">&quot;core.event_count&quot;</span><span class="p">:</span>         <span class="s1">&#39;int&#39;</span>
         <span class="s2">&quot;core.events&quot;</span><span class="p">:</span>              <span class="s1">&#39;list&#39;</span>
         <span class="s2">&quot;core.file_content_status&quot;</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span>
@@ -85,9 +85,9 @@
         <span class="s2">&quot;core.run_type&quot;</span><span class="p">:</span>            <span class="s1">&#39;str&#39;</span>
         <span class="s2">&quot;core.runs&quot;</span><span class="p">:</span>                <span class="s1">&#39;list&#39;</span>
         <span class="s2">&quot;core.runs_subruns&quot;</span><span class="p">:</span>        <span class="s1">&#39;list&#39;</span>
-        <span class="s2">&quot;core.start_time&quot;</span><span class="p">:</span>          <span class="s1">&#39;float&#39;</span>
+        <span class="c1">#&quot;core.start_time&quot;:          &#39;float&#39;</span>
         <span class="s2">&quot;dune.daq_test&quot;</span><span class="p">:</span>            <span class="s1">&#39;str&#39;</span>
-        <span class="s2">&quot;dune.config_file&quot;</span><span class="p">:</span>         <span class="s1">&#39;str&#39;</span>
+        <span class="c1">#&quot;dune.config_file&quot;:         &#39;str&#39;</span>
         <span class="s2">&quot;dune_mc.gen_fcl_filename&quot;</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span>
         <span class="s2">&quot;dune_mc.geometry_version&quot;</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span>
         <span class="s2">&quot;retention.status&quot;</span><span class="p">:</span>         <span class="s1">&#39;str&#39;</span>
@@ -124,16 +124,9 @@
           <span class="o">-</span> <span class="s2">&quot;311&quot;</span>                   <span class="c1"># old script</span>
           <span class="o">-</span> <span class="s2">&quot;311_dp_light&quot;</span>          <span class="c1"># old script</span>
         <span class="c1"># Other keys from metacat</span>
-        <span class="c1"># - &quot;physics&quot;</span>
           <span class="o">-</span> <span class="s2">&quot;ehn1-beam-np04&quot;</span>
+          <span class="o">-</span> <span class="s2">&quot;physics&quot;</span>
         <span class="c1"># - &quot;justin-tutorial&quot;</span>
-        <span class="c1"># Keys from old script that are not in metacat</span>
-        <span class="c1"># - &quot;protodune&quot;</span>
-        <span class="c1"># - &quot;35ton&quot;</span>
-        <span class="c1"># - &quot;fardet-dp&quot;</span>
-        <span class="c1"># - &quot;fardet-moo&quot;</span>
-        <span class="c1"># - &quot;vd-protodune-arapucas&quot;</span>
-        <span class="c1"># - &quot;protodune-vst&quot;</span>
         <span class="s2">&quot;core.file_type&quot;</span><span class="p">:</span>
           <span class="o">-</span> <span class="s2">&quot;mc&quot;</span>
           <span class="o">-</span> <span class="s2">&quot;detector&quot;</span>
@@ -187,12 +180,6 @@
         <span class="c1"># - &quot;test&quot;</span>
         <span class="c1"># - &quot;stage1&quot;</span>
         <span class="c1"># - &quot;stage2&quot;</span>
-        <span class="c1"># Keys from old script that are not in metacat</span>
-        <span class="c1"># - &quot;reconstructed-2d&quot;</span>
-        <span class="c1"># - &quot;reconstructed-3d&quot;</span>
-        <span class="c1"># - &quot;dc1output&quot;</span>
-        <span class="c1"># - &quot;dqm&quot;</span>
-        <span class="c1"># - &quot;storage-testing&quot;</span>
         <span class="s2">&quot;core.file_format&quot;</span><span class="p">:</span>
           <span class="o">-</span> <span class="s2">&quot;root&quot;</span>
           <span class="o">-</span> <span class="s2">&quot;artroot&quot;</span>
@@ -200,9 +187,27 @@
           <span class="o">-</span> <span class="s2">&quot;rootntuple&quot;</span>
           <span class="o">-</span> <span class="s2">&quot;hdf5&quot;</span>
           <span class="o">-</span> <span class="s2">&quot;tar&quot;</span>
-        <span class="c1"># Other keys from metacat</span>
-        <span class="c1"># - &quot;tfile&quot;</span>
-        <span class="c1"># - &quot;unknown&quot;</span>
+    <span class="n">optional</span><span class="p">:</span>
+        <span class="s2">&quot;all&quot;</span><span class="p">:</span>  <span class="c1"># These keys are optional for all files</span>
+            <span class="o">-</span> <span class="s2">&quot;core.events&quot;</span>
+            <span class="o">-</span> <span class="s2">&quot;dune.daq_test&quot;</span>
+        <span class="s2">&quot;mc&quot;</span><span class="p">:</span>  <span class="c1"># These keys are specific to MC files</span>
+            <span class="o">-</span> <span class="s2">&quot;dune_mc.gen_fcl_filename&quot;</span>
+            <span class="o">-</span> <span class="s2">&quot;dune_mc.geometry_version&quot;</span>
+        <span class="s2">&quot;root-tuple&quot;</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">tuple_optionals</span>
+            <span class="o">-</span> <span class="s2">&quot;core.event_count&quot;</span>
+            <span class="o">-</span> <span class="s2">&quot;core.first_event_number&quot;</span>
+            <span class="o">-</span> <span class="s2">&quot;core.last_event_number&quot;</span>
+        <span class="s2">&quot;root-tuple-virtual&quot;</span><span class="p">:</span> <span class="o">*</span><span class="n">tuple_optionals</span>
+        <span class="s2">&quot;raw&quot;</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">raw_optionals</span>
+            <span class="o">-</span> <span class="s2">&quot;dune.config_file&quot;</span>
+            <span class="o">-</span> <span class="s2">&quot;dune_mc.gen_fcl_filename&quot;</span>
+            <span class="o">-</span> <span class="s2">&quot;dune_mc.geometry_version&quot;</span>
+            <span class="o">-</span> <span class="s2">&quot;core.application.family&quot;</span>
+            <span class="o">-</span> <span class="s2">&quot;core.application.name&quot;</span>
+            <span class="o">-</span> <span class="s2">&quot;core.application.version&quot;</span>
+        <span class="s2">&quot;binary-raw&quot;</span><span class="p">:</span> <span class="o">*</span><span class="n">raw_optionals</span>
+        <span class="s2">&quot;trigprim&quot;</span><span class="p">:</span> <span class="o">*</span><span class="n">raw_optionals</span>
     <span class="n">fixes</span><span class="p">:</span>  <span class="c1"># Fix common issues with the metadata</span>
         <span class="n">keys</span><span class="p">:</span>       <span class="c1"># Misspelled keys</span>
             <span class="s2">&quot;DUNE.requestid&quot;</span><span class="p">:</span> <span class="s2">&quot;dune.requestid&quot;</span>
@@ -216,7 +221,9 @@
         <span class="s2">&quot;core.data_stream&quot;</span><span class="p">:</span>
             <span class="s2">&quot;Test&quot;</span><span class="p">:</span> <span class="s2">&quot;test&quot;</span>
             <span class="s2">&quot;Cosmics&quot;</span><span class="p">:</span> <span class="s2">&quot;cosmics&quot;</span>
-            <span class="c1">#&quot;pdstl&quot;: &quot;pedestal&quot;</span>
+            <span class="s2">&quot;pdstl&quot;</span><span class="p">:</span> <span class="s2">&quot;pedestal&quot;</span> <span class="c1"># Not completely sure about this one</span>
+        <span class="s2">&quot;core.file_format&quot;</span><span class="p">:</span>
+            <span class="s2">&quot;tfile&quot;</span><span class="p">:</span> <span class="s2">&quot;root&quot;</span>     <span class="c1"># </span>
 
 <span class="n">sites</span><span class="p">:</span>
     <span class="n">max_distance</span><span class="p">:</span> <span class="mi">1000</span>        <span class="c1"># Distances range from 0 to 101</span>
@@ -228,35 +235,76 @@
       <span class="o">-</span> <span class="s2">&quot;CERN&quot;</span>
 
 <span class="n">merging</span><span class="p">:</span>
-    <span class="n">method</span><span class="p">:</span> <span class="n">auto</span>        <span class="c1"># Manual options: tar, targz, hadd, lar, hdf5</span>
+    <span class="n">method</span><span class="p">:</span> <span class="n">auto</span>        <span class="c1"># Can be auto or a specific method from the list below</span>
     <span class="n">target_mode</span><span class="p">:</span> <span class="n">size</span>   <span class="c1"># Options: size, count</span>
     <span class="n">target_size</span><span class="p">:</span> <span class="mi">20</span>     <span class="c1"># Target size (in GB) or number of files</span>
     <span class="n">equalize</span><span class="p">:</span> <span class="n">true</span>      <span class="c1"># Try to equalize the size of the merged files</span>
     <span class="n">chunk_min</span><span class="p">:</span> <span class="mi">5</span>        <span class="c1"># Minimum number of files to merge at once</span>
     <span class="n">chunk_max</span><span class="p">:</span> <span class="mi">100</span>      <span class="c1"># Maxiumum number of files to merge at once</span>
+    <span class="n">metadata</span><span class="p">:</span>   <span class="c1"># Special handling for metadata keys, options are:</span>
+        <span class="c1"># unique   only save key if all values are the same</span>
+        <span class="c1"># all      save a list of all values</span>
+        <span class="c1"># min      save the minimum value</span>
+        <span class="c1"># max      save the maximum value</span>
+        <span class="c1"># sum      save the sum of all values</span>
+        <span class="c1"># union    save the union of all values</span>
+        <span class="c1"># ~        ignore the key</span>
+        <span class="n">default</span><span class="p">:</span>                    <span class="n">unique</span>
+        <span class="s2">&quot;core.first_event_number&quot;</span><span class="p">:</span>  <span class="nb">min</span>
+        <span class="s2">&quot;core.last_event_number&quot;</span><span class="p">:</span>   <span class="nb">max</span>
+        <span class="s2">&quot;core.event_count&quot;</span><span class="p">:</span>         <span class="nb">sum</span>
+        <span class="s2">&quot;core.events&quot;</span><span class="p">:</span>              <span class="n">union</span>
+        <span class="s2">&quot;core.runs&quot;</span><span class="p">:</span>                <span class="n">union</span>
+        <span class="s2">&quot;core.runs_subruns&quot;</span><span class="p">:</span>        <span class="n">union</span>
+        <span class="s2">&quot;core.start_time&quot;</span><span class="p">:</span>          <span class="o">~</span>
+        <span class="s2">&quot;core.end_time&quot;</span><span class="p">:</span>            <span class="o">~</span>
+        <span class="s2">&quot;Offline.options&quot;</span><span class="p">:</span>          <span class="o">~</span>
+        <span class="s2">&quot;Offline.machine&quot;</span><span class="p">:</span>          <span class="o">~</span>
+        <span class="n">overrides</span><span class="p">:</span> <span class="c1"># Set keys to specific values</span>
+            <span class="s2">&quot;retention.status&quot;</span><span class="p">:</span>     <span class="s2">&quot;active&quot;</span>
+    <span class="n">methods</span><span class="p">:</span>
+        <span class="s2">&quot;hadd&quot;</span><span class="p">:</span>
+            <span class="n">file_format</span><span class="p">:</span>
+              <span class="o">-</span> <span class="s2">&quot;root&quot;</span>
+              <span class="o">-</span> <span class="s2">&quot;rootntuple&quot;</span>
+              <span class="o">-</span> <span class="s2">&quot;tfile&quot;</span>
+            <span class="n">ext</span><span class="p">:</span> <span class="s2">&quot;.root&quot;</span>
+        <span class="s2">&quot;lar&quot;</span><span class="p">:</span>
+            <span class="n">file_format</span><span class="p">:</span>
+              <span class="o">-</span> <span class="s2">&quot;artroot&quot;</span>
+            <span class="n">ext</span><span class="p">:</span> <span class="s2">&quot;.root&quot;</span>
+        <span class="s2">&quot;hdf5&quot;</span><span class="p">:</span>
+            <span class="n">file_format</span><span class="p">:</span>
+              <span class="o">-</span> <span class="s2">&quot;hdf5&quot;</span>
+            <span class="n">ext</span><span class="p">:</span> <span class="s2">&quot;.hdf5&quot;</span>
+        <span class="s2">&quot;tar&quot;</span><span class="p">:</span>
+            <span class="n">file_format</span><span class="p">:</span>
+              <span class="o">-</span> <span class="s2">&quot;binary&quot;</span>
+              <span class="o">-</span> <span class="s2">&quot;tar&quot;</span>
+              <span class="o">-</span> <span class="s2">&quot;unknown&quot;</span>
+            <span class="n">output_format</span><span class="p">:</span> <span class="s2">&quot;tar&quot;</span>
+            <span class="n">ext</span><span class="p">:</span> <span class="s2">&quot;.tar&quot;</span>
 
 <span class="n">output</span><span class="p">:</span>
     <span class="n">name</span><span class="p">:</span> <span class="s2">&quot;</span><span class="si">{core.run_type}</span><span class="s2">_</span><span class="si">{dune.campaign}</span><span class="s2">_</span><span class="si">{dune.config_file}</span><span class="s2">_</span><span class="si">{core.application.name}</span><span class="s2">_merged_</span><span class="si">{timestamp}</span><span class="s2">&quot;</span>
     <span class="c1">#name: &quot;{core.run_type}_{core.file_type}_{dune.campaign}_{core.data_stream}_{dune.config_file}_{core.data_tier}_merged_{timestamp}&quot;</span>
     <span class="n">grandparents</span><span class="p">:</span> <span class="n">false</span> <span class="c1"># List the parents of the input files as the parents of the merged file</span>
-    <span class="n">metadata_overrides</span><span class="p">:</span> <span class="c1"># Metadata to override in the output files</span>
-        <span class="s2">&quot;retention.status&quot;</span><span class="p">:</span> <span class="s2">&quot;active&quot;</span>
     <span class="n">abbreviations</span><span class="p">:</span>
         <span class="s2">&quot;core.run_type&quot;</span><span class="p">:</span>
-            <span class="s2">&quot;protodune-sp&quot;</span><span class="p">:</span>             <span class="s2">&quot;sp-pd&quot;</span>
-            <span class="s2">&quot;protodune-dp&quot;</span><span class="p">:</span>             <span class="s2">&quot;dp-pd&quot;</span>
-            <span class="s2">&quot;hd-coldbox&quot;</span><span class="p">:</span>               <span class="s2">&quot;hd-cb&quot;</span>
-            <span class="s2">&quot;vd-coldbox&quot;</span><span class="p">:</span>               <span class="s2">&quot;vd-cb&quot;</span>
-            <span class="s2">&quot;vd-coldbox-bottom&quot;</span><span class="p">:</span>        <span class="s2">&quot;vd-cb-b&quot;</span>
-            <span class="s2">&quot;vd-coldbox-top&quot;</span><span class="p">:</span>           <span class="s2">&quot;vd-cb-t&quot;</span>
-            <span class="s2">&quot;protodune-hd&quot;</span><span class="p">:</span>             <span class="s2">&quot;hd-pd&quot;</span>
-            <span class="s2">&quot;hd-protodune&quot;</span><span class="p">:</span>             <span class="s2">&quot;hd-pd&quot;</span>
-            <span class="s2">&quot;vd-protodune&quot;</span><span class="p">:</span>             <span class="s2">&quot;vd-pd&quot;</span>
-            <span class="s2">&quot;vd-protodune-pds&quot;</span><span class="p">:</span>         <span class="s2">&quot;vd-pd-pds&quot;</span>
-            <span class="s2">&quot;vd-protodune-arapucas&quot;</span><span class="p">:</span>    <span class="s2">&quot;vd-pd-arapucas&quot;</span>
-            <span class="s2">&quot;dc4-vd-coldbox-bottom&quot;</span><span class="p">:</span>    <span class="s2">&quot;dc4-vd-cb-b&quot;</span>
-            <span class="s2">&quot;dc4-vd-coldbox-top&quot;</span><span class="p">:</span>       <span class="s2">&quot;dc4-vd-cb-t&quot;</span>
-            <span class="s2">&quot;dc4-hd-protodune&quot;</span><span class="p">:</span>         <span class="s2">&quot;dc4-hd-pd&quot;</span>
+            <span class="s2">&quot;protodune-sp&quot;</span><span class="p">:</span>             <span class="s2">&quot;pd-sp&quot;</span>
+            <span class="s2">&quot;protodune-dp&quot;</span><span class="p">:</span>             <span class="s2">&quot;pd-dp&quot;</span>
+            <span class="s2">&quot;hd-coldbox&quot;</span><span class="p">:</span>               <span class="s2">&quot;cb-hd&quot;</span>
+            <span class="s2">&quot;vd-coldbox&quot;</span><span class="p">:</span>               <span class="s2">&quot;cb-vd&quot;</span>
+            <span class="s2">&quot;vd-coldbox-bottom&quot;</span><span class="p">:</span>        <span class="s2">&quot;cb-vd-b&quot;</span>
+            <span class="s2">&quot;vd-coldbox-top&quot;</span><span class="p">:</span>           <span class="s2">&quot;cb-vd-t&quot;</span>
+            <span class="s2">&quot;protodune-hd&quot;</span><span class="p">:</span>             <span class="s2">&quot;pd-hd&quot;</span>
+            <span class="s2">&quot;hd-protodune&quot;</span><span class="p">:</span>             <span class="s2">&quot;pd-hd&quot;</span>
+            <span class="s2">&quot;vd-protodune&quot;</span><span class="p">:</span>             <span class="s2">&quot;pd-vd&quot;</span>
+            <span class="s2">&quot;vd-protodune-pds&quot;</span><span class="p">:</span>         <span class="s2">&quot;pd-vd-pds&quot;</span>
+            <span class="s2">&quot;vd-protodune-arapucas&quot;</span><span class="p">:</span>    <span class="s2">&quot;pd-vd-arapucas&quot;</span>
+            <span class="s2">&quot;dc4-vd-coldbox-bottom&quot;</span><span class="p">:</span>    <span class="s2">&quot;cb-dc4-vd-b&quot;</span>
+            <span class="s2">&quot;dc4-vd-coldbox-top&quot;</span><span class="p">:</span>       <span class="s2">&quot;cb-dc4-vd-t&quot;</span>
+            <span class="s2">&quot;dc4-hd-protodune&quot;</span><span class="p">:</span>         <span class="s2">&quot;pd-dc4-hd&quot;</span>
             <span class="s2">&quot;neardet&quot;</span><span class="p">:</span>                  <span class="s2">&quot;nd&quot;</span>
             <span class="s2">&quot;neardet-lar&quot;</span><span class="p">:</span>              <span class="s2">&quot;nd-lar&quot;</span>
             <span class="s2">&quot;neardet-2x2&quot;</span><span class="p">:</span>              <span class="s2">&quot;nd-2x2&quot;</span>
