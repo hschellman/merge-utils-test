@@ -158,19 +158,20 @@ class JustinScheduler():
             return
         self.upload_cfg()
 
-        with open(os.path.join(self.dir, "tier0.bat"), 'w', encoding="utf-8") as f:
+        with open(os.path.join(self.dir, "tier0.sh"), 'w', encoding="utf-8") as f:
             f.write("#!/bin/bash\n")
             f.write("# This script will submit the JustIN jobs for tier 0\n")
             for site in self.tier0:
                 cmd = self.get_cmd(0, site)
                 f.write(f"{' '.join(cmd)}\n")
 
-        with open(os.path.join(self.dir, "tier1.bat"), 'w', encoding="utf-8") as f:
-            f.write("#!/bin/bash\n")
-            f.write("# This script will submit the JustIN jobs for tier 1\n")
-            for site in self.tier1:
-                cmd = self.get_cmd(1, site)
-                f.write(f"{' '.join(cmd)}\n")
+        if self.tier1:
+            with open(os.path.join(self.dir, "tier1.sh"), 'w', encoding="utf-8") as f:
+                f.write("#!/bin/bash\n")
+                f.write("# This script will submit the JustIN jobs for tier 1\n")
+                for site in self.tier1:
+                    cmd = self.get_cmd(1, site)
+                    f.write(f"{' '.join(cmd)}\n")
 
         logger.info("JustIN job scripts written to %s", self.dir)
         #subprocess.run(cmd, check=True)
