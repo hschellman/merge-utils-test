@@ -21,6 +21,7 @@ EOF
 
 DUNE_VERSION=${DUNE_VERSION:-v09_75_00d00}
 DUNE_QUALIFIER=${DUNE_QUALIFIER:-e20:prof}
+#OUT_DIR=${OUT_DIR:.}
 
 # Try to get an unprocessed file from this stage
 did_pfn_rse=`$JUSTIN_PATH/justin-get-file`
@@ -44,7 +45,7 @@ while [ ! -d $CONFIG_DIR ]; do
 done
 cat $CONFIG_DIR/$config
 
-python3 $CONFIG_DIR/do_merge.py $CONFIG_DIR/$config
+python3 $CONFIG_DIR/do_merge.py $CONFIG_DIR/$config $OUT_DIR
 
 echo "$jobkey" > justin-processed-pfns.txt
 

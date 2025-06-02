@@ -16,8 +16,7 @@ logger = logging.getLogger(__name__)
 class FileRetriever(ABC):
     """Base class for retrieving metadata from a source"""
 
-    def __init__(self) -> dict:
-        """Initialize the file retriever"""
+    def __init__(self):
         self.step = config.validation['batch_size']
         self.allow_missing = config.validation['allow_missing']
         self._missing = collections.defaultdict(int)

@@ -3,7 +3,6 @@
 import argparse
 import logging
 
-
 logger = logging.getLogger(__name__)
 
 def main():
@@ -25,6 +24,11 @@ def main():
     pfn_parser.add_argument('-f', '--filelist', help='a file containing a list of file DIDs')
     pfn_parser.add_argument('-a', '--all', action='store_true', help='list replicas from all RSEs')
     pfn_parser.add_argument('files', nargs=argparse.REMAINDER, help='individual file DIDs')
+
+    merge_parser = subparsers.add_parser('merge', help='actualy merge files')
+    merge_parser.add_argument('-q', '--query', help='MetaCat query to find files')
+    merge_parser.add_argument('-f', '--filelist', help='a file containing a list of file DIDs')
+    merge_parser.add_argument('files', nargs=argparse.REMAINDER, help='individual file DIDs')
 
     parser.add_argument('-c', '--config', help='a configuration file')
     parser.add_argument('-v', '--verbose', action='count', default=0, help='print more verbose output')
@@ -48,6 +52,8 @@ def main():
         list_dids(args)
     elif args.function == "pfns":
         list_pfns(args)
+    elif args.function == "merge":
+        merge(args)
 
 
 def list_dids(args):
@@ -81,3 +87,12 @@ def list_pfns(args):
             print(f"site {chunk.site}")
             for pfn in chunk.values():
                 print(f"  {pfn.path}")
+
+def merge(args):
+    """List the PFNs of files from Rucio"""
+    flist = io_utils.get_inputs(args.filelist, args.files)
+
+    sched = scheduler.JustinScheduler(rucio_utils.RucioRetriever(
+        metacat_utils.MetaCatRetriever(query=args.query, filelist=flist)
+    ))
+    sched.run()

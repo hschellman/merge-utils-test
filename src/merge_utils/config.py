@@ -6,13 +6,29 @@ from merge_utils import io_utils
 
 DEFAULT_CONFIG = "defaults.yaml"
 
+# Configuration dictionaries
 validation: dict = {}
 sites: dict = {}
 merging: dict = {}
 output: dict = {}
-abbreviations: dict = {}
+
+initialized: bool = False
 
 logger = logging.getLogger(__name__)
+
+def recursive_update(old_dict: dict, new_dict: dict) -> None:
+    """
+    Recursively update dictionary d with values from dictionary u.
+    
+    :param old_dict: Dictionary to be updated.
+    :param new_dict: Dictionary with new values.
+    :return: None
+    """
+    for key, val in new_dict.items():
+        if isinstance(val, dict) and key in old_dict:
+            recursive_update(old_dict[key], val)
+        else:
+            old_dict[key] = val
 
 def load(file: str = None) -> None:
     """
@@ -22,17 +38,16 @@ def load(file: str = None) -> None:
     :param file: Configuration file name or path.
     :return: None
     """
-    cfg = io_utils.read_config_file(DEFAULT_CONFIG)
-    if file:
-        cfg.update(io_utils.read_config_file(file))
-        logger.info("Loaded configuration file %s", file)
-    else:
-        logger.info("Loaded default configuration file %s", DEFAULT_CONFIG)
+    global initialized # pylint: disable=global-statement
+    if not initialized:
+        initialized = True
+        load(DEFAULT_CONFIG)
+    if not file:
+        return
+    cfg = io_utils.read_config_file(file)
+    logger.info("Loaded configuration file %s", file)
 
-    global validation, sites, merging, output, abbreviations # pylint: disable=global-statement
-
-    validation = cfg.get("validation", {})
-    sites = cfg.get("sites", {})
-    merging = cfg.get("merging", {})
-    output = cfg.get("output", {})
-    abbreviations = cfg.get("abbreviations", {})
+    recursive_update(validation, cfg.get("validation", {}))
+    recursive_update(sites, cfg.get("sites", {}))
+    recursive_update(merging, cfg.get("merging", {}))
+    recursive_update(output, cfg.get("output", {}))

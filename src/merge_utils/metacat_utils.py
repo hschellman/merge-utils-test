@@ -144,3 +144,25 @@ def list_field_values(field: str) -> list:
         values.append(value)
         query = f"""files where {field} present and {field} not in ('{"','".join(values)}') limit 1"""
         #time.sleep(1)
+    return values
+
+def list_extensions() -> list:
+    """
+    Get a list of all file extensions in the MetaCat database.
+
+    :return: list of file extensions
+    """
+    client = metacat.MetaCatClient()
+    query = "files where name ~ '\\.[a-z]' limit 1"
+    and_name = "' and name !~ '\\."
+    values = []
+    while True:
+        res = client.query(query, with_metadata=False)
+        data = next(res, None)
+        if not data:
+            break
+        ext = data['name'].split('.')[-1]
+        print(data['namespace']+":"+data['name'])
+        values.append(ext)
+        query = f"files where name ~ '\\.[a-z]{and_name}{and_name.join(values)}' limit 1"
+    return values

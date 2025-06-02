@@ -5,11 +5,10 @@ import collections
 import logging
 import subprocess
 import hashlib
-import copy
 import math
 from typing import Iterable, Generator
 
-from merge_utils import config, merge_meta
+from merge_utils import config, meta
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +24,7 @@ class MergeFile:
             logger.warning("No checksums for %s", self)
         elif 'adler32' not in self.checksums:
             logger.warning("No adler32 checksum for %s", self)
-        self.metadata = data['metadata']
+        self.metadata = meta.validate(self._did, data['metadata'])
         self.parents = data.get('parents', [])
 
     @property
@@ -76,7 +75,7 @@ class MergeSet(collections.UserDict):
         super().__init__()
 
         self.allow_duplicates = config.validation['allow_duplicates']
-        self.checked_fields = config.validation['metadata_fields']
+        self.consistent_fields = config.validation['consistency']
         self.field_values = None
 
         if files:
@@ -102,7 +101,7 @@ class MergeSet(collections.UserDict):
             return None
 
         # Check if the file metadata is consistent
-        vals = file.get_fields(self.checked_fields)
+        vals = file.get_fields(self.consistent_fields)
         if not self.field_values:
             # First file, so set the field values
             self.field_values = vals
@@ -111,7 +110,7 @@ class MergeSet(collections.UserDict):
             errs = [f"Found inconsistent metadata for file {did}:"]
             if vals[0] != self.field_values[0]:
                 errs.append(f"\n  namespace: '{vals[0]}' != '{self.field_values[0]}'")
-            for i, field in enumerate(self.checked_fields, start=1):
+            for i, field in enumerate(self.consistent_fields, start=1):
                 if vals[i] != self.field_values[i]:
                     errs.append(f"\n  {field}: '{vals[i]}' != '{self.field_values[i]}'")
             msg = "".join(errs)
@@ -220,14 +219,25 @@ class MergeSet(collections.UserDict):
 
         divs.append(len(self.data))
         logger.info("Merging %d inputs into %d groups of %.2f GB",
-                        len(self.data), len(divs), target_size)
+                        len(self.data), len(divs), target_size / 1024**3)
         return divs
 
     def groups(self) -> Generator[dict, None, None]:
         """Split the files into groups for merging"""
-        new_meta = merge_meta.merged_keys(self.data)
-        new_meta['merge.hash'] = self.hash
-        new_name = merge_meta.make_name(new_meta)
+        # Get merged metadata
+        merge_meta = meta.merged_keys(self.data, warn = True)
+
+        # Figure out the merge method if not already set
+        if config.merging['method'] == 'auto':
+            fmt = merge_meta['core.file_format']
+            for method, cfg in config.merging['methods'].items():
+                if fmt in cfg['file_format']:
+                    config.merging['method'] = method
+                    logger.info("Using merge method '%s' for file format '%s'", method, fmt)
+                    break
+
+        merge_name = meta.make_name(merge_meta)
+        merge_hash = self.hash
 
         # Get the group divisions
         if config.merging['target_mode'] == 'count':
@@ -242,7 +252,7 @@ class MergeSet(collections.UserDict):
 
         # Actually output the groups
         group_id = 0
-        group = MergeChunk(name=new_name, metadata=new_meta)
+        group = MergeChunk(merge_name, merge_hash)
         if len(divs) > 1:
             group.group_id = group_id
         for i, file in enumerate(self.files):
@@ -252,7 +262,7 @@ class MergeSet(collections.UserDict):
                 logger.debug("Yielding group %d with %d files", group_id, len(group))
                 yield group
                 group_id += 1
-                group = MergeChunk(name=new_name, metadata=new_meta, idx=group_id)
+                group = MergeChunk(merge_name, merge_hash, group=group_id)
 
     def check_consistency(self, fields: list) -> bool:
         """
@@ -294,24 +304,60 @@ class MergeSet(collections.UserDict):
 
 class MergeChunk(collections.UserDict):
     """Class to keep track of a chunk of files for merging"""
-    def __init__(self, name: str, metadata: dict, idx: int = -1):
+    def __init__(self, name: str, merge_hash: str, group: int = -1):
         super().__init__()
         self._name = name
-        self.metadata = copy.deepcopy(metadata)
+        self.merge_hash = merge_hash
         self.site = None
-        self.group_id = idx
+        self.group_id = group
         self.chunk_id = -1
         self.chunks = 0
 
     @property
     def name(self) -> str:
         """The name of the chunk"""
-        the_name = self._name
+        the_name, ext = self._name.split('.', 1)
         if self.group_id >= 0:
             the_name = f"{the_name}_f{self.group_id}"
         if self.chunk_id >= 0:
             the_name = f"{the_name}_c{self.chunk_id}"
-        return the_name
+        return f"{the_name}.{ext}"
+
+    @property
+    def inputs(self) -> list[str]:
+        """Get the list of input files"""
+        if self.chunks == 0:
+            return [file.path for file in self.data.values()]
+        the_name, ext = self.name.split('.', 1)
+        return [f"{the_name}_c{idx}.{ext}" for idx in range(self.chunks)]
+
+    @property
+    def metadata(self) -> dict:
+        """Get the metadata for the chunk"""
+        md = meta.merged_keys(self.data)
+        md['merge.method'] = config.merging['method']
+        md['merge.hash'] = self.merge_hash
+        if self.group_id >= 0:
+            md['merge.group'] = self.group_id
+        if self.chunk_id >= 0:
+            md['merge.chunk'] = self.chunk_id
+        return md
+
+    @property
+    def parents(self) -> list[str]:
+        """Get the list of parent dids"""
+        return meta.parents(self.data)
+
+    @property
+    def json(self) -> dict:
+        """Get the chunk metadata as a JSON-compatible dictionary"""
+        data = {
+            'name': self.name,
+            'metadata': self.metadata,
+            'parents': self.parents,
+            'inputs': self.inputs,
+        }
+        return data
 
     def add(self, file: MergeFile) -> None:
         """Add a file to the chunk"""
@@ -319,7 +365,7 @@ class MergeChunk(collections.UserDict):
 
     def chunk(self) -> MergeChunk:
         """Create a subset of the chunk with the same metadata"""
-        chunk = MergeChunk(metadata=self.metadata, name=self.name, idx=self.group_id)
+        chunk = MergeChunk(self.name, self.merge_hash, self.group_id)
         chunk.site = self.site
         chunk.chunk_id = self.chunks
         self.chunks += 1
