@@ -137,11 +137,11 @@ class JustinScheduler():
 
         cmd = [
             'justin', 'simple-workflow',
-            '--monte-carlo', len(site_jobs),
+            '--monte-carlo', str(len(site_jobs)),
             '--jobscript', os.path.join(io_utils.src_dir(), "merge.jobscript"),
             '--env', f'MERGE_CONFIG="tier{tier}_{site}"',
             '--env', f'CONFIG_DIR="{self.cvmfs_dir}"',
-            '--env', 'OUT_DIR="/nashome/e/emuldoon/scratch"'
+            '--env', 'OUT_DIR="/nashome/e/emuldoon/scratch"',
             '--site', site
         ]
         return cmd
