@@ -75,7 +75,7 @@ validation:
           - "311_dp_light"          # old script
         # Other keys from metacat
         # - "physics"
-        # - "ehn1-beam-np04"
+          - "ehn1-beam-np04"
         # - "justin-tutorial"
         # Keys from old script that are not in metacat
         # - "protodune"
@@ -114,7 +114,7 @@ validation:
           - "numip"
           - "numil"
         # Other keys from metacat
-        # - "g4beamline"
+          - "g4beamline"
         "core.data_tier":
           - "simulated"
           - "raw"
