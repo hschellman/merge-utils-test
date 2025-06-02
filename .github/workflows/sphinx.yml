@@ -24,12 +24,14 @@ jobs:
     - name: directly build sphinx
       run: |
         pip install -r docs/requirements.txt
+        pip install logging
+        pip install .
         cd docs
         make html
         cd ..
-    # - name: install myself
-    #   run: |
-    #     pip install . 
+   #- name: install myself
+   #   run: |
+   #     pip install .  
     - name: check env again
       run: env
     - name: Upload artifacts

@@ -74,8 +74,8 @@ validation:
           - "311"                   # old script
           - "311_dp_light"          # old script
         # Other keys from metacat
+          - "ehn1-beam-np04"
           - "physics"
-        # - "ehn1-beam-np04"
         # - "justin-tutorial"
         "core.file_type":
           - "mc"
@@ -107,7 +107,7 @@ validation:
           - "numip"
           - "numil"
         # Other keys from metacat
-        # - "g4beamline"
+          - "g4beamline"
         "core.data_tier":
           - "simulated"
           - "raw"
