@@ -77,10 +77,11 @@ class JustinScheduler():
         else:
             raise ValueError("Tier must be 0 or 1")
 
+        idx = len(site_jobs) + 1
         if site:
-            name = f"tier{tier}_{site}_{len(site_jobs):>06}.json"
+            name = f"tier{tier}_{site}_{idx:>06}.json"
         else:
-            name = f"tier{tier}_{len(site_jobs):>06}.json"
+            name = f"tier{tier}_{idx:>06}.json"
         name = os.path.join(self.dir, name)
         site_jobs.append(name)
         return name
