@@ -3,6 +3,8 @@
 import argparse
 import logging
 
+from merge_utils import io_utils, config, metacat_utils, rucio_utils, scheduler
+
 logger = logging.getLogger(__name__)
 
 def main():
@@ -38,8 +40,6 @@ def main():
     print (args)
 
     # move this here so that one can get the help output without loading code.
-
-    from merge_utils import io_utils, config, metacat_utils, rucio_utils
 
     io_utils.setup_log(args.function)
     config.load(args.config)
