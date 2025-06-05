@@ -24,20 +24,20 @@ class JobScheduler(ABC):
         """
         self.source = source
         self.dir = os.path.join(io_utils.pkg_dir(), "tmp", io_utils.get_timestamp())
-        self.tier1 = []
-        self.tier2 = []
+        self.pass1 = []
+        self.pass2 = []
 
     def get_chunks(self) -> None:
         """Run the FileRetriever and get the list of chunks."""
         self.source.run()
         for chunk in self.source.output_chunks():
             json_dict = chunk.json
-            if chunk.chunks: # if the chunk has sub-chunks it is tier 2
-                json_name = os.path.join(self.dir, f"tier2_{len(self.tier2):>06}.json")
-                self.tier2.append(json_name)
-            else: # if the chunk has no sub-chunks it is tier 1
-                json_name = os.path.join(self.dir, f"tier1_{len(self.tier1):>06}.json")
-                self.tier1.append(json_name)
+            if chunk.chunks: # if the chunk has sub-chunks it is pass 2
+                json_name = os.path.join(self.dir, f"pass2_{len(self.pass2):>06}.json")
+                self.pass2.append(json_name)
+            else: # if the chunk has no sub-chunks it is pass 1
+                json_name = os.path.join(self.dir, f"pass1_{len(self.pass1):>06}.json")
+                self.pass1.append(json_name)
             with open(json_name, 'w', encoding="utf-8") as fjson:
                 fjson.write(json.dumps(json_dict, indent=2))
 
@@ -57,31 +57,30 @@ class JustinScheduler():
         """
         self.source = source
         self.dir = os.path.join(io_utils.pkg_dir(), "tmp", io_utils.get_timestamp())
-        self.tier0 = collections.defaultdict(list)
-        self.tier1 = collections.defaultdict(list)
+        self.pass1 = collections.defaultdict(list)
+        self.pass2 = collections.defaultdict(list)
         self.cvmfs_dir = None
 
     def json_name(self, tier: int, site: str = None) -> str:
         """
-        Get the name of the next JSON config file for a given tier and site.
+        Get the name of the next JSON config file for a given pass and site.
         
-        :param tier: Tier number (0 or 1)
+        :param tier: Pass number (1 or 2)
         :param site: Optional site name
         :return: Name of the JSON file
         """
-        tier = int(tier)
-        if tier == 0:
-            site_jobs = self.tier0[site]
-        elif tier == 1:
-            site_jobs = self.tier1[site]
+        if tier == 1:
+            site_jobs = self.pass1[site]
+        elif tier == 2:
+            site_jobs = self.pass2[site]
         else:
-            raise ValueError("Tier must be 0 or 1")
+            raise ValueError("Tier must be 1 or 2")
 
         idx = len(site_jobs) + 1
         if site:
-            name = f"tier{tier}_{site}_{idx:>06}.json"
+            name = f"pass{tier}_{site}_{idx:>06}.json"
         else:
-            name = f"tier{tier}_{idx:>06}.json"
+            name = f"pass{tier}_{idx:>06}.json"
         name = os.path.join(self.dir, name)
         site_jobs.append(name)
         return name
@@ -93,7 +92,7 @@ class JustinScheduler():
         for chunk in self.source.output_chunks():
             json_dict = chunk.json
             site = chunk.site
-            name = self.json_name(chunk.chunks > 0, site)
+            name = self.json_name(chunk.tier, site)
             with open(name, 'w', encoding="utf-8") as fjson:
                 fjson.write(json.dumps(json_dict, indent=2))
 
@@ -105,7 +104,7 @@ class JustinScheduler():
         """
         cfg = os.path.join(self.dir, "config.tar")
         with tarfile.open(cfg,"w") as tar:
-            for _, files in collections.ChainMap(self.tier0, self.tier1).items():
+            for _, files in collections.ChainMap(self.pass1, self.pass2).items():
                 for file in files:
                     tar.add(file, os.path.basename(file))
             tar.add(os.path.join(io_utils.src_dir(), "do_merge.py"), "do_merge.py")
@@ -121,29 +120,30 @@ class JustinScheduler():
         """
         Get the command to run for a given tier and site.
         
-        :param tier: Tier number (0 or 1)
+        :param tier: Pass number (1 or 2)
         :param site: Optional site name
         :return: Command string
         """
-        tier = int(tier)
-        if tier == 0:
-            site_jobs = self.tier0[site]
-        elif tier == 1:
-            site_jobs = self.tier1[site]
+        if tier == 1:
+            site_jobs = self.pass1[site]
+        elif tier == 2:
+            site_jobs = self.pass2[site]
         else:
-            raise ValueError("Tier must be 0 or 1")
+            raise ValueError("Tier must be 1 or 2")
 
         if not site_jobs:
-            raise ValueError(f"No jobs found for tier {tier} and site {site}")
+            raise ValueError(f"No jobs found for pass {tier} and site {site}")
 
         cmd = [
             'justin', 'simple-workflow',
             '--monte-carlo', str(len(site_jobs)),
             '--jobscript', os.path.join(io_utils.src_dir(), "merge.jobscript"),
-            '--env', f'MERGE_CONFIG="tier{tier}_{site}"',
+            '--env', f'MERGE_CONFIG="pass{tier}_{site}"',
             '--env', f'CONFIG_DIR="{self.cvmfs_dir}"',
-            '--env', 'OUT_DIR="/nashome/e/emuldoon/scratch"',
-            '--site', site
+            '--site', site,
+            '--scope', 'usertests',
+            '--output-pattern', '*_merged_*:merge-test'
+            '--lifetime-days', '1'
         ]
         return cmd
 
@@ -154,24 +154,24 @@ class JustinScheduler():
         :return: None
         """
         self.get_chunks()
-        if not self.tier0:
+        if not self.pass1:
             logger.warning("No files to merge")
             return
         self.upload_cfg()
 
-        with open(os.path.join(self.dir, "tier0.sh"), 'w', encoding="utf-8") as f:
+        with open(os.path.join(self.dir, "pass1.sh"), 'w', encoding="utf-8") as f:
             f.write("#!/bin/bash\n")
-            f.write("# This script will submit the JustIN jobs for tier 0\n")
-            for site in self.tier0:
-                cmd = self.get_cmd(0, site)
+            f.write("# This script will submit the JustIN jobs for pass 1\n")
+            for site in self.pass1:
+                cmd = self.get_cmd(1, site)
                 f.write(f"{' '.join(cmd)}\n")
 
-        if self.tier1:
-            with open(os.path.join(self.dir, "tier1.sh"), 'w', encoding="utf-8") as f:
+        if self.pass2:
+            with open(os.path.join(self.dir, "pass2.sh"), 'w', encoding="utf-8") as f:
                 f.write("#!/bin/bash\n")
-                f.write("# This script will submit the JustIN jobs for tier 1\n")
-                for site in self.tier1:
-                    cmd = self.get_cmd(1, site)
+                f.write("# This script will submit the JustIN jobs for pass 2\n")
+                for site in self.pass2:
+                    cmd = self.get_cmd(2, site)
                     f.write(f"{' '.join(cmd)}\n")
 
         logger.info("JustIN job scripts written to %s", self.dir)

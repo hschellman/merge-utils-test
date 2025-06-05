@@ -307,6 +307,7 @@ class MergeChunk(collections.UserDict):
     def __init__(self, name: str, merge_hash: str, group: int = -1):
         super().__init__()
         self._name = name
+        self.namespace = None
         self.merge_hash = merge_hash
         self.site = None
         self.group_id = group
@@ -324,6 +325,13 @@ class MergeChunk(collections.UserDict):
         return f"{the_name}.{ext}"
 
     @property
+    def tier(self) -> int:
+        """Get the pass number for the chunk"""
+        if self.chunks == 0:
+            return 1
+        return 2
+
+    @property
     def inputs(self) -> list[str]:
         """Get the list of input files"""
         if self.chunks == 0:
@@ -337,6 +345,8 @@ class MergeChunk(collections.UserDict):
         md = meta.merged_keys(self.data)
         md['merge.method'] = config.merging['method']
         md['merge.hash'] = self.merge_hash
+        if config.merging['method'] == 'lar':
+            md['merge.fcl'] = config.merging['methods']['lar']['fcl']
         if self.group_id >= 0:
             md['merge.group'] = self.group_id
         if self.chunk_id >= 0:
@@ -353,6 +363,7 @@ class MergeChunk(collections.UserDict):
         """Get the chunk metadata as a JSON-compatible dictionary"""
         data = {
             'name': self.name,
+            'namespace': self.namespace,
             'metadata': self.metadata,
             'parents': self.parents,
             'inputs': self.inputs,
@@ -362,6 +373,8 @@ class MergeChunk(collections.UserDict):
     def add(self, file: MergeFile) -> None:
         """Add a file to the chunk"""
         self.data[file.did] = file
+        if self.namespace is None:
+            self.namespace = file.namespace
 
     def chunk(self) -> MergeChunk:
         """Create a subset of the chunk with the same metadata"""
