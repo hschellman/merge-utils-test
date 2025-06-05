@@ -36,7 +36,7 @@ def main():
     parser.add_argument('-v', '--verbose', action='count', default=0, help='print more verbose output')
     print ("before parser")
     args = parser.parse_args()
-    print ("after parser",list(args))
+    #print ("after parser",list(args))
 
     # move this here so that one can get the help output without loading code.
 
