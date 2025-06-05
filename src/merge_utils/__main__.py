@@ -2,8 +2,10 @@
 
 import argparse
 import logging
+from merge_utils import io_utils, config, metacat_utils, rucio_utils, scheduler
 
 logger = logging.getLogger(__name__)
+
 
 def main():
     """Test the command line interface for merge_utils."""
@@ -32,14 +34,13 @@ def main():
 
     parser.add_argument('-c', '--config', help='a configuration file')
     parser.add_argument('-v', '--verbose', action='count', default=0, help='print more verbose output')
-
+    print ("before parser")
     args = parser.parse_args()
-
-    print (args)
+    print ("after parser",list(args))
 
     # move this here so that one can get the help output without loading code.
 
-    from merge_utils import io_utils, config, metacat_utils, rucio_utils
+    
 
     io_utils.setup_log(args.function)
     config.load(args.config)
