@@ -85,7 +85,8 @@ def list_paths(args):
     """List the paths of files from a list"""
     from merge_utils import io_utils, config, metacat_utils, rucio_utils, scheduler
     from merge_utils import standalone_file_utils
-        flist = io_utils.get_inputs(args.pathlist, args.paths)
+    
+    flist = io_utils.get_inputs(args.pathlist, args.paths)
 
     matlist = standalone_file_utils.StandAloneRetriever._get_files(filepaths=flist)
     
