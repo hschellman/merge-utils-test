@@ -82,6 +82,8 @@
 <span class="sd">    :return: None</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">global</span> <span class="n">initialized</span> <span class="c1"># pylint: disable=global-statement</span>
+
+    <span class="nb">print</span> <span class="p">(</span><span class="s2">&quot;asking for config file&quot;</span><span class="p">,</span><span class="n">file</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">initialized</span><span class="p">:</span>
         <span class="n">initialized</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">load</span><span class="p">(</span><span class="n">DEFAULT_CONFIG</span><span class="p">)</span>
