@@ -2,7 +2,7 @@
 
 import argparse
 import logging
-from merge_utils import io_utils, config, metacat_utils, rucio_utils, scheduler
+
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +19,14 @@ def main():
     did_parser = subparsers.add_parser('dids', help='list the DIDs of files from MetaCat')
     did_parser.add_argument('-q', '--query', help='MetaCat query to find files')
     did_parser.add_argument('-f', '--filelist', help='a file containing a list of file DIDs')
+    #did_parser.add_argument('-f', '--pathlist', help='a file containing a list of file paths for files that have local metadata')
     did_parser.add_argument('files', nargs=argparse.REMAINDER, help='individual file DIDs')
+
+    path_parser = subparsers.add_parser('paths', help='list the paths of files from a list')
+    #did_parser.add_argument('-q', '--query', help='MetaCat query to find files')
+    #did_parser.add_argument('-f', '--filelist', help='a file containing a list of file DIDs')
+    path_parser.add_argument('-p', '--pathlist', help='a file containing a list of file paths for files that have local metadata')
+    path_parser.add_argument('paths', nargs=argparse.REMAINDER, help='individual file paths')
 
     pfn_parser = subparsers.add_parser('pfns', help='list the PFNs of files from Rucio')
     pfn_parser.add_argument('-q', '--query', help='MetaCat query to find files')
@@ -34,8 +41,11 @@ def main():
 
     parser.add_argument('-c', '--config', help='a configuration file')
     parser.add_argument('-v', '--verbose', action='count', default=0, help='print more verbose output')
-    print ("before parser")
+    #print ("before parser")
     args = parser.parse_args()
+
+    from merge_utils import io_utils, config, metacat_utils, rucio_utils, scheduler
+    from merge_utils import standalone_file_utils
     #print ("after parser",list(args))
 
     # move this here so that one can get the help output without loading code.
@@ -51,6 +61,8 @@ def main():
 
     if args.function == "dids":
         list_dids(args)
+    elif args.function == "paths":
+        list_paths(args)
     elif args.function == "pfns":
         list_pfns(args)
     elif args.function == "merge":
@@ -60,6 +72,8 @@ def main():
 def list_dids(args):
     """List the DIDs of files from MetaCat"""
 
+    from merge_utils import io_utils, config, metacat_utils, rucio_utils, scheduler
+    from merge_utils import standalone_file_utils
     flist = io_utils.get_inputs(args.filelist, args.files)
 
     retriever = metacat_utils.MetaCatRetriever(query=args.query, filelist=flist)
@@ -67,8 +81,21 @@ def list_dids(args):
     for file in retriever.files:
         print (file.did)
 
+def list_paths(args):
+    """List the paths of files from a list"""
+    from merge_utils import io_utils, config, metacat_utils, rucio_utils, scheduler
+    from merge_utils import standalone_file_utils
+        flist = io_utils.get_inputs(args.pathlist, args.paths)
+
+    matlist = standalone_file_utils.StandAloneRetriever._get_files(filepaths=flist)
+    
+    for file in matlist:
+        print (file)
+
 def list_pfns(args):
     """List the PFNs of files from Rucio"""
+    from merge_utils import io_utils, config, metacat_utils, rucio_utils, scheduler
+    from merge_utils import standalone_file_utils
     flist = io_utils.get_inputs(args.filelist, args.files)
 
     retriever = rucio_utils.RucioRetriever(
@@ -91,6 +118,8 @@ def list_pfns(args):
 
 def merge(args):
     """List the PFNs of files from Rucio"""
+    from merge_utils import io_utils, config, metacat_utils, rucio_utils, scheduler
+    from merge_utils import standalone_file_utils
     flist = io_utils.get_inputs(args.filelist, args.files)
 
     sched = scheduler.JustinScheduler(rucio_utils.RucioRetriever(

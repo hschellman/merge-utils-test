@@ -39,6 +39,8 @@ def load(file: str = None) -> None:
     :return: None
     """
     global initialized # pylint: disable=global-statement
+
+    print ("asking for config file",file)
     if not initialized:
         initialized = True
         load(DEFAULT_CONFIG)
