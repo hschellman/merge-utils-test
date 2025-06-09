@@ -46,35 +46,58 @@ def validate(name: str, metadata: dict) -> dict:
     """
     # Fix metadata
     metadata = fix(name, metadata)
-    # Always require run_type and data_tier
-    for key in ["core.run_type", "core.data_tier"]:
+    errs = []
+    # Check for required keys
+    required = set()
+    inserts = MergeMetaNameDict()
+    for key in config.validation['required']:
+        required.add(key)
         if key not in metadata:
-            raise ValueError(f"File {name} metadata missing required key: {key}")
-    # Get optional keys
-    optionals = config.validation['optional']['all']
-    optionals += config.validation['optional'].get(metadata["core.data_tier"], {})
-    if metadata["core.run_type"] != "mc":
-        optionals += config.validation['optional']['mc']
-    # Check required keys
-    for key, values in config.validation['required'].items():
-        if key in optionals:
+            if key in config.validation['optional']:
+                continue
+            errs.append(f"Missing required key: {key}")
+        else:
+            inserts[key] = metadata[key]
+
+    # Check for conditionally required keys
+    for condition, keys in config.validation['conditional'].items():
+        expr = condition.format_map(inserts)
+        try:
+            if not eval(expr): #pylint: disable=eval-used
+                logger.debug("Condition failed: %s", expr)
+                continue
+        except Exception as exc:
+            raise ValueError(f"Error evaluating condition '{condition}'") from exc
+        logger.debug("Condition matched: %s", expr)
+        for key in keys:
+            if key in required:
+                continue
+            required.add(key)
+            if key not in metadata and key not in config.validation['optional']:
+                errs.append(f"Missing conditionally required key: {key} (from {condition})")
+
+    # Check for restricted keys
+    for key, options in config.validation['restricted'].items():
+        if key not in metadata:
             continue
-        if key not in metadata:
-            raise ValueError(f"File {name} metadata missing required key: {key}")
         value = metadata[key]
-        if value not in values:
-            raise ValueError(f"File {name} invalid value for {key}: {value}")
+        if value not in options:
+            errs.append(f"Invalid value for {key}: {value}")
+
     # Check value types
     for key, expected_type in config.validation['types'].items():
-        if key in optionals:
+        if key not in metadata or key in config.validation['restricted']:
             continue
-        if key not in metadata:
-            raise ValueError(f"File {name} metadata missing required key: {key}")
         value = metadata[key]
         type_name = type(value).__name__
         if (type_name == expected_type) or (expected_type == 'float' and type_name == 'int'):
             continue
-        raise ValueError(f"File {name} invalid type for {key}: {value} (expected {expected_type})")
+        errs.append(f"Invalid type for {key}: {value} (expected {expected_type})")
+
+    if errs:
+        io_utils.log_list("File %s has {n} invalid metadata key{s}:" % name, errs, logging.ERROR)
+        raise ValueError(f"Invalid metadata for file {name}")
+
     return metadata
 
 class MergeMetaMin:
@@ -253,11 +276,18 @@ def parents(files: dict) -> list[str]:
     :return: set of parents
     """
     if not config.output['grandparents']:
-        return list(files.keys())
+        output = []
+        for file in files.values():
+            output.append({
+                "fid": file.fid,
+                "name": file.name,
+                "namespace": file.namespace
+            })
     grandparents = set()
     for file in files.values():
-        grandparents.update(file.parents)
-    return list(grandparents)
+        for grandparent in file.parents:
+            grandparents.add(tuple(sorted(grandparent.items())))
+    return [dict(t) for t in grandparents]
 
 class MergeMetaNameDict(collections.UserDict):
     """Class to inject metadata into a name template."""
@@ -313,4 +343,4 @@ def make_name(metadata: dict) -> str:
 
     name = config.output['name'].format_map(inserts)
     ext = config.merging['methods'][config.merging['method']]['ext']
-    return name + ext
+    return f"{name}_merged_{inserts['timestamp']}{ext}"

@@ -8,7 +8,7 @@ import subprocess
 import collections
 from abc import ABC, abstractmethod
 
-from merge_utils import io_utils
+from merge_utils import io_utils, config
 from merge_utils.retriever import FileRetriever
 
 logger = logging.getLogger(__name__)
@@ -45,6 +45,76 @@ class JobScheduler(ABC):
     def run(self) -> None:
         """Run the job scheduler."""
         raise NotImplementedError("Subclasses must implement this method")
+
+class LocalScheduler():
+    """Job scheduler for local merge jobs"""
+
+    def __init__(self, source: FileRetriever):
+        """
+        Initialize the LocalScheduler with a source of files to merge.
+        
+        :param source: FileRetriever object to provide input files
+        """
+        self.source = source
+        self.dir = os.path.join(io_utils.pkg_dir(), "tmp", io_utils.get_timestamp())
+        self.pass1 = []
+        self.pass2 = []
+    
+    def json_name(self, tier: int) -> str:
+        """
+        Get the name of the next JSON config file for a given pass and site.
+        
+        :param tier: Pass number (1 or 2)
+        :param site: Optional site name
+        :return: Name of the JSON file
+        """
+        if tier == 1:
+            site_jobs = self.pass1
+        elif tier == 2:
+            site_jobs = self.pass2
+        else:
+            raise ValueError("Tier must be 1 or 2")
+
+        idx = len(site_jobs) + 1
+        name = f"pass{tier}_{idx:>06}.json"
+        name = os.path.join(self.dir, name)
+        site_jobs.append(name)
+        return name
+
+    def get_chunks(self) -> None:
+        """Run the FileRetriever and get the list of chunks."""
+        self.source.run()
+        os.makedirs(self.dir)
+        for chunk in self.source.output_chunks():
+            json_dict = chunk.json
+            name = self.json_name(chunk.tier)
+            with open(name, 'w', encoding="utf-8") as fjson:
+                fjson.write(json.dumps(json_dict, indent=2))
+
+    def run(self) -> None:
+        """Run the job scheduler."""
+        self.get_chunks()
+        if not self.pass1:
+            logger.warning("No files to merge")
+            return
+
+        with open(os.path.join(self.dir, "pass1.sh"), 'w', encoding="utf-8") as f:
+            f.write("#!/bin/bash\n")
+            f.write("# This script will run the merge jobs for pass 1\n")
+            for chunk in self.pass1:
+                cmd = [os.path.join(io_utils.src_dir(), "do_merge.py"), chunk]
+                f.write(f"{' '.join(cmd)}\n")
+
+        if self.pass2:
+            with open(os.path.join(self.dir, "pass2.sh"), 'w', encoding="utf-8") as f:
+                f.write("#!/bin/bash\n")
+                f.write("# This script will run the merge jobs for pass 2\n")
+                for chunk in self.pass2:
+                    cmd = [os.path.join(io_utils.src_dir(), "do_merge.py"), chunk]
+                    f.write(f"{' '.join(cmd)}\n")
+
+        logger.info("Local job scripts written to %s", self.dir)
+        #subprocess.run(cmd, check=True)
 
 class JustinScheduler():
     """Job scheduler for JustIN merge jobs"""
@@ -87,8 +157,8 @@ class JustinScheduler():
 
     def get_chunks(self) -> None:
         """Run the FileRetriever and get the list of chunks."""
-        os.makedirs(self.dir)
         self.source.run()
+        os.makedirs(self.dir)
         for chunk in self.source.output_chunks():
             json_dict = chunk.json
             site = chunk.site

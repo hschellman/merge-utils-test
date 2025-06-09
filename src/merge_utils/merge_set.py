@@ -1,6 +1,7 @@
 """Container for a set of files to be merged"""
 
 from __future__ import annotations
+import os
 import collections
 import logging
 import subprocess
@@ -14,10 +15,10 @@ logger = logging.getLogger(__name__)
 
 class MergeFile:
     """A generic data file with metadata"""
-    def __init__(self, data: dict, path: str = None):
+    def __init__(self, data: dict):
         self._did = data['namespace'] + ':' + data['name']
-        self.path = path
-        self.fid = data['fid']
+        self.path = data.get('path', None)
+        self.fid = data.get('fid', None)
         self.size = data['size']
         self.checksums = data['checksums']
         if len(self.checksums) == 0:
@@ -74,8 +75,8 @@ class MergeSet(collections.UserDict):
     def __init__(self, files: list[MergeFile] = None):
         super().__init__()
 
-        self.allow_duplicates = config.validation['allow_duplicates']
-        self.consistent_fields = config.validation['consistency']
+        self.allow_duplicates = config.validation['skip']['duplicate']
+        self.consistent_fields = config.validation['consistent']
         self.field_values = None
 
         if files:
@@ -337,7 +338,8 @@ class MergeChunk(collections.UserDict):
         if self.chunks == 0:
             return [file.path for file in self.data.values()]
         the_name, ext = self.name.split('.', 1)
-        return [f"{the_name}_c{idx}.{ext}" for idx in range(self.chunks)]
+        output_dir = config.output['dir']
+        return [os.path.join(output_dir, f"{the_name}_c{idx}.{ext}") for idx in range(self.chunks)]
 
     @property
     def metadata(self) -> dict:
