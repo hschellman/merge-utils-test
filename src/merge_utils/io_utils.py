@@ -95,6 +95,33 @@ def read_config_file(file_path: str = None) -> dict:
         raise ValueError(f"Unknown file type: {suffix}")
     return cfg
 
+def find_fcl(name: str) -> str:
+    """
+    Find the full path to a FCL file
+
+    :param name: Name of the FCL file
+    :return: Full path to the FCL file
+    :raises FileNotFoundError: If the file does not exist
+    """
+    # If the name is already a complete path, return it
+    if os.path.exists(name):
+        return os.path.abspath(name)
+    # Otherwise, look for the file in the config directory
+    fcl_path = os.path.join(pkg_dir(), "config", name)
+    if os.path.exists(fcl_path):
+        return fcl_path
+    # Otherwise, look in the standard locations
+    fcl_dirs = os.getenv("FHICL_FILE_PATH")
+    if fcl_dirs is None:
+        logger.warning("FHICL_FILE_PATH environment variable is not set")
+    else:
+        for fcl_dir in fcl_dirs.split(':'):
+            fcl_path = os.path.join(fcl_dir, name)
+            if os.path.exists(fcl_path):
+                return fcl_path
+    # Failed to find the file
+    raise FileNotFoundError(f"Could not find FCL file {name}")
+
 def setup_log(name: str) -> None:
     """Configure logging"""
     logger_config = read_config_file(os.path.join(os.getenv("MERGEROOT"),"config","logging.json"))

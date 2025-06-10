@@ -4,6 +4,7 @@ import logging
 import math
 import collections
 import asyncio
+import os
 from abc import ABC, abstractmethod
 
 from typing import AsyncGenerator, Generator
@@ -18,7 +19,7 @@ class FileRetriever(ABC):
 
     def __init__(self):
         self.step = config.validation['batch_size']
-        self.allow_missing = config.validation['allow_missing']
+        self.allow_missing = config.validation['skip']['missing']
         self._missing = collections.defaultdict(int)
         self._files = MergeSet()
 
@@ -112,3 +113,82 @@ class FileRetriever(ABC):
                 if chunk:
                     yield chunk
             yield group
+
+class LocalRetriever(FileRetriever):
+    """FileRetriever for local files"""
+
+    def __init__(self, filelist: list, meta_dirs: list = None):
+        """
+        Initialize the LocalRetriever with a list of files and optional metadata directories.
+        
+        :param filelist: list of input data files
+        :param meta_dirs: optional list of directories to search for metadata files
+        """
+        super().__init__()
+        self.filelist = filelist or []
+        self.meta_dirs = meta_dirs or []
+        self.json_files = {}
+
+    async def connect(self) -> None:
+        """No need to connect to the local filesystem, but we can do some preprocessing."""
+        # No connection needed for local files
+        # We might have a mix of data and json files, so we need to separate them
+        data_files = []
+        for file in self.filelist:
+            name = os.path.basename(file)
+            if os.path.splitext(name)[1] == '.json':
+                path = os.path.dirname(file)
+                name = os.path.splitext(name)[0]
+                self.json_files[name] = path
+            else:
+                if os.path.exists(file):
+                    data_files.append(file)
+                else:
+                    self.missing[name] += 1
+        self.filelist = data_files
+        logger.debug("Found %d input data files", len(self.filelist))
+
+    async def get_metadata(self, file: str) -> dict:
+        """Retrieve metadata for a single file"""
+        name = os.path.basename(file)
+        path = os.path.dirname(file)
+        metadata = None
+        if name in self.json_files:
+            # we already have a matching json file for this data file
+            meta_path = os.path.join(self.json_files.pop(name), name + '.json')
+            if os.path.exists(meta_path):
+                metadata = io_utils.read_config_file(meta_path)
+        if metadata is None:
+            # try to find a matching json file in the same directory or in the meta_dirs
+            dirs = [path] + self.meta_dirs
+            for path in dirs:
+                meta_path = os.path.join(path, name + '.json')
+                if os.path.exists(meta_path):
+                    metadata = io_utils.read_config_file(meta_path)
+                    break
+        if metadata is None:
+            self.missing[name] += 1
+            return None
+        metadata['path'] = os.path.join(path, name)
+        return metadata
+
+    async def input_batches(self) -> AsyncGenerator[dict, None]:
+        """Retrieve metadata for local files in batches"""
+        batch_id = 0
+        batch = []
+        for file in self.filelist:
+            metadata = await self.get_metadata(file)
+            if metadata is None:
+                continue
+            batch.append(metadata)
+
+            if len(batch) >= self.step:
+                added = await self.add(batch)
+                logger.debug("yielding file batch %d", batch_id)
+                batch_id += 1
+                yield added
+                batch = []
+        if batch:
+            added = await self.add(batch)
+            logger.debug("yielding last file batch")
+            yield added
