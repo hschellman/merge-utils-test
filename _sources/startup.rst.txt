@@ -9,9 +9,10 @@ To install the official DUNE version (until we add to spack)
 First make a virtual environment and activate it.
 
 .. code-block:: bash
-
+    
+    # note, this ends up in the directory you invoke the venv in
     python3 -m venv .merging
-    . $HOME/.merging/bin/activate
+    . .merging/bin/activate
 
 Then use spack (or ups) to set up a normal DUNE environment
 
@@ -23,7 +24,7 @@ Then download and install the merge-utils code in your virtual environment
 
     git clone https://github.com/DUNE/merge-utils.git
     cd merge-utils
-    pip install . 
+    pip install -e .   # this makes an editable environment
 
 .. note::
 
