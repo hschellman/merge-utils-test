@@ -7,13 +7,16 @@ from merge_utils import io_utils, config, metacat_utils, rucio_utils, scheduler,
 
 logger = logging.getLogger(__name__)
 
+
 def main():
     """Test the command line interface for merge_utils."""
 
     parser = argparse.ArgumentParser(
         description='Command line interface for merge_utils')
+
     parser.add_argument('-c', '--config', action='append', help='a configuration file')
     parser.add_argument('-v', '--verbose', action='count', default=0, help='print more verbose output')
+
 
     in_group = parser.add_argument_group('input arguments')
     in_group.add_argument('-l', '--local', action='store_true',
@@ -35,6 +38,7 @@ def main():
     if args.list:
         name = "list "+args.list
     io_utils.setup_log(name)
+
     config.load(args.config)
     if args.verbose == 1:
         io_utils.set_log_level("INFO")
@@ -82,3 +86,4 @@ def main():
         else:
             sched = scheduler.JustinScheduler(ret)
         sched.run()
+

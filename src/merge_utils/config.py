@@ -51,7 +51,9 @@ def update(cfg: dict) -> None:
     :param cfg: Dictionary containing new configuration values.
     :return: None
     """
+    
     recursive_update(inputs, cfg.get("inputs", {}))
+
     recursive_update(validation, cfg.get("validation", {}))
     recursive_update(sites, cfg.get("sites", {}))
     recursive_update(merging, cfg.get("merging", {}))

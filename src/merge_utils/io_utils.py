@@ -124,7 +124,7 @@ def find_fcl(name: str) -> str:
 
 def setup_log(name: str) -> None:
     """Configure logging"""
-    logger_config = read_config_file("logging.json")
+    logger_config = read_config_file(os.path.join(os.getenv("MERGEROOT"),"config","logging.json"))
     log_file = logger_config['handlers']['file']['filename']
     if not os.path.isabs(log_file):
         log_file = os.path.join(pkg_dir(), "logs", log_file)
