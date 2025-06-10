@@ -89,35 +89,58 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Fix metadata</span>
     <span class="n">metadata</span> <span class="o">=</span> <span class="n">fix</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">metadata</span><span class="p">)</span>
-    <span class="c1"># Always require run_type and data_tier</span>
-    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;core.run_type&quot;</span><span class="p">,</span> <span class="s2">&quot;core.data_tier&quot;</span><span class="p">]:</span>
+    <span class="n">errs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="c1"># Check for required keys</span>
+    <span class="n">required</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="n">inserts</span> <span class="o">=</span> <span class="n">MergeMetaNameDict</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">config</span><span class="o">.</span><span class="n">validation</span><span class="p">[</span><span class="s1">&#39;required&#39;</span><span class="p">]:</span>
+        <span class="n">required</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">metadata</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;File </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> metadata missing required key: </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="c1"># Get optional keys</span>
-    <span class="n">optionals</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">validation</span><span class="p">[</span><span class="s1">&#39;optional&#39;</span><span class="p">][</span><span class="s1">&#39;all&#39;</span><span class="p">]</span>
-    <span class="n">optionals</span> <span class="o">+=</span> <span class="n">config</span><span class="o">.</span><span class="n">validation</span><span class="p">[</span><span class="s1">&#39;optional&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;core.data_tier&quot;</span><span class="p">],</span> <span class="p">{})</span>
-    <span class="k">if</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;core.run_type&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;mc&quot;</span><span class="p">:</span>
-        <span class="n">optionals</span> <span class="o">+=</span> <span class="n">config</span><span class="o">.</span><span class="n">validation</span><span class="p">[</span><span class="s1">&#39;optional&#39;</span><span class="p">][</span><span class="s1">&#39;mc&#39;</span><span class="p">]</span>
-    <span class="c1"># Check required keys</span>
-    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">values</span> <span class="ow">in</span> <span class="n">config</span><span class="o">.</span><span class="n">validation</span><span class="p">[</span><span class="s1">&#39;required&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">optionals</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">config</span><span class="o">.</span><span class="n">validation</span><span class="p">[</span><span class="s1">&#39;optional&#39;</span><span class="p">]:</span>
+                <span class="k">continue</span>
+            <span class="n">errs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Missing required key: </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">inserts</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+
+    <span class="c1"># Check for conditionally required keys</span>
+    <span class="k">for</span> <span class="n">condition</span><span class="p">,</span> <span class="n">keys</span> <span class="ow">in</span> <span class="n">config</span><span class="o">.</span><span class="n">validation</span><span class="p">[</span><span class="s1">&#39;conditional&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">expr</span> <span class="o">=</span> <span class="n">condition</span><span class="o">.</span><span class="n">format_map</span><span class="p">(</span><span class="n">inserts</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">eval</span><span class="p">(</span><span class="n">expr</span><span class="p">):</span> <span class="c1">#pylint: disable=eval-used</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Condition failed: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">expr</span><span class="p">)</span>
+                <span class="k">continue</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error evaluating condition &#39;</span><span class="si">{</span><span class="n">condition</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Condition matched: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">expr</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">required</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">required</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">metadata</span> <span class="ow">and</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">config</span><span class="o">.</span><span class="n">validation</span><span class="p">[</span><span class="s1">&#39;optional&#39;</span><span class="p">]:</span>
+                <span class="n">errs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Missing conditionally required key: </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> (from </span><span class="si">{</span><span class="n">condition</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Check for restricted keys</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">options</span> <span class="ow">in</span> <span class="n">config</span><span class="o">.</span><span class="n">validation</span><span class="p">[</span><span class="s1">&#39;restricted&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">metadata</span><span class="p">:</span>
             <span class="k">continue</span>
-        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">metadata</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;File </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> metadata missing required key: </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="n">value</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">value</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">values</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;File </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> invalid value for </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
+            <span class="n">errs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid value for </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
     <span class="c1"># Check value types</span>
     <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">expected_type</span> <span class="ow">in</span> <span class="n">config</span><span class="o">.</span><span class="n">validation</span><span class="p">[</span><span class="s1">&#39;types&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">optionals</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">metadata</span> <span class="ow">or</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">config</span><span class="o">.</span><span class="n">validation</span><span class="p">[</span><span class="s1">&#39;restricted&#39;</span><span class="p">]:</span>
             <span class="k">continue</span>
-        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">metadata</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;File </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> metadata missing required key: </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="n">value</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
         <span class="n">type_name</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">type_name</span> <span class="o">==</span> <span class="n">expected_type</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">expected_type</span> <span class="o">==</span> <span class="s1">&#39;float&#39;</span> <span class="ow">and</span> <span class="n">type_name</span> <span class="o">==</span> <span class="s1">&#39;int&#39;</span><span class="p">):</span>
             <span class="k">continue</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;File </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> invalid type for </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2"> (expected </span><span class="si">{</span><span class="n">expected_type</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+        <span class="n">errs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid type for </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2"> (expected </span><span class="si">{</span><span class="n">expected_type</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">errs</span><span class="p">:</span>
+        <span class="n">io_utils</span><span class="o">.</span><span class="n">log_list</span><span class="p">(</span><span class="s2">&quot;File </span><span class="si">%s</span><span class="s2"> has </span><span class="si">{n}</span><span class="s2"> invalid metadata key</span><span class="si">{s}</span><span class="s2">:&quot;</span> <span class="o">%</span> <span class="n">name</span><span class="p">,</span> <span class="n">errs</span><span class="p">,</span> <span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid metadata for file </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
     <span class="k">return</span> <span class="n">metadata</span></div>
 
 
@@ -344,11 +367,18 @@
 <span class="sd">    :return: set of parents</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">config</span><span class="o">.</span><span class="n">output</span><span class="p">[</span><span class="s1">&#39;grandparents&#39;</span><span class="p">]:</span>
-        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">files</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+                <span class="s2">&quot;fid&quot;</span><span class="p">:</span> <span class="n">file</span><span class="o">.</span><span class="n">fid</span><span class="p">,</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">file</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                <span class="s2">&quot;namespace&quot;</span><span class="p">:</span> <span class="n">file</span><span class="o">.</span><span class="n">namespace</span>
+            <span class="p">})</span>
     <span class="n">grandparents</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
     <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-        <span class="n">grandparents</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">file</span><span class="o">.</span><span class="n">parents</span><span class="p">)</span>
-    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">grandparents</span><span class="p">)</span></div>
+        <span class="k">for</span> <span class="n">grandparent</span> <span class="ow">in</span> <span class="n">file</span><span class="o">.</span><span class="n">parents</span><span class="p">:</span>
+            <span class="n">grandparents</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">grandparent</span><span class="o">.</span><span class="n">items</span><span class="p">())))</span>
+    <span class="k">return</span> <span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">grandparents</span><span class="p">]</span></div>
 
 
 <div class="viewcode-block" id="MergeMetaNameDict">
@@ -410,7 +440,7 @@
 
     <span class="n">name</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">output</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">format_map</span><span class="p">(</span><span class="n">inserts</span><span class="p">)</span>
     <span class="n">ext</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">merging</span><span class="p">[</span><span class="s1">&#39;methods&#39;</span><span class="p">][</span><span class="n">config</span><span class="o">.</span><span class="n">merging</span><span class="p">[</span><span class="s1">&#39;method&#39;</span><span class="p">]][</span><span class="s1">&#39;ext&#39;</span><span class="p">]</span>
-    <span class="k">return</span> <span class="n">name</span> <span class="o">+</span> <span class="n">ext</span></div>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">_merged_</span><span class="si">{</span><span class="n">inserts</span><span class="p">[</span><span class="s1">&#39;timestamp&#39;</span><span class="p">]</span><span class="si">}{</span><span class="n">ext</span><span class="si">}</span><span class="s2">&quot;</span></div>
 
 </pre></div>
 

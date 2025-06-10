@@ -121,6 +121,39 @@
 
 </dd></dl>
 
+<dl class="py class">
+<dt class="sig sig-object py" id="retriever.LocalRetriever">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">retriever.</span></span><span class="sig-name descname"><span class="pre">LocalRetriever</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filelist</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meta_dirs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/retriever.html#LocalRetriever"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#retriever.LocalRetriever" title="Link to this definition">¶</a></dt>
+<dd><p>FileRetriever for local files</p>
+<p>Initialize the LocalRetriever with a list of files and optional metadata directories.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filelist</strong> – list of input data files</p></li>
+<li><p><strong>meta_dirs</strong> – optional list of directories to search for metadata files</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="retriever.LocalRetriever.connect">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">connect</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/retriever.html#LocalRetriever.connect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#retriever.LocalRetriever.connect" title="Link to this definition">¶</a></dt>
+<dd><p>No need to connect to the local filesystem, but we can do some preprocessing.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="retriever.LocalRetriever.get_metadata">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_metadata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="_modules/retriever.html#LocalRetriever.get_metadata"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#retriever.LocalRetriever.get_metadata" title="Link to this definition">¶</a></dt>
+<dd><p>Retrieve metadata for a single file</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="retriever.LocalRetriever.input_batches">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">input_batches</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">AsyncGenerator</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/retriever.html#LocalRetriever.input_batches"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#retriever.LocalRetriever.input_batches" title="Link to this definition">¶</a></dt>
+<dd><p>Retrieve metadata for local files in batches</p>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 
 
@@ -143,6 +176,12 @@
 <li><a class="reference internal" href="#retriever.FileRetriever.missing"><code class="docutils literal notranslate"><span class="pre">FileRetriever.missing</span></code></a></li>
 <li><a class="reference internal" href="#retriever.FileRetriever.output_chunks"><code class="docutils literal notranslate"><span class="pre">FileRetriever.output_chunks()</span></code></a></li>
 <li><a class="reference internal" href="#retriever.FileRetriever.run"><code class="docutils literal notranslate"><span class="pre">FileRetriever.run()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#retriever.LocalRetriever"><code class="docutils literal notranslate"><span class="pre">LocalRetriever</span></code></a><ul>
+<li><a class="reference internal" href="#retriever.LocalRetriever.connect"><code class="docutils literal notranslate"><span class="pre">LocalRetriever.connect()</span></code></a></li>
+<li><a class="reference internal" href="#retriever.LocalRetriever.get_metadata"><code class="docutils literal notranslate"><span class="pre">LocalRetriever.get_metadata()</span></code></a></li>
+<li><a class="reference internal" href="#retriever.LocalRetriever.input_batches"><code class="docutils literal notranslate"><span class="pre">LocalRetriever.input_batches()</span></code></a></li>
 </ul>
 </li>
 </ul>

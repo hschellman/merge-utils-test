@@ -42,9 +42,10 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">merge_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">io_utils</span>
 
-<span class="n">DEFAULT_CONFIG</span> <span class="o">=</span> <span class="s2">&quot;defaults.yaml&quot;</span>
+<span class="n">DEFAULT_CONFIG</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;validation.yaml&quot;</span><span class="p">,</span> <span class="s2">&quot;defaults.yaml&quot;</span><span class="p">]</span>
 
 <span class="c1"># Configuration dictionaries</span>
+<span class="n">inputs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
 <span class="n">validation</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
 <span class="n">sites</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
 <span class="n">merging</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
@@ -65,37 +66,65 @@
 <span class="sd">    :return: None</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">new_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">old_dict</span><span class="p">:</span>
-            <span class="n">recursive_update</span><span class="p">(</span><span class="n">old_dict</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">val</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">old_dict</span><span class="p">:</span>
+            <span class="c1"># If the key does not exist in the old dictionary, add it</span>
+            <span class="n">old_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+            <span class="k">continue</span>
+        <span class="n">old_val</span> <span class="o">=</span> <span class="n">old_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">old_val</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="c1"># If both are dictionaries, recursively update</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="n">recursive_update</span><span class="p">(</span><span class="n">old_dict</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">val</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">old_val</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="c1"># If the old value is a list, extend it with the new value</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="n">old_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">val</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">old_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">old_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span></div>
 
 
-<div class="viewcode-block" id="load">
-<a class="viewcode-back" href="../config.html#config.load">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">load</span><span class="p">(</span><span class="n">file</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="update">
+<a class="viewcode-back" href="../config.html#config.update">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Load the specified configuration file.</span>
-<span class="sd">    Missing keys will be filled in with the defaults in DEFAULT_CONFIG.</span>
+<span class="sd">    Update the global configuration with values from the provided dictionary.</span>
 <span class="sd">    </span>
-<span class="sd">    :param file: Configuration file name or path.</span>
+<span class="sd">    :param cfg: Dictionary containing new configuration values.</span>
 <span class="sd">    :return: None</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">global</span> <span class="n">initialized</span> <span class="c1"># pylint: disable=global-statement</span>
-
-    <span class="nb">print</span> <span class="p">(</span><span class="s2">&quot;asking for config file&quot;</span><span class="p">,</span><span class="n">file</span><span class="p">)</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">initialized</span><span class="p">:</span>
-        <span class="n">initialized</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="n">load</span><span class="p">(</span><span class="n">DEFAULT_CONFIG</span><span class="p">)</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">file</span><span class="p">:</span>
-        <span class="k">return</span>
-    <span class="n">cfg</span> <span class="o">=</span> <span class="n">io_utils</span><span class="o">.</span><span class="n">read_config_file</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Loaded configuration file </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
+    
+    <span class="n">recursive_update</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;inputs&quot;</span><span class="p">,</span> <span class="p">{}))</span>
 
     <span class="n">recursive_update</span><span class="p">(</span><span class="n">validation</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;validation&quot;</span><span class="p">,</span> <span class="p">{}))</span>
     <span class="n">recursive_update</span><span class="p">(</span><span class="n">sites</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;sites&quot;</span><span class="p">,</span> <span class="p">{}))</span>
     <span class="n">recursive_update</span><span class="p">(</span><span class="n">merging</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;merging&quot;</span><span class="p">,</span> <span class="p">{}))</span>
     <span class="n">recursive_update</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;output&quot;</span><span class="p">,</span> <span class="p">{}))</span></div>
+
+
+<div class="viewcode-block" id="load">
+<a class="viewcode-back" href="../config.html#config.load">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">load</span><span class="p">(</span><span class="n">files</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Load the specified configuration files.</span>
+<span class="sd">    Missing keys will be filled in with the defaults in DEFAULT_CONFIG.</span>
+<span class="sd">    </span>
+<span class="sd">    :param files: List of configuration files.</span>
+<span class="sd">    :return: None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Add the default configuration file to the beginning of the list</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">files</span><span class="p">:</span>
+        <span class="n">files</span> <span class="o">=</span> <span class="n">DEFAULT_CONFIG</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">files</span> <span class="o">=</span> <span class="n">DEFAULT_CONFIG</span> <span class="o">+</span> <span class="p">[</span><span class="n">files</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">files</span> <span class="o">=</span> <span class="n">DEFAULT_CONFIG</span> <span class="o">+</span> <span class="n">files</span>
+
+    <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+        <span class="n">cfg</span> <span class="o">=</span> <span class="n">io_utils</span><span class="o">.</span><span class="n">read_config_file</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Loaded configuration file </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
+        <span class="n">update</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span></div>
 
 </pre></div>
 
