@@ -28,7 +28,7 @@ def main():
     
 
     args = parser.parse_args()
-    print (args)
+    print ("main arguments are: ",args)
 
     # Set up logging and configuration
     name = "merge"
