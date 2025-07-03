@@ -383,6 +383,24 @@
     <span class="k">return</span> <span class="n">metadata</span></div>
 
 
+<div class="viewcode-block" id="common_keys">
+<a class="viewcode-back" href="../meta.html#meta.common_keys">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">common_keys</span><span class="p">(</span><span class="n">files</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">warn</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; find keys that are common to all merged files - useful for dataset metadata &quot;&quot;&quot;</span>
+    <span class="n">common</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">different</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1"># flag keys that have multiple values</span>
+    <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>    
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">file</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">different</span><span class="p">:</span> <span class="k">continue</span> <span class="c1"># already looked at this one</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">common</span><span class="p">:</span> <span class="c1"># first instance</span>
+                <span class="n">common</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="k">else</span><span class="p">:</span>  
+                <span class="k">if</span> <span class="n">common</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">!=</span> <span class="n">value</span><span class="p">:</span> <span class="c1"># key has 2 calues, flag it and remove from common</span>
+                    <span class="n">different</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+                    <span class="n">common</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">common</span> </div>
+
+
 <div class="viewcode-block" id="parents">
 <a class="viewcode-back" href="../meta.html#meta.parents">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">parents</span><span class="p">(</span><span class="n">files</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
