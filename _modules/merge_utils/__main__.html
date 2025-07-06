@@ -80,10 +80,9 @@
 
     <span class="c1"># Set up the retriever based on the input arguments</span>
     <span class="n">flist</span> <span class="o">=</span> <span class="n">io_utils</span><span class="o">.</span><span class="n">get_inputs</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">filelist</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">files</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">local</span><span class="p">:</span>
+
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">filelist</span><span class="p">:</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="n">retriever</span><span class="o">.</span><span class="n">LocalRetriever</span><span class="p">(</span><span class="n">filelist</span><span class="o">=</span><span class="n">flist</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">query</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;The --query option is ignored when processing local files.&quot;</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">args</span><span class="o">.</span><span class="n">list</span> <span class="o">==</span> <span class="s1">&#39;dids&#39;</span><span class="p">:</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="n">metacat_utils</span><span class="o">.</span><span class="n">MetaCatRetriever</span><span class="p">(</span><span class="n">query</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">query</span><span class="p">,</span> <span class="n">filelist</span><span class="o">=</span><span class="n">flist</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
