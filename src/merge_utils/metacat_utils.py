@@ -3,32 +3,31 @@
 import logging
 import itertools
 import asyncio
-import time
 from typing import AsyncGenerator
 
 import metacat.webapi as metacat
 
 from merge_utils import config
-from merge_utils.retriever import FileRetriever
+from merge_utils.retriever import MetaRetriever
 
 logger = logging.getLogger(__name__)
 
-class MetaCatRetriever(FileRetriever):
+class MetaCatRetriever(MetaRetriever):
     """Class for managing asynchronous queries to the MetaCat web API."""
 
-    def __init__(self, query: str = None, filelist: list = None):
+    def __init__(self, query: str = None, dids: list = None):
         """
         Initialize the MetaCatRetriever with a query or a list of files.
 
         :param query: MQL query to find files
-        :param filelist: list of file DIDs to find
+        :param dids: list of file DIDs to find
         """
         super().__init__()
 
         self.query = query
-        self.filelist = filelist
+        self.filelist = dids
         self.parents = config.output['grandparents']
-        if query and filelist:
+        if query and dids:
             logger.warning("Both query and file list provided, was this intended?")
         if not self.filelist:
             self.filelist = []
@@ -61,7 +60,7 @@ class MetaCatRetriever(FileRetriever):
                                           with_metadata = True, with_provenance = self.parents)
         except (ValueError, metacat.webapi.BadRequestError) as err:
             logger.critical("%s", err)
-            raise ValueError(f"Failed to retrieve files from MetaCat for batch {idx}: {err}") from err
+            raise ValueError(f"MetaCat error for batch {idx}: {err}") from err
         return list(res)
 
     async def _get_query(self, idx: int) -> list:
@@ -135,7 +134,7 @@ def list_field_values(field: str) -> list:
     """
     client = metacat.MetaCatClient()
     query = f"files where {field} present limit 1"
-    values = []
+    vals = []
     while True:
         res = client.query(query, with_metadata=True)
         data = next(res, None)
@@ -143,10 +142,10 @@ def list_field_values(field: str) -> list:
             break
         value = data['metadata'][field]
         print(value)
-        values.append(value)
-        query = f"""files where {field} present and {field} not in ('{"','".join(values)}') limit 1"""
+        vals.append(value)
+        query = f"""files where {field} present and {field} not in ('{"','".join(vals)}') limit 1"""
         #time.sleep(1)
-    return values
+    return vals
 
 def list_extensions() -> list:
     """
