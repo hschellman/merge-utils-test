@@ -164,3 +164,91 @@ validation:
             - "core.application.version"
         "'{core.data_tier}' == 'root-tuple-virtual'": *tuple_requirements
     optional: []  # These metadata keys are optional (overrides required and conditional keys)
+
+merging:
+    metadata:   # Special merging behavior for metadata keys, options are:
+        # unique   only save key if all values are the same
+        # all      save a list of all values
+        # min      save the minimum value
+        # max      save the maximum value
+        # sum      save the sum of all values
+        # union    save the union of all values
+        # skip     ignore the key
+        default:                    unique
+        "core.first_event_number":  min
+        "core.last_event_number":   max
+        "core.event_count":         sum
+        "core.events":              union
+        "core.runs":                union
+        "core.runs_subruns":        union
+        # Skip values that don't make sense to merge
+        "core.start_time":          skip
+        "core.end_time":            skip
+        "Offline.options":          skip
+        "Offline.machine":          skip
+        overrides: # Set keys to specific values
+            "retention.status":     "active"
+
+output:
+    abbreviations:  # Try to shorten long output file names
+        "core.run_type":
+            "protodune-sp":             "pd-sp"
+            "protodune-dp":             "pd-dp"
+            "hd-coldbox":               "cb-hd"
+            "vd-coldbox":               "cb-vd"
+            "vd-coldbox-bottom":        "cb-vd-b"
+            "vd-coldbox-top":           "cb-vd-t"
+            "protodune-hd":             "pd-hd"
+            "hd-protodune":             "pd-hd"
+            "vd-protodune":             "pd-vd"
+            "vd-protodune-pds":         "pd-vd-pds"
+            "vd-protodune-arapucas":    "pd-vd-arapucas"
+            "dc4-vd-coldbox-bottom":    "cb-dc4-vd-b"
+            "dc4-vd-coldbox-top":       "cb-dc4-vd-t"
+            "dc4-hd-protodune":         "pd-dc4-hd"
+            "neardet":                  "nd"
+            "neardet-lar":              "nd-lar"
+            "neardet-2x2":              "nd-2x2"
+            "neardet-2x2-lar":          "nd-2x2-lar"
+            "neardet-2x2-lar-charge":   "nd-2x2-lar-charge"
+            "neardet-2x2-lar-light":    "nd-2x2-lar-light"
+            "neardet-2x2-minerva":      "nd-2x2-minerva"
+            "fardet":                   "fd"
+            "fardet-sp":                "fd-sp"
+            "fardet-hd":                "fd-hd"
+            "fardet-vd":                "fd-vd"
+            "fardet-dp":                "fd-dp"
+            "fardet-moo":               "fd-moo"
+            "311_dp_light":             "311-dp-light"
+            "physics":                  "phys"
+            "protodune":                "pd"
+            "protodune-vst":            "pd-vst"
+        "core.file_type":
+            "detector":                 "det"
+            "importedDetector":         "imp-det"
+            "binary":                   "bin"
+            "photon_detector":          "photo-det"
+        "core.data_stream":
+            "calibration":              "calib"
+            "physics":                  "phys"
+            "commissioning":            "comm"
+            "pedestal":                 "pdstl"
+            "g4beamline":               "g4"
+        "core.data_tier":
+            "simulated":                "sim"
+            "hit-reconstructed":        "hit-reco"
+            "full-reconstructed":       "full-reco"
+            "generated":                "gen"
+            "detector-simulated":       "det-sim"
+            "root-tuple":               "r-tuple"
+            "root-hist":                "r-hist"
+            "decoded-raw":              "dec-raw"
+            "pandora-info":             "pandora"
+            "reco-recalibrated":        "reco-recal"
+            "root-tuple-virtual":       "r-tuple-v"
+            "binary-raw":               "binary"
+            "sam-user":                 "sam"
+        "core.file_format":
+            "artroot":                  "art"
+            "binary":                   "bin"
+            "rootntuple":               "tuple"
