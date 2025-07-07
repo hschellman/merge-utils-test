@@ -1,6 +1,7 @@
 """Keep track of RSEs where files are stored"""
 
 import os
+import sys
 import logging
 import collections
 import itertools
@@ -14,7 +15,7 @@ import requests
 
 from rucio.client.rseclient import RSEClient
 
-from merge_utils import config
+from merge_utils import io_utils, config
 
 logger = logging.getLogger(__name__)
 
@@ -128,7 +129,12 @@ class MergeRSEs(collections.UserDict):
     """Class to keep track of a set of RSEs"""
     def __init__(self):
         super().__init__()
-        self.sites = config.sites['allowed_sites']
+        if config.output['mode'] == 'local':
+            self.sites = [config.sites['local_site']]
+            logger.info("Running locally on site %s", self.sites[0])
+        else:
+            self.sites = config.sites['allowed_sites']
+            io_utils.log_list("Running on {n} allowed merging site{s}:", self.sites, logging.INFO)
         self.max_distance = config.sites['max_distance']
         self.nearline_distances = config.sites['nearline_distance']
 
@@ -153,22 +159,49 @@ class MergeRSEs(collections.UserDict):
             self[rse['rse']] = MergeRSE(valid, nearline_dist)
 
         # Get site distances from justIN web API
-        fields = ['site', 'rse', 'dist', 'site_enabled', 'rse_read', 'rse_write']
-        res = await asyncio.to_thread(requests.get, SITES_STORAGES_URL, verify=False, timeout=10)
-        text = res.iter_lines(decode_unicode=True)
-        reader = csv.DictReader(text, fields)
-        for row in reader:
-            if not row['site_enabled'] or not row['rse_read']:
-                continue
-            site = row['site']
-            rse = row['rse']
-            if site not in self.sites or rse not in self or not self[rse].valid:
-                continue
-            self[rse].distances[site] = 100*float(row['dist'])
-
-        n_accessible = sum(1 for rse in self.values() if rse.valid
-                           and rse.nearest_site()[1] <= self.max_distance)
-        logger.info("Found %d RSEs accessible from %d sites", n_accessible, len(self.sites))
+        accessible = set()
+        try:
+            res = await asyncio.to_thread(
+                requests.get, SITES_STORAGES_URL, verify=False, timeout=10
+            )
+            connected = res.ok
+        except requests.ConnectionError as err:
+            logger.error("JustIN connection error: %s", err)
+            connected = False
+        if connected:
+            text = res.iter_lines(decode_unicode=True)
+            fields = ['site', 'rse', 'dist', 'site_enabled', 'rse_read', 'rse_write']
+            reader = csv.DictReader(text, fields)
+            for row in reader:
+                if not row['site_enabled'] or not row['rse_read']:
+                    continue
+                site = row['site']
+                rse = row['rse']
+                if site not in self.sites or rse not in self or not self[rse].valid:
+                    continue
+                dist = 100*float(row['dist'])
+                self[rse].distances[site] = dist
+                if dist <= self.max_distance:
+                    accessible.add(rse)
+            io_utils.log_list("Found {n} accessible RSE{s} in JustIN database:",
+                              accessible, logging.INFO)
+        else:
+            logger.error("Failed to retrieve RSE-site distances from JustIN!\n"
+                         "  Falling back to RSEs located directly at merging sites.")
+            # fall back to rucio RSE attributes
+            for name, rse in self.items():
+                if not rse.valid:
+                    continue
+                attr = await asyncio.to_thread(rse_client.list_rse_attributes, name)
+                site = attr.get('site', None)
+                if site not in self.sites:
+                    continue
+                rse.distances[site] = 0
+                accessible.add(name)
+            io_utils.log_list("Found {n} accessible RSE{s} in Rucio:", accessible, logging.INFO)
+        if len(accessible) == 0:
+            logger.critical("No accessible RSEs found in JustIN or Rucio!")
+            sys.exit(1)
 
     async def add_pfn(self, did: str, pfn: str, info: dict) -> float:
         """Add a file PFN to the corresponding RSE
@@ -234,13 +267,6 @@ class MergeRSEs(collections.UserDict):
                          did, best_dist, self.max_distance)
             raise ValueError("File exceeds max distance")
         return sum(1 for dist in results if dist <= self.max_distance)
-
-    def set_rse_sites(self) -> None:
-        """Query Rucio for the site associated with each RSE"""
-        rse_client = RSEClient()
-        for name, rse in self.items():
-            attr = rse_client.list_rse_attributes(name)
-            rse.site = attr['site']
 
     def cleanup(self) -> None:
         """Remove RSEs with no files"""

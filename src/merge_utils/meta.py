@@ -299,6 +299,7 @@ def parents(files: dict) -> list[str]:
     :return: set of parents
     """
     if not config.output['grandparents']:
+        logger.info("Listing direct parents")
         output = []
         for file in files.values():
             output.append({
@@ -306,6 +307,8 @@ def parents(files: dict) -> list[str]:
                 "name": file.name,
                 "namespace": file.namespace
             })
+        return output
+    logger.info("Listing grandparents instead of direct parents")
     grandparents = set()
     for file in files.values():
         for grandparent in file.parents:

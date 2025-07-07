@@ -4,14 +4,14 @@ import logging
 
 from merge_utils import io_utils
 
-DEFAULT_CONFIG = ["validation.yaml", "defaults.yaml"]
+DEFAULT_CONFIG = ["metadata.yaml", "defaults.yaml"]
 
 # Configuration dictionaries
 inputs: dict = {}
+output: dict = {}
 validation: dict = {}
 sites: dict = {}
 merging: dict = {}
-output: dict = {}
 
 initialized: bool = False
 
@@ -52,10 +52,10 @@ def update(cfg: dict) -> None:
     :return: None
     """
     recursive_update(inputs, cfg.get("inputs", {}))
+    recursive_update(output, cfg.get("output", {}))
     recursive_update(validation, cfg.get("validation", {}))
     recursive_update(sites, cfg.get("sites", {}))
     recursive_update(merging, cfg.get("merging", {}))
-    recursive_update(output, cfg.get("output", {}))
 
 def load(files: list = None) -> None:
     """

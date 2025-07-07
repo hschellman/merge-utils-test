@@ -1,7 +1,6 @@
 """FileRetriever classes"""
 
 import logging
-import os
 import sys
 import math
 import asyncio
@@ -9,12 +8,12 @@ from abc import ABC, abstractmethod
 
 from typing import AsyncGenerator, Generator
 
-from merge_utils import io_utils, config
+from merge_utils import config
 from merge_utils.merge_set import MergeSet, MergeChunk
 
 logger = logging.getLogger(__name__)
 
-class FileRetriever(ABC):
+class MetaRetriever(ABC):
     """Base class for retrieving metadata from a source"""
 
     def __init__(self):
@@ -30,14 +29,13 @@ class FileRetriever(ABC):
     @property
     def dupes(self) -> dict:
         """Return the set of duplicate files from the source"""
-        return self._files.dupes
+        return self.files.dupes
 
     @property
     def missing(self) -> dict:
         """Return the set of missing files from the source"""
-        return self._files.missing
+        return self.files.missing
 
-    @abstractmethod
     async def connect(self) -> None:
         """Connect to the metadata source"""
         # connect to source
@@ -115,88 +113,37 @@ class FileRetriever(ABC):
                     yield chunk
             yield group
 
-class LocalRetriever(FileRetriever):
-    """FileRetriever for local files"""
+class PathFinder(MetaRetriever):
+    """Base class for finding paths to files"""
 
-    def __init__(self, filelist: list, meta_dirs: list = None):
-        """
-        Initialize the LocalRetriever with a list of files and optional metadata directories.
-        
-        :param filelist: list of input data files
-        :param meta_dirs: optional list of directories to search for metadata files
-        """
-        super().__init__()
-        self.filelist = filelist or []
-        self.meta_dirs = meta_dirs or []
-        self.json_files = {}
+    def __init__(self, meta: MetaRetriever): #pylint: disable=super-init-not-called
+        self.meta = meta
+
+    @property
+    def files(self) -> MergeSet:
+        """Return the set of files from the source"""
+        return self.meta.files
 
     async def connect(self) -> None:
-        """No need to connect to the local filesystem, but we can do some preprocessing."""
-        # No connection needed for local files
-        # We might have a mix of data and json files, so we need to separate them
-        data_files = []
-        for file in self.filelist:
-            name = os.path.basename(file)
-            if os.path.splitext(name)[1] == '.json':
-                path = os.path.dirname(file)
-                name = os.path.splitext(name)[0]
-                self.json_files[name] = path
-            else:
-                if os.path.exists(file):
-                    data_files.append(file)
-                else:
-                    self.missing[name] += 1
-        self.filelist = data_files
-        logger.debug("Found %d input data files", len(self.filelist))
+        """Connect to the file source"""
+        # connect to source
+        await self.meta.connect()
 
-    async def get_metadata(self, file: str) -> dict:
-        """Retrieve metadata for a single file"""
-        name = os.path.basename(file)
-        path = os.path.dirname(file)
-        metadata = None
-        if name in self.json_files:
-            # we already have a matching json file for this data file
-            meta_path = os.path.join(self.json_files.pop(name), name + '.json')
-            if os.path.exists(meta_path):
-                metadata = io_utils.read_config_file(meta_path)
-        if metadata is None:
-            # try to find a matching json file in the same directory or in the meta_dirs
-            dirs = [path] + self.meta_dirs
-            for path in dirs:
-                meta_path = os.path.join(path, name + '.json')
-                if os.path.exists(meta_path):
-                    metadata = io_utils.read_config_file(meta_path)
-                    break
-        if metadata is None:
-            self.missing[name] += 1
-            return None
-
-        path = os.path.join(path, name)
-        #TODO: generalize this for other sites
-        if path.startswith('/pnfs/'):
-            # convert pnfs paths to xroot paths
-            fnal_prefix = "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr"
-            path = path.replace('/pnfs', fnal_prefix)
-        metadata['path'] = path
-        return metadata
+    @abstractmethod
+    async def process(self, files: dict) -> None:
+        """
+        Process a batch of files to find their physical locations.
+        
+        :param files: dictionary of files to process
+        """
+        # process files to find paths
 
     async def input_batches(self) -> AsyncGenerator[dict, None]:
-        """Retrieve metadata for local files in batches"""
-        batch_id = 0
-        batch = []
-        for file in self.filelist:
-            metadata = await self.get_metadata(file)
-            if metadata is None:
-                continue
-            batch.append(metadata)
+        """
+        Asynchronously retrieve paths for the next batch of files.
 
-            if len(batch) >= self.step:
-                added = await self.add(batch)
-                logger.debug("yielding file batch %d", batch_id)
-                batch_id += 1
-                yield added
-                batch = []
-        if batch:
-            added = await self.add(batch)
-            logger.debug("yielding last file batch")
-            yield added
+        :return: dict of MergeFile objects that were added
+        """
+        async for batch in self.meta.input_batches():
+            await self.process(batch)
+            yield batch

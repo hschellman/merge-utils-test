@@ -4,54 +4,38 @@ from __future__ import annotations
 import logging
 import math
 import asyncio
-from typing import AsyncGenerator, Generator
+from typing import Generator
 
 from rucio.client.replicaclient import ReplicaClient
 
-from merge_utils.merge_set import MergeFile, MergeSet, MergeChunk
-from merge_utils.retriever import FileRetriever
+from merge_utils.merge_set import MergeFile, MergeChunk
+from merge_utils.retriever import MetaRetriever, PathFinder
 from merge_utils.merge_rse import MergeRSEs
 from merge_utils import io_utils, config
 
 logger = logging.getLogger(__name__)
 
-class RucioRetriever (FileRetriever):
+class RucioFinder (PathFinder):
     """Class for managing asynchronous queries to the Rucio web API."""
 
-    def __init__(self, source: FileRetriever):
+    def __init__(self, source: MetaRetriever):
         """
         Initialize the RucioRetriever with a source of file metadata.
         
         :param source: FileRetriever object to use as the source of file metadata
         """
-        super().__init__()
+        super().__init__(source)
 
         self.checksums = config.validation['checksums']
         self.rses = MergeRSEs()
-        self.source = source
 
         self.client = None
-
-    @property
-    def files(self) -> MergeSet:
-        """Return the set of files from the source"""
-        return self.source.files
-
-    @property
-    def missing(self) -> dict:
-        """Return the set of missing files from the source"""
-        return self.source.missing
-
-    @property
-    def dupes(self) -> dict:
-        """Return the set of duplicate files from the source"""
-        return self.source.dupes
 
     async def connect(self) -> None:
         """Connect to the Rucio web API"""
         if not self.client:
             logger.debug("Connecting to Rucio")
-            src_connect = asyncio.create_task(self.source.connect())
+            src_connect = asyncio.create_task(self.meta.connect())
             rse_connect = asyncio.create_task(self.rses.connect())
             self.client = ReplicaClient()
             await rse_connect
@@ -83,16 +67,20 @@ class RucioRetriever (FileRetriever):
                 if csum1 == csum2:
                     logger.debug("Found matching %s checksum for %s", algo, file.did)
                     return True
-                lvl = logging.ERROR if config.validation['skip']['unreachable'] else logging.CRITICAL
-                logger.log(lvl, "%s checksum mismatch for %s: %s != %s", algo, file.did, csum1, csum2)
+                logger.log(
+                    logging.ERROR if config.validation['skip']['unreachable'] else logging.CRITICAL,
+                    "%s checksum mismatch for %s: %s != %s", algo, file.did, csum1, csum2
+                )
                 return False
             if algo not in file.checksums:
                 logger.debug("MetaCat missing %s checksum for %s", algo, file.did)
             if algo not in rucio:
                 logger.debug("Rucio missing %s checksum for %s", algo, file.did)
         # If we get here, we have no matching checksums
-        lvl = logging.ERROR if config.validation['skip']['unreachable'] else logging.CRITICAL
-        logger.log(lvl, "No matching checksums for %s", file.did)
+        logger.log(
+            logging.ERROR if config.validation['skip']['unreachable'] else logging.CRITICAL,
+            "No matching checksums for %s", file.did
+        )
         return False
 
     async def process(self, files: dict) -> None:
@@ -129,16 +117,6 @@ class RucioRetriever (FileRetriever):
         unreachable.extend(missing)
         io_utils.log_list("Failed to retrieve {n} file{s} from Rucio:", unreachable, lvl)
         self.files.set_unreachable(unreachable)
-
-    async def input_batches(self) -> AsyncGenerator[dict, None]:
-        """
-        Asynchronously retrieve metadata for the next batch of files.
-
-        :return: dict of MergeFile objects that were added
-        """
-        async for batch in self.source.input_batches():
-            await self.process(batch)
-            yield batch
 
     def run(self) -> None:
         """Retrieve metadata for all files."""

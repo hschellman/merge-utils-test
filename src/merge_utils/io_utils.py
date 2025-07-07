@@ -20,43 +20,41 @@ import yaml
 
 logger = logging.getLogger(__name__)
 
-def src_dir() -> str:
-    """Get the source directory of the package"""
-    return os.path.dirname(__file__)
-
 def pkg_dir() -> str:
     """Get the base directory of the package"""
-    return os.path.dirname(os.path.dirname(src_dir()))
+    directory = os.environ.get('MERGE_UTILS_DIR')
+    if directory:
+        return directory
+    return os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+
+def src_dir() -> str:
+    """Get the source directory of the package"""
+    return os.path.join(pkg_dir(), 'src', 'merge_utils')
 
 def get_timestamp() -> str:
     """Get the current timestamp as a string"""
     return datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
 
-def get_inputs(file_path: str, args: list[str]) -> list[str]:
+def get_inputs(filelists: list[str] = None) -> list[str]:
     """
-    Get a list of inputs from various sources, including
-    1. A file containing a list of entries
-    2. entries passed as command line arguments
-    3. entries piped in from standard input
+    Get a list of inputs from the the file lists and standard input
 
-    :param file_path: full path to a file containing a list of entries
-    :param args: Arguments from command line
+    :param filelists: full paths to files containing lists of entries
     :return: combined list of entries
     """
+    inputs = []
 
-    if len(args) > 0:
-        logger.debug("Found %d entires from command line", len(args))
-    inputs = args
-
-    if file_path is not None:
-        with open(file_path, encoding="utf-8") as f:
+    if filelists is None:
+        filelists = []
+    for filelist in filelists:
+        with open(filelist, encoding="utf-8") as f:
             entries = f.readlines()
-        logger.debug("Found %d entries in file %s", len(entries), file_path)
+        log_nonzero("Found {n} input{s} in file %s" % filelist, len(entries))
         inputs.extend([x.strip() for x in entries])
 
     if not sys.stdin.isatty():
         entries = sys.stdin.readlines()
-        logger.debug("Found %d entries from standard input", len(entries))
+        log_nonzero("Found {n} input{s} from standard input", len(entries))
         inputs.extend([x.strip() for x in entries])
 
     return inputs
@@ -70,6 +68,8 @@ def read_config_file(file_path: str = None) -> dict:
     :raises FileNotFoundError: If the file does not exist
     :raises ValueError: If the file type is not supported
     """
+    if file_path is None:
+        return None
     if not os.path.exists(file_path):
         # See if we can find the file in the config directory
         file_path = os.path.join(pkg_dir(), "config", file_path)
@@ -152,6 +152,25 @@ def set_log_level(level: int) -> None:
     for handler in logging.getLogger().handlers:
         if handler.get_name() == "console":
             handler.setLevel(level)
+            handler.addFilter(lambda record:
+                              not hasattr(record, 'block') or record.block != "console")
+
+def log_print(msg: str, level=logging.INFO) -> None:
+    """Print a message and save it to the log file"""
+    logger.log(level, msg, stacklevel=2, extra={'block': 'console'})
+    print(msg)
+
+def log_nonzero(msg: str, value: int, level=logging.DEBUG) -> int:
+    """Log a message if the value is non-zero"""
+    if value == 0:
+        return 0
+    if value == 1:
+        msg = msg.format(n=1, s="", es="")
+    else:
+        msg = msg.format(n=value, s="s", es="es")
+
+    logger.log(level, msg, stacklevel=2)
+    return value
 
 def log_list(msg: str, items: Iterable, level=logging.WARNING) -> int:
     """Log a message for a list of items"""
@@ -159,7 +178,7 @@ def log_list(msg: str, items: Iterable, level=logging.WARNING) -> int:
     if total == 0:
         return 0
     if total == 1:
-        msg = [msg.format(n=1, s="")]
+        msg = [msg.format(n=1, s="", es="")]
     else:
         msg = [msg.format(n=total, s="s", es="es")]
 
@@ -173,7 +192,7 @@ def log_dict(msg: str, items: dict, level=logging.WARNING) -> int:
     if total == 0:
         return 0
     if total == 1:
-        msg = [msg.format(n=1, s="")]
+        msg = [msg.format(n=1, s="", es="")]
     else:
         msg = [msg.format(n=total, s="s", es="es")]
 
