@@ -46,6 +46,9 @@ def main():
     config.load(args.config)
     io_utils.set_log_level(args.verbose)
 
+    if args.local:
+        config.output['mode'] = 'local'
+
     if args.input_mode:
         config.inputs['mode'] = args.input_mode
     input_mode = config.inputs['mode']
