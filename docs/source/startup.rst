@@ -50,6 +50,11 @@ You can check to see if it is set up by typing
 Dependencies
 ------------
 
+.. image:: merge_utils_local.png
+    :width: 400
+
+----
+
 .. image:: merge_utils_io_utils.png
     :width: 400
 

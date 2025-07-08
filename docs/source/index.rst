@@ -34,7 +34,11 @@ Configuration
 
 .. toctree::
 
+    configuration
     defaults
+    metadata
+    logging
+    valid_values
 
 python API
 ----------
@@ -43,6 +47,7 @@ python API
        
     do_merge
     config
+    local
     io_utils
     metacat_utils
     meta
