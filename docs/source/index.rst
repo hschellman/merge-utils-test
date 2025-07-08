@@ -35,10 +35,6 @@ Configuration
 .. toctree::
 
     configuration
-    defaults
-    metadata
-    logging
-    valid_values
 
 python API
 ----------
