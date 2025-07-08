@@ -53,14 +53,14 @@ Dependencies
 local.py 
 
 .. image:: merge_utils_local.png
-    :width: 400
+    :width: 600
 
 ----
 
 io_utils.py
 
 .. image:: merge_utils_io_utils.png
-    :width: 400
+    :width: 600
 
 ----
 
