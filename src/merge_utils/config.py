@@ -1,10 +1,11 @@
 """Module for configuration settings."""
 
 import logging
+import json
 
 from merge_utils import io_utils
 
-DEFAULT_CONFIG = ["metadata.yaml", "defaults.yaml"]
+DEFAULT_CONFIG = ["defaults/metadata.yaml", "defaults/defaults.yaml"]
 
 # Configuration dictionaries
 inputs: dict = {}
@@ -17,15 +18,50 @@ initialized: bool = False
 
 logger = logging.getLogger(__name__)
 
-def recursive_update(old_dict: dict, new_dict: dict) -> None:
+def update_list(old_list: list, new_list: list) -> None:
     """
-    Recursively update dictionary d with values from dictionary u.
+    Append values from new_list to old_list.
+    Strings beginning with '~' are removed from old_list instead.
+    
+    :param old_list: List to be updated.
+    :param new_list: List with new values.
+    :return: None
+    """
+    # Ensure new_list is a list
+    if not isinstance(new_list, list):
+        new_list = [new_list]
+    for val in new_list:
+        if isinstance(val, str) and val.startswith("~"):
+            # Remove the value if it starts with '~'
+            val = val[1:]  # Remove the '~' prefix
+            if val in old_list:
+                old_list.remove(val)
+        elif val not in old_list:
+            # Add the value if it is not already in the old list
+            old_list.append(val)
+
+def update_dict(old_dict: dict, new_dict: dict) -> None:
+    """
+    Add key value pairs from new_dict to old_dict.
+    If a key in new_dict does not exist in old_dict, it is added.
+    If the value is a dict or list, the values are merged recursively.
+    If a key in new_dict starts with '~', it overrides the value in old_dict instead.
+    If the value is None, the key is removed from old_dict instead.
     
     :param old_dict: Dictionary to be updated.
     :param new_dict: Dictionary with new values.
     :return: None
     """
     for key, val in new_dict.items():
+        if val is None and key in old_dict:
+            # If the value is None, remove the key from the old dictionary
+            del old_dict[key]
+            continue
+        if key.startswith("~"):
+            # If the key starts with '~', override the value in old_dict
+            key = key[1:]  # Remove the '~' prefix
+            old_dict[key] = val
+            continue
         if key not in old_dict:
             # If the key does not exist in the old dictionary, add it
             old_dict[key] = val
@@ -34,13 +70,10 @@ def recursive_update(old_dict: dict, new_dict: dict) -> None:
         if isinstance(old_val, dict):
             # If both are dictionaries, recursively update
             if isinstance(val, dict):
-                recursive_update(old_dict[key], val)
+                update_dict(old_dict[key], val)
         elif isinstance(old_val, list):
             # If the old value is a list, extend it with the new value
-            if isinstance(val, list):
-                old_dict[key].extend(val)
-            elif val is not None:
-                old_dict[key].append(val)
+            update_list(old_dict[key], val)
         else:
             old_dict[key] = val
 
@@ -51,11 +84,11 @@ def update(cfg: dict) -> None:
     :param cfg: Dictionary containing new configuration values.
     :return: None
     """
-    recursive_update(inputs, cfg.get("inputs", {}))
-    recursive_update(output, cfg.get("output", {}))
-    recursive_update(validation, cfg.get("validation", {}))
-    recursive_update(sites, cfg.get("sites", {}))
-    recursive_update(merging, cfg.get("merging", {}))
+    update_dict(inputs, cfg.get("inputs", {}))
+    update_dict(output, cfg.get("output", {}))
+    update_dict(validation, cfg.get("validation", {}))
+    update_dict(sites, cfg.get("sites", {}))
+    update_dict(merging, cfg.get("merging", {}))
 
 def load(files: list = None) -> None:
     """
@@ -77,3 +110,12 @@ def load(files: list = None) -> None:
         cfg = io_utils.read_config_file(file)
         logger.info("Loaded configuration file %s", file)
         update(cfg)
+
+    logger.debug(
+        "Final configuration:\ninputs: %s\noutput: %s\nvalidation: %s\nsites: %s\nmerging: %s",
+        json.dumps(inputs, indent=2),
+        json.dumps(output, indent=2),
+        json.dumps(validation, indent=2),
+        json.dumps(sites, indent=2),
+        json.dumps(merging, indent=2)
+    )

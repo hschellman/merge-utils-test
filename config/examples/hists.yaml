@@ -1,0 +1,13 @@
+# Adding histograms doesn't significantly increase the file size,
+# so we can merge an abitrary number of inputs into a single output.
+
+merging:
+    target_mode: count      # Just use number of files, don't bother with size
+    target_size: 1e9        # Use a high target size to ensure a single output
+    equalize: False         # Don't bother equalizing sizes, since we only want one output
+    method: "hadd"          # Use the hadd method for histograms
+
+validation:
+    restricted:
+        "~core.data_tier":  # Make sure we only merge histograms ('~' indicates override)
+          - "root-hist"

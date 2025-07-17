@@ -13,17 +13,17 @@ output:
     namespace: "usertests" # Optionally specify a namespace different from the parents
     name: "{core.run_type}_{dune.campaign}_{dune.config_file}_{core.application.name}"
     #name: "{core.run_type}_{core.file_type}_{dune.campaign}_{core.data_stream}_{dune.config_file}_{core.data_tier}"
-    grandparents: false # List the parents of the input files as the parents of the merged file
+    grandparents: False # List the parents of the input files as the parents of the merged file
 
 validation:
     batch_size: 100   # Number of files to query metacat about at once
     fast_fail: True   # Stop processing files as soon as one batch fails validation
     skip:             # Continue processing files even if some fail validation
-        missing:      false # Skip files with missing metadata
-        duplicate:    false # Skip duplicated files
-        unreachable:  false # Skip files that are not accessible
-        invalid:      false # Skip files with invalid metadata
-        inconsistent: false # Skip files with inconsistent metadata
+        missing:      False # Skip files with missing metadata
+        duplicate:    False # Skip duplicated files
+        unreachable:  False # Skip files that are not accessible
+        invalid:      False # Skip files with invalid metadata
+        inconsistent: False # Skip files with inconsistent metadata
     checksums:
       - "adler32"     # Adler32 should be the default checksum
     consistent:       # These metadata keys must be the same for all input files
@@ -37,7 +37,6 @@ validation:
       - "dune.requestid"
       - "dune.config_file"          # Not checked in old merging
       - "core.application.version"  # Not checked in old merging
-    required:       # These metadata keys must be present in all input files
     optional:       # These metadata keys are optional (overrides required and conditional keys)
       - "dune_mc.geometry_version"
 
@@ -52,12 +51,12 @@ sites:
         "FNAL_DCACHE":  10
 
 merging:
-    method: auto        # Can be auto or a specific method from the list below
     target_mode: size   # Options: size, count
     target_size: 10     # Target size (in GB) or number of files
-    equalize: true      # Try to equalize the size of the merged files
+    equalize: True      # Try to equalize the size of the merged files
     chunk_min: 5        # Minimum number of files to merge at once
     chunk_max: 100      # Maxiumum number of files to merge at once
+    method: auto        # Can be auto or a specific method from the list below
     methods:
         "hadd":
             file_format:

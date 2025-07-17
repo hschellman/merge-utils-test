@@ -17,6 +17,7 @@ def main():
                         help='a configuration file')
     parser.add_argument('-v', '--verbose', action='count', default=0,
                         help='print more verbose output (e.g. -vvv for debug output)')
+    parser.add_argument('--log', help='specify a custom log file path')
 
     in_group = parser.add_argument_group('input arguments')
     in_group.add_argument('input_mode', nargs='?', default=None, metavar='MODE',
@@ -42,9 +43,8 @@ def main():
     name = "merge"
     if args.list:
         name = "list "+args.list
-    io_utils.setup_log(name)
+    io_utils.setup_log(name, log_file=args.log, verbosity=args.verbose)
     config.load(args.config)
-    io_utils.set_log_level(args.verbose)
 
     if args.local:
         config.output['mode'] = 'local'

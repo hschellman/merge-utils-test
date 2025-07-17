@@ -122,10 +122,13 @@ def find_fcl(name: str) -> str:
     # Failed to find the file
     raise FileNotFoundError(f"Could not find FCL file {name}")
 
-def setup_log(name: str) -> None:
+def setup_log(name: str, log_file: str = None, verbosity: int = 0) -> None:
     """Configure logging"""
     logger_config = read_config_file("logging.json")
-    log_file = logger_config['handlers']['file']['filename']
+    if log_file:
+        logger_config['handlers']['file']['filename'] = log_file
+    else:
+        log_file = logger_config['handlers']['file']['filename']
     if not os.path.isabs(log_file):
         log_file = os.path.join(pkg_dir(), "logs", log_file)
         logger_config['handlers']['file']['filename'] = log_file
@@ -137,6 +140,7 @@ def setup_log(name: str) -> None:
 
     logging.config.dictConfig(logger_config)
     logger.info("Starting script %s", os.path.basename(name))
+    set_log_level(verbosity)
 
 def set_log_level(level: int) -> None:
     """Override the logging level for the console"""

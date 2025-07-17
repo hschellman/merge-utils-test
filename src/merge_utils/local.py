@@ -95,7 +95,6 @@ class LocalMetaRetriever(MetaRetriever):
         batch_id = 0
         batch = []
         for name, path in self.filelist.items():
-            print(f"Processing metadata file: {name} at {path}")
             if path is None:
                 self.missing[config.inputs['namespace'] + ':' + name] += 1
                 continue
