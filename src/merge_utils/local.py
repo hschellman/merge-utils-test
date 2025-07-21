@@ -94,7 +94,8 @@ class LocalMetaRetriever(MetaRetriever):
         """Retrieve metadata for local files in batches"""
         batch_id = 0
         batch = []
-        for name, path in self.filelist.items():
+        while self.filelist:
+            name, path = self.filelist.popitem()
             if path is None:
                 self.missing[config.inputs['namespace'] + ':' + name] += 1
                 continue
@@ -119,16 +120,18 @@ class LocalMetaRetriever(MetaRetriever):
 class LocalPathFinder(PathFinder):
     """PathFinder for local files"""
 
-    def __init__(self, source: MetaRetriever, files: dict):
+    def __init__(self, source: MetaRetriever, files: dict = None, dirs: list = None):
         """
         Initialize the LocalMetaRetriever with a list of json files.
 
         :param source: MetaRetriever object to use as the source of file metadata
         :param files: dictionary of metadata file names and paths
+        :param dirs: list of directories to search for data files
         """
         super().__init__(source)
 
-        self.filelist = files
+        self.filelist = files or {}
+        self.dirs = dirs or []
 
     async def process(self, files: dict) -> None:
         """
@@ -141,8 +144,12 @@ class LocalPathFinder(PathFinder):
         for file in files.values():
             path = self.filelist.pop(file.name, None)
             if path is None:
-                unreachable.append(file.did)
-                continue
+                # If no path is found, try searching in the provided directories
+                path = search(file.name, self.dirs)
+                if path is None:
+                    # If still not found, mark as unreachable
+                    unreachable.append(file.did)
+                    continue
 
             #TODO: generalize this for other sites
             if path.startswith('/pnfs/'):

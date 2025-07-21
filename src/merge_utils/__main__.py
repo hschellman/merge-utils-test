@@ -65,17 +65,18 @@ def main():
         sys.exit(1)
     io_utils.log_list("Found {n} total input{s}:", inputs, logging.INFO)
 
+    # Collect file search directories
+    dirs = config.inputs['search_dirs'] or []
+    io_utils.log_nonzero("Found {n} search location{s} from config files", len(dirs))
+    if args.dir:
+        io_utils.log_nonzero("Found {n} search location{s} from command line", len(args.dir))
+        dirs.extend(args.dir)
+    io_utils.log_list("Found {n} total search location{s}:", dirs, logging.INFO)
+
     # Determine input mode and retrieve metadata
     paths = None
     metadata = None
     if input_mode == 'files':
-        dirs = config.inputs['search_dirs'] or []
-        io_utils.log_nonzero("Found {n} search location{s} from config files", len(dirs))
-        if args.dir:
-            io_utils.log_nonzero("Found {n} search location{s} from command line", len(args.dir))
-            dirs.extend(args.dir)
-        io_utils.log_list("Found {n} total search location{s}:", dirs, logging.INFO)
-
         paths = local.get_local_files(inputs, dirs)
         metadata = paths.meta
     elif input_mode == 'query':
@@ -100,8 +101,13 @@ def main():
 
     # Set up a retriever for physical file locations if needed
     if not paths:
-        from merge_utils.rucio_utils import RucioFinder #pylint: disable=import-outside-toplevel
-        paths = RucioFinder(metadata)
+        if dirs:
+            logger.info("Searching for local data files in provided directories")
+            paths = local.LocalPathFinder(metadata, dirs=dirs)
+        else:
+            logger.info("No local search directories provided, querying Rucio to find data files")
+            from merge_utils.rucio_utils import RucioFinder #pylint: disable=import-outside-toplevel
+            paths = RucioFinder(metadata)
 
     # Process the other list options
     if args.list:
