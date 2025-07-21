@@ -1,0 +1,16 @@
+# This config file will disable most of the metadata consistency checks.
+# It is mainly intended to demonstrate how to disable default settings, 
+# But it may also be useful for testing purposes.
+
+output:
+    name: "loose_consistency_{core.run_type}_{dune.campaign}_{dune.config_file}_{core.application.name}"
+    namespace: "usertests"
+
+validation:
+    ~consistent:  # Reduced set of consistency checks ('~' indicates override)
+      - "core.run_type"
+      - "core.file_format"
+      - "core.data_tier"
+      - "core.application.name"
+    required:
+      - "~core.runs" # Don't require core.runs ('~' indicates negation)
