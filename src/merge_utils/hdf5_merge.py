@@ -294,6 +294,7 @@ def merge_hdf5(output: str, inputs: list, config: str) -> None:
         cfg.update(yaml.safe_load(f))
     print(f"Oputput file: {output}")
     print(f"Input files: {inputs}")
+    print(f"Configuration: {cfg}")
     fout = h5py.File(output, 'w')
 
     # Merge all the input files
@@ -305,7 +306,7 @@ def merge_hdf5(output: str, inputs: list, config: str) -> None:
 
     # Warn about inconsistent attributes
     if inconsistent:
-        print(f"Warning: Found {len(inconsistent)} inconsistent attributes:")
+        print(f"Warning: Omitted {len(inconsistent)} inconsistent attributes:")
         for attr, values in inconsistent.items():
             print(f"  {attr}:")
             for value in values:

@@ -4,9 +4,9 @@ attrs:              # Handling of group and dataset attributes
     mode:           # Merge these attributes in a specific way
         "/charge/raw_events/input_filename": list
         "/light/events/input_filename": list
-    overrides:      # Override the atributes with the specified value
-        "/charge/raw_events/end_position": ~
-        "/light/events/end_position": ~
+    overrides: {}   # Override the atributes with the specified value
+        #"/charge/raw_events/end_position": ~
+        #"/light/events/end_position": ~
     special:        # Special attributes that are handled differently
         "/creation_timestamp": creation_time
         "/closing_timestamp": closing_time
