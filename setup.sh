@@ -10,6 +10,9 @@ if [[ "$release" == "AlmaLinux" ]]; then
     spack load justin
     htgettoken -a htvaultprod.fnal.gov -i dune
 
+    spack load hdf5
+    spack load py-h5py
+
     python3 -m venv $MERGE_UTILS_DIR/.venv_al9
     . $MERGE_UTILS_DIR/.venv_al9/bin/activate
     pip install --upgrade pip
@@ -21,10 +24,6 @@ elif [[ "$release" == "Scientific" ]]; then
     export UPS_OVERRIDE="-H Linux64bit+3.10-2.17"
     source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
     setup dunesw v10_08_01d00 -q e26:prof
-
-    python3 -m venv $MERGE_UTILS_DIR/.venv_sl7
-    . $MERGE_UTILS_DIR/.venv_sl7/bin/activate
-    pip install $MERGE_UTILS_DIR --use-feature=in-tree-build
 
     export METACAT_AUTH_SERVER_URL=https://metacat.fnal.gov:8143/auth/dune
     export METACAT_SERVER_URL=https://metacat.fnal.gov:9443/dune_meta_prod/app 
@@ -40,5 +39,9 @@ elif [[ "$release" == "Scientific" ]]; then
 
     setup justin
     htgettoken -a htvaultprod.fnal.gov -i dune
+
+    python3 -m venv $MERGE_UTILS_DIR/.venv_sl7
+    . $MERGE_UTILS_DIR/.venv_sl7/bin/activate
+    pip install $MERGE_UTILS_DIR --use-feature=in-tree-build
 
 fi
