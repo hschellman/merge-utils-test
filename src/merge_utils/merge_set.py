@@ -299,6 +299,18 @@ class MergeSet(collections.UserDict):
             self.check_uniqueness(final)
         ])
 
+    def count_errors(self) -> int:
+        """
+        Count the number of errors in the set.
+        
+        :return: total number of errors
+        """
+        return (len(self.invalid) +
+                len(self.inconsistent) +
+                len(self.unreachable) +
+                sum(self.missing.values()) +
+                sum(self.dupes.values()))
+
     def group_count(self) -> list[int]:
         """Group input files by count"""
         target_size = config.merging['target_size']

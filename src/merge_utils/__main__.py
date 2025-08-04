@@ -31,6 +31,8 @@ def main():
     in_group.add_argument('inputs', nargs='*', help='remaining command line inputs')
 
     out_group = parser.add_argument_group('output arguments')
+    out_group.add_argument('--validate', action='store_true',
+                           help='only validate metadata instead of merging')
     out_group.add_argument('--list', choices=['dids', 'replicas', 'pfns'], metavar='OPT',
                            help='list (dids, replicas, pfns) instead of merging')
     out_group.add_argument('-l', '--local', action='store_true',
@@ -41,7 +43,10 @@ def main():
 
     # Set up logging and configuration
     name = "merge"
-    if args.list:
+    if args.validate:
+        name = "validate"
+        args.list = 'dids'
+    elif args.list:
         name = "list "+args.list
     io_utils.setup_log(name, log_file=args.log, verbosity=args.verbose)
     config.load(args.config)
@@ -93,8 +98,17 @@ def main():
         sys.exit(1)
 
     # If we're only listing DIDs, we can skip the rest of the setup
+    if args.validate:
+        metadata.run()
+        io_utils.log_print(f"{len(metadata.files)} inputs passed validation")
+        nerrs = metadata.files.count_errors()
+        if nerrs:
+            io_utils.log_print(f"{nerrs} inputs failed validation")
+        return
+
     if args.list == 'dids':
         metadata.run()
+        io_utils.log_print(f"Found {len(metadata.files)} valid inputs:")
         for file in metadata.files:
             print(file.did)
         return
