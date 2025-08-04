@@ -183,6 +183,6 @@ class JustinScheduler(JobScheduler):
                     '--output-pattern', '*_merged_*:merge-test', 
                     '--lifetime-days', '1'
                 ]
-            f.write(f"{' '.join(cmd)}\n")
+                f.write(f"{' '.join(cmd)}\n")
         subprocess.run(['chmod', '+x', script_name], check=False)
         return script_name

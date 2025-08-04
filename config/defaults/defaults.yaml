@@ -39,6 +39,7 @@ validation:
       - "core.application.version"  # Not checked in old merging
     optional:       # These metadata keys are optional (overrides required and conditional keys)
       - "dune_mc.geometry_version"
+      - "dune_mc.gen_fcl_filename"
 
 sites:
     local_site: "US_FNAL-FermiGrid"   # Local site name
@@ -68,11 +69,12 @@ merging:
             file_format:
               - "artroot"
             ext: ".root"
-            fcl: "artcat.fcl"
+            cfg: "artcat.fcl"
         "hdf5":
             file_format:
               - "hdf5"
             ext: ".hdf5"
+            cfg: "hdf5.yaml"
         "tar":
             file_format:
               - "binary"

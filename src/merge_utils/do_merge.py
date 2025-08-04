@@ -24,16 +24,17 @@ def merge_hadd(output: str, inputs: list) -> None:
     print(f"Running command:\n{' '.join(cmd)}")
     subprocess.run(cmd, check=True)
 
-def merge_lar(output: str, inputs: list[str], config: str) -> None:
+def merge_lar(output: str, inputs: list[str], cfg: str) -> None:
     """Merge the input files using lar"""
-    cmd = ['lar', '-c', config, '-o', output] + inputs
+    cmd = ['lar', '-c', cfg, '-o', output] + inputs
     print(f"Running command:\n{' '.join(cmd)}")
     subprocess.run(cmd, check=True)
 
-def merge_hdf5(output: str, inputs: list[str]) -> None:
+def merge_hdf5(output: str, inputs: list[str], cfg: str) -> None:
     """Merge the input files into an HDF5 file"""
-    raise NotImplementedError("HDF5 merging is not yet implemented")
-    #TODO: investigate https://github.com/NU-CUCIS/ph5concat
+    import hdf5_merge # pylint: disable=import-outside-toplevel
+    cfg_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'config', 'hdf5', cfg)
+    hdf5_merge.merge_hdf5(output, inputs, cfg_path)
 
 def merge_tar(output: str, inputs: list[str]) -> None:
     """Merge the input files into a tar.gz archive"""
@@ -51,10 +52,11 @@ def merge(config: dict, outdir: str) -> None:
     if method == "hadd":
         merge_hadd(output, inputs)
     elif method == "lar":
-        lar_config = config['metadata']['merge.fcl']
+        lar_config = config['metadata']['merge.cfg']
         merge_lar(output, inputs, lar_config)
     elif method == "hdf5":
-        merge_hdf5(output, inputs)
+        hdf5_config = config['metadata']['merge.cfg']
+        merge_hdf5(output, inputs, hdf5_config)
     elif method == "tar":
         merge_tar(output, inputs)
     else:

@@ -446,7 +446,9 @@ class MergeChunk(collections.UserDict):
         md['merge.method'] = config.merging['method']
         md['merge.hash'] = self.merge_hash
         if config.merging['method'] == 'lar':
-            md['merge.fcl'] = config.merging['methods']['lar']['fcl']
+            md['merge.cfg'] = config.merging['methods']['lar']['cfg']
+        elif config.merging['method'] == 'hdf5':
+            md['merge.cfg'] = config.merging['methods']['hdf5']['cfg']
         if self.group_id >= 0:
             md['merge.group'] = self.group_id
         if self.chunk_id >= 0:
