@@ -4,7 +4,7 @@ import os,sys,csv
 Script to create pass1 merge commands for a given task
 '''
 
-import csv
+
 from metacat.webapi import MetaCatClient
 
 mc_client = MetaCatClient(os.environ["METACAT_SERVER_URL"])
@@ -12,6 +12,8 @@ mc_client = MetaCatClient(os.environ["METACAT_SERVER_URL"])
 from datetime import datetime, timezone
 
 if __name__ == '__main__':
+
+    ''' make a set of merge commands for a particular tag '''
     
     timestamp: str = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
 
