@@ -144,9 +144,12 @@ if __name__ == "__main__":
     parser.add_argument("--did", help="The did of the file to find the provenance of")
     parser.add_argument("--fid", help="The fid of the file to find the provenance of")
     parser.add_argument("--dataset", help="The dataset to find the provenance of (first file)")
-    parser.add_argument("--query", help="Use first file from this query to find the provenance of")
+    parser.add_argument("--query", help="Find provenance of the first file from this query")
     parser.add_argument("--test", help="Run a test of the provenance code", action="store_true")
     args = parser.parse_args()
+    if len(sys.argv) == 1:
+        parser.print_help()
+        sys.exit(1)
     if args.dataset:
         query = f"files from {args.dataset} limit 1"  
         files, = mc_client.query(query=query) 
