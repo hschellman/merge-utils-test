@@ -4,6 +4,7 @@ import os
 import sys
 import json
 import argparse
+import csv
 from metacat.webapi import MetaCatClient
 mc_client = MetaCatClient(os.environ["METACAT_SERVER_URL"])
 DEBUG = False
@@ -19,12 +20,14 @@ def makestep(filemeta):
     step["fid"] = filemeta["fid"]
     step["namespace"] = filemeta["namespace"]
     step["name"] = filemeta["name"]
-    step["metadata"] = filemeta["metadata"]
+    #step["metadata"] = filemeta["metadata"]
     metadata = filemeta["metadata"]
     step["data_tier"] = metadata["core.data_tier"]
     step["appversion"] = metadata["core.application.version"]
     step["appname"] = metadata["core.application.name"]
     #step["config_file"] = metadata["dune.config_file"]
+    if "dune.campaign" in metadata:
+        step["campaign"] = metadata["dune.campaign"]
     if "dune.config_file" in metadata:
         step["config_file"] = metadata["dune.config_file"]
     else:
@@ -181,3 +184,18 @@ if __name__ == "__main__":
         print (f"geometry_version: {geo}")
     if generator != "":
         print (f"generators:       {generator}")
+    
+    
+    for astep in allsteps:
+        astep.pop("parents")
+        astep.pop("did")
+        name = astep.pop("name")
+        astep["name"] = name
+    header = list(allsteps[0].keys())
+    print (header)
+    csvfile = open(args.did.split(":")[1].replace("_","").replace(".root","")+".csv",'w')
+    writer = csv.DictWriter(csvfile,fieldnames=header)
+
+    writer.writeheader()
+    writer.writerows(allsteps)
+    csvfile.close()
