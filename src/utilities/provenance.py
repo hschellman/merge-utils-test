@@ -63,13 +63,12 @@ def makestep_from_merge(filemeta):
     step["namespace"] = filemeta["namespace"]
     step["created_timestamp"] = filemeta["created_timestamp"]
     step["name"] = filemeta["name"]
-    #step["metadata"] = filemeta["metadata"]
     metadata = filemeta["metadata"]
     step["data_tier"] = metadata["core.data_tier"]
     step["appversion"] = metadata["core.application.version"]
-    step["appname"] = metadata["core.application.name"]
-    step["config_file"] = metadata["merge.config_file"]
-    step["appfamily"] = metadata["merge-utils"]
+    step["appname"] = "merge"
+    step["config_file"] = metadata["merge.cfg"]
+    step["appfamily"] = metadata["core.application.family"]
     if "parents" in filemeta:
         step["parents"] = filemeta["parents"]
     if "dune.requestid" in metadata:
@@ -94,6 +93,7 @@ def makestep_from_origins(thefilemeta, steps):
         step["data_tier"] = metadata["core.data_tier"]
         step["appname"] = origin
         step["appversion"] = version
+        
         if "dune.config_file" in metadata:
             step["config_file"] = metadata["dune.config_file"]
         else:
@@ -137,13 +137,14 @@ def get_provenance(did =None,fid=None,steps=None):
         print (json.dumps(thefilemeta,indent=4))
 
     # special case for merge steps, which have the config file in a different metadata field and don't have parents, so we want to make the step before looking for parents
-    if "merge.config_file" in thefilemeta["metadata"]:
-        try:
-            step = makestep_from_merge(thefilemeta)
-        except Exception as e:
-            print ("Error occurred while making step from merge", e,fid,did)
-            return steps
-        steps = prepend(step, steps)
+    if "merge.tag" in thefilemeta["metadata"]:
+        print ("making step from merge",did,fid)
+        #try:
+        step = makestep_from_merge(thefilemeta)
+        #except Exception as e:
+        #    print ("Error occurred while making step from merge", e,fid,did)
+    
+        
     else:
         try:
             if DEBUG: print ("making step from file",did,fid)
@@ -151,10 +152,10 @@ def get_provenance(did =None,fid=None,steps=None):
         except Exception as e:
             print ("error:",e)
             print ("Error occurred while making step from file", e,fid,did)
-            return steps
-            print (json.dumps(step,indent=4))
-        #steps[step["config_file"]] = step
-        steps = prepend(step, steps)
+           
+            
+    #steps[step["config_file"]] = step
+    steps = prepend(step, steps)
     #print ("steps in get_provenance",len(steps))
     if "parents" in step and len(step["parents"]) > 0:
         if DEBUG: print ("has parents")
@@ -234,3 +235,5 @@ def main():
     allsteps =get_provenance(did=args.did,fid=args.fid,steps=allsteps)
     output(args,allsteps)
     return 0
+if __name__ == "__main__":
+    sys.exit(main())
