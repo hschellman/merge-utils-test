@@ -30,6 +30,7 @@ test = ["pytest"]
 
 [project.scripts]
 merge = "merge_utils.__main__:main"
+provenance = "utilities.provenance:main"
 
 [build-system]
 requires = ["hatchling"]

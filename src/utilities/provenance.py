@@ -31,19 +31,24 @@ def makestep(filemeta):
     #step["config_file"] = metadata["dune.config_file"]
     if "dune.campaign" in metadata:
         step["campaign"] = metadata["dune.campaign"]
+    else:
+        step["campaign"] = "unknown"
     if "dune.config_file" in metadata:
         step["config_file"] = metadata["dune.config_file"]
     else:
         print ("WARNING: no dune.config_file in metadata for this step",step["appname"],step["appversion"])
         step["config_file"] = "unknown"
-    if "dune_mc.generators" in metadata:
-        step["generators"] = metadata["dune_mc.generators"]
     if "dune.requestid" in metadata:
         step["requestid"] = metadata["dune.requestid"]
-    if "dune_mc.gen_fcl_filename" in metadata:  
-        step["gen_fcl_filename"] = metadata["dune_mc.gen_fcl_filename"]
-    if "dune_mc.geometry_version" in metadata:
-        step["geometry_version"] = metadata["dune_mc.geometry_version"]
+    if metadata["core.file_type"] == "mc":
+        if "dune_mc.generators" in metadata:
+            step["generators"] = metadata["dune_mc.generators"]
+        else:
+            step["generators"] = "unknown"       
+        if "dune_mc.gen_fcl_filename" in metadata:  
+            step["gen_fcl_filename"] = metadata["dune_mc.gen_fcl_filename"]
+        if "dune_mc.geometry_version" in metadata:
+            step["geometry_version"] = metadata["dune_mc.geometry_version"]
     step["appfamily"] = metadata["core.application.family"]
     if "parents" in filemeta:
         step["parents"] = filemeta["parents"]
@@ -51,6 +56,7 @@ def makestep(filemeta):
     return step
 
 def makestep_from_merge(filemeta):
+    ''' special step for merged file '''
     step = {}
     step["did"] = filemeta["namespace"] + ":" + filemeta["name"]
     step["fid"] = filemeta["fid"]
@@ -110,6 +116,7 @@ def makestep_from_origins(thefilemeta, steps):
     return steps
 
 def get_provenance(did =None,fid=None,steps=None):
+    ''' generic recursive function to get provenance ''' 
 
     if did is not None and not ":" in did:
         print ("You must specify a did in the form of scope:name")
@@ -158,9 +165,11 @@ def get_provenance(did =None,fid=None,steps=None):
             steps = makestep_from_origins(thefilemeta = thefilemeta,steps=steps)
     return steps
 
-def output(allsteps):
+def output(args,allsteps):
+    ''' create output to screen and csv file'''
     gen = ""
     geo = ""
+    generator = ""
     for astep in allsteps:
         #print (json.dumps(astep,indent=4))
         date = datetime.fromtimestamp(int(astep["created_timestamp"]), tz=UTC)
@@ -171,7 +180,7 @@ def output(allsteps):
             geo = astep["geometry_version"]
         if "generators" in astep:
             generator = astep["generators"]
-        print (f"{astep["date"]} {astep['appname']:<10} {astep['data_tier']:<20} {astep['appversion']:<10}\t {astep['config_file']}" ) 
+        print (f"{astep["date"]} {astep['appname']:<15} {astep['data_tier']:<20} {astep['appversion']:<12} {astep['campaign']:<20} {astep['config_file']}" ) 
     if gen != "":
         print (f"gen_fcl_filename: {gen}")
     if geo != "":
@@ -190,6 +199,7 @@ def output(allsteps):
         header.update(astep.keys())
     #header = list(allsteps[0].keys())
     #print (header)
+    
     csvfile = open(args.did.split(":")[1].replace("_","").replace(".root","")+".csv",'w')
     writer = csv.DictWriter(csvfile,fieldnames=header)
 
@@ -197,7 +207,8 @@ def output(allsteps):
     writer.writerows(allsteps)
     csvfile.close()
     
-if __name__ == "__main__":
+def main():
+    ''' main function for provenance utility'''
     parser = argparse.ArgumentParser(description="Find the provenance of a file using metacat")
     parser.add_argument("--did", help="The did of the file to find the provenance of")
     parser.add_argument("--fid", help="The fid of the file to find the provenance of")
@@ -221,4 +232,5 @@ if __name__ == "__main__":
     print ("Looking at provenance for did:",args.did)
     allsteps=[]
     allsteps =get_provenance(did=args.did,fid=args.fid,steps=allsteps)
-    output(allsteps)
+    output(args,allsteps)
+    return 0
