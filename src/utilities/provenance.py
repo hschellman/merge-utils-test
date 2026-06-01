@@ -1,10 +1,12 @@
 ''' provenance - use metacat to find provenance of a file'''
 
+from importlib import metadata
 import os
 import sys
 import json
 import argparse
 import csv
+from datetime import datetime, UTC
 from metacat.webapi import MetaCatClient
 mc_client = MetaCatClient(os.environ["METACAT_SERVER_URL"])
 DEBUG = False
@@ -25,6 +27,7 @@ def makestep(filemeta):
     step["data_tier"] = metadata["core.data_tier"]
     step["appversion"] = metadata["core.application.version"]
     step["appname"] = metadata["core.application.name"]
+    step["created_timestamp"] = filemeta["created_timestamp"]
     #step["config_file"] = metadata["dune.config_file"]
     if "dune.campaign" in metadata:
         step["campaign"] = metadata["dune.campaign"]
@@ -35,6 +38,8 @@ def makestep(filemeta):
         step["config_file"] = "unknown"
     if "dune_mc.generators" in metadata:
         step["generators"] = metadata["dune_mc.generators"]
+    if "dune.requestid" in metadata:
+        step["requestid"] = metadata["dune.requestid"]
     if "dune_mc.gen_fcl_filename" in metadata:  
         step["gen_fcl_filename"] = metadata["dune_mc.gen_fcl_filename"]
     if "dune_mc.geometry_version" in metadata:
@@ -50,8 +55,9 @@ def makestep_from_merge(filemeta):
     step["did"] = filemeta["namespace"] + ":" + filemeta["name"]
     step["fid"] = filemeta["fid"]
     step["namespace"] = filemeta["namespace"]
+    step["created_timestamp"] = filemeta["created_timestamp"]
     step["name"] = filemeta["name"]
-    step["metadata"] = filemeta["metadata"]
+    #step["metadata"] = filemeta["metadata"]
     metadata = filemeta["metadata"]
     step["data_tier"] = metadata["core.data_tier"]
     step["appversion"] = metadata["core.application.version"]
@@ -60,7 +66,10 @@ def makestep_from_merge(filemeta):
     step["appfamily"] = metadata["merge-utils"]
     if "parents" in filemeta:
         step["parents"] = filemeta["parents"]
-
+    if "dune.requestid" in metadata:
+        step["requestid"] = metadata["dune.requestid"]
+    if "dune.campaign" in metadata:
+        step["campaign"] = metadata["dune.campaign"]
     return step
 
 def makestep_from_origins(thefilemeta, steps):
@@ -69,12 +78,14 @@ def makestep_from_origins(thefilemeta, steps):
     metadata = thefilemeta["metadata"]
     origins = metadata["origin.applications.config_files"]
     version = metadata["core.application.version"]
+    
     for origin in origins:
         step = {}
+        step["created_timestamp"] = thefilemeta["created_timestamp"]
         step["name"] = thefilemeta["name"]
         step["namespace"] = thefilemeta["namespace"]
         step["fid"] = thefilemeta["fid"]
-
+        step["data_tier"] = metadata["core.data_tier"]
         step["appname"] = origin
         step["appversion"] = version
         if "dune.config_file" in metadata:
@@ -88,6 +99,11 @@ def makestep_from_origins(thefilemeta, steps):
             step["gen_fcl_filename"] = metadata["dune_mc.gen_fcl_filename"]
         if "dune_mc.geometry_version" in metadata:
             step["geometry_version"] = metadata["dune_mc.geometry_version"]
+        if "dune.requestid" in metadata:
+            step["requestid"] = metadata["dune.requestid"]
+        if "dune.campaign" in metadata:
+            step["campaign"] = metadata["dune.campaign"]
+        step["appfamily"] = "origin"
         step["name"]="null"
         steps = prepend(step,steps)
 
@@ -141,6 +157,45 @@ def get_provenance(did =None,fid=None,steps=None):
         if "origin.applications.config_files" in thefilemeta["metadata"]:
             steps = makestep_from_origins(thefilemeta = thefilemeta,steps=steps)
     return steps
+
+def output(allsteps):
+    gen = ""
+    geo = ""
+    for astep in allsteps:
+        #print (json.dumps(astep,indent=4))
+        date = datetime.fromtimestamp(int(astep["created_timestamp"]), tz=UTC)
+        astep["date"] = date.strftime("%Y%m%dT%H%M%S".replace("+00:00","Z"))
+        if "gen_fcl_filename" in astep:
+            gen = astep["gen_fcl_filename"]
+        if "geometry_version" in astep:
+            geo = astep["geometry_version"]
+        if "generators" in astep:
+            generator = astep["generators"]
+        print (f"{astep["date"]} {astep['appname']:<10} {astep['data_tier']:<20} {astep['appversion']:<10}\t {astep['config_file']}" ) 
+    if gen != "":
+        print (f"gen_fcl_filename: {gen}")
+    if geo != "":
+        print (f"geometry_version: {geo}")
+    if generator != "":
+        print (f"generators:       {generator}")
+    
+    header = set()
+    for astep in allsteps:
+        if "parents" in astep:
+            astep.pop("parents")
+        if "did" in astep:
+            astep.pop("did")
+        name = astep.pop("name")
+        astep["name"] = name
+        header.update(astep.keys())
+    #header = list(allsteps[0].keys())
+    #print (header)
+    csvfile = open(args.did.split(":")[1].replace("_","").replace(".root","")+".csv",'w')
+    writer = csv.DictWriter(csvfile,fieldnames=header)
+
+    writer.writeheader()
+    writer.writerows(allsteps)
+    csvfile.close()
     
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Find the provenance of a file using metacat")
@@ -166,36 +221,4 @@ if __name__ == "__main__":
     print ("Looking at provenance for did:",args.did)
     allsteps=[]
     allsteps =get_provenance(did=args.did,fid=args.fid,steps=allsteps)
-    #print ("provenance steps:",len(allsteps))
-    gen = ""
-    geo = ""
-    for astep in allsteps:
-        #print (json.dumps(astep,indent=4))
-        if "gen_fcl_filename" in astep:
-            gen = astep["gen_fcl_filename"]
-        if "geometry_version" in astep:
-            geo = astep["geometry_version"]
-        if "generators" in astep:
-            generator = astep["generators"]
-        print (f"{astep['appname']:<10} {astep['data_tier']:<20} {astep['appversion']:<10}\t {astep['config_file']}" ) 
-    if gen != "":
-        print (f"gen_fcl_filename: {gen}")
-    if geo != "":
-        print (f"geometry_version: {geo}")
-    if generator != "":
-        print (f"generators:       {generator}")
-    
-    
-    for astep in allsteps:
-        astep.pop("parents")
-        astep.pop("did")
-        name = astep.pop("name")
-        astep["name"] = name
-    header = list(allsteps[0].keys())
-    print (header)
-    csvfile = open(args.did.split(":")[1].replace("_","").replace(".root","")+".csv",'w')
-    writer = csv.DictWriter(csvfile,fieldnames=header)
-
-    writer.writeheader()
-    writer.writerows(allsteps)
-    csvfile.close()
+    output(allsteps)
