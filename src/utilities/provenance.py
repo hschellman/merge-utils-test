@@ -20,6 +20,7 @@ def makestep(filemeta):
     step = {}
     step["did"] = filemeta["namespace"] + ":" + filemeta["name"]
     step["fid"] = filemeta["fid"]
+    step["size"] = filemeta["size"]
     step["namespace"] = filemeta["namespace"]
     step["name"] = filemeta["name"]
     #step["metadata"] = filemeta["metadata"]
@@ -60,6 +61,7 @@ def makestep_from_merge(filemeta):
     step = {}
     step["did"] = filemeta["namespace"] + ":" + filemeta["name"]
     step["fid"] = filemeta["fid"]
+    step["size"] = filemeta["size"]
     step["namespace"] = filemeta["namespace"]
     step["created_timestamp"] = filemeta["created_timestamp"]
     step["name"] = filemeta["name"]
@@ -88,6 +90,7 @@ def makestep_from_origins(thefilemeta, steps):
         step = {}
         step["created_timestamp"] = thefilemeta["created_timestamp"]
         step["name"] = thefilemeta["name"]
+        step["size"] = thefilemeta["size"]
         step["namespace"] = thefilemeta["namespace"]
         step["fid"] = thefilemeta["fid"]
         step["data_tier"] = metadata["core.data_tier"]
@@ -138,13 +141,12 @@ def get_provenance(did =None,fid=None,steps=None):
 
     # special case for merge steps, which have the config file in a different metadata field and don't have parents, so we want to make the step before looking for parents
     if "merge.tag" in thefilemeta["metadata"]:
-        print ("making step from merge",did,fid)
+        if DEBUG: print ("making step from merge",did,fid)
         #try:
         step = makestep_from_merge(thefilemeta)
         #except Exception as e:
         #    print ("Error occurred while making step from merge", e,fid,did)
-    
-        
+       
     else:
         try:
             if DEBUG: print ("making step from file",did,fid)
@@ -153,7 +155,6 @@ def get_provenance(did =None,fid=None,steps=None):
             print ("error:",e)
             print ("Error occurred while making step from file", e,fid,did)
            
-            
     #steps[step["config_file"]] = step
     steps = prepend(step, steps)
     #print ("steps in get_provenance",len(steps))
@@ -181,7 +182,7 @@ def output(args,allsteps):
             geo = astep["geometry_version"]
         if "generators" in astep:
             generator = astep["generators"]
-        print (f"{astep["date"]} {astep['appname']:<15} {astep['data_tier']:<20} {astep['appversion']:<12} {astep['campaign']:<20} {astep['config_file']}" ) 
+        print (f"{astep["date"]} {astep['appname']:<15} {astep['data_tier']:<20} {astep['size']:<12} {astep['appversion']:<12} {astep['campaign']:<20} {astep['config_file']}" ) 
     if gen != "":
         print (f"gen_fcl_filename: {gen}")
     if geo != "":
@@ -232,8 +233,9 @@ def main():
         args.did ="fardet-hd:prodbackground_radiological_decay0_dune10kt_1x2x6_centralAPA_20250802T061831Z_gen_001175_supernova_g4_detsim_reco.root"
     print ("Looking at provenance for did:",args.did)
     allsteps=[]
-    allsteps =get_provenance(did=args.did,fid=args.fid,steps=allsteps)
+    allsteps =get_provenance(did=args.did, fid=args.fid, steps=allsteps)
     output(args,allsteps)
     return 0
+
 if __name__ == "__main__":
     sys.exit(main())

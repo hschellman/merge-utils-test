@@ -40,10 +40,10 @@ print ("PATH",sys.path)
 
 project = 'merge-utils'
 copyright = '2025, Fermi National Accelerator Laboratory'
-author = 'Heidi Schellman and Ethan Muldoon'
+author = 'Heidi Schellman and Ethan Muldoon\\ Oregon State University'
 
 # The full version, including alpha/beta/rc tags
-release = '0.8'
+release = '1.0.1'
 
 
 # -- General configuration ---------------------------------------------------
