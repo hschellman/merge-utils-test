@@ -59,6 +59,25 @@ def get_key(name: str) -> ConfigKey:
                 raise KeyError(f"Config key '{obj_name}' is not a collection and cannot be indexed")
     return obj
 
+def check_cfg_version(ver: str, file_name: str) -> bool:
+    """Check if the provided config version is compatible with the current package version."""
+    if ver == __version__:
+        return True
+    pkg_ver = __version__.split('.')
+    file_ver = ver.split('.')
+    if len(file_ver) < 2:
+        logger.error("Failed to load config file %s: invalid version %s (expected major.minor[.patch])",
+                      file_name, ver)
+        return False
+    if file_ver[0] == pkg_ver[0] and file_ver[1] == pkg_ver[1]:
+        if len(file_ver) > 2:
+            logger.warning("Config file %s has outdated version %s, consider updating to %s",
+                           file_name, ver, __version__)
+        return True
+    logger.error("Failed to load config file %s: version mismatch (file: %s, package: %s)",
+                      file_name, ver, __version__)
+    return False
+
 def update(file_name: str) -> None:
     """
     Update the global configuration with values from the provided dictionary.
@@ -70,9 +89,7 @@ def update(file_name: str) -> None:
     errors = []
     # Check version compatibility
     ver = cfg.pop('version', None)
-    if ver and ver != __version__:
-        logger.error("Failed to load config file %s: version mismatch (file: %s, package: %s)",
-                      file_name, ver, __version__)
+    if ver and not check_cfg_version(ver, file_name):
         sys.exit(1)
     if 'version' not in cfg_dict._value: # pylint: disable=protected-access
         cfg_dict._update({'version': __version__}) # pylint: disable=protected-access
