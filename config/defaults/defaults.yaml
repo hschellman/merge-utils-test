@@ -20,10 +20,10 @@ input:
 output:
     mode: <opt(merge, validate, metadata, dids, replicas, pfns, rses)>  # Whether to run merging or just validate/list metadata, DIDs, replicas, PFNs, or RSEs
     local: False          # Run merging locally instead of submitting to JustIN
+    tmp_dir: "{PKG}/tmp"  # Directory for generated job scripts
     name: "{core.run_type}_{dune.campaign}_{dune.config_file}_{core.application.name}"
     namespace: <str>      # Optionally specify a namespace different from the parents
     grandparents: False   # List the parents of the input files as the parents of the merged file
-    tmp_dir: "{PKG}/tmp"  # Directory for generated job scripts
     out_dir: "/pnfs/dune/scratch/users/{$USER}/merge_test" # Local output directory
     batch:                # Settings for batch merging
         lifetime: 1000    # Lifetime of output files (in days)
@@ -48,6 +48,7 @@ validation:
     check_fids: True  # Make sure parent FIDs exist in MetaCat (DIDs are always checked)
     handling:         # How to handle files with errors
         default:      <opt(quit,skip,gap)>         # Default handling mode
+        # Errors
         duplicate:    <opt(default,quit,skip,gap)> # Duplicated files
         no_metadata:  <opt(default,quit,skip,gap)> # Files without metadata
         undeclared:   <opt(default,quit,skip,gap)> # Files without a MetaCat record
@@ -56,6 +57,7 @@ validation:
         no_replicas:  <opt(default,quit,skip,gap)> # Files without any replicas
         unreachable:  <opt(default,quit,skip,gap)> # Replicas exist but exceed max distance
         inconsistent: <opt(default,quit,skip,gap)> # Metadata inconsistent with other files
+        # Warnings
         already_done: <opt(include,quit,skip,gap)> # Files that have been merged in a previous job
     checksums:
       - "adler32"     # Adler32 should be the default checksum
@@ -78,21 +80,29 @@ sites:
             staging: 10.0
 
 local:
-    site: <str>
-    hosts:
+    site: <str>                           # Manually specify the local site name
+    hosts:                                # Map of hostnames to site names, used to auto-detect the local site
         "*.fnal.gov": "US_FNAL-FermiGrid"
-    xrootd:
-        "US_FNAL-FermiGrid":
+    xrootd:                               # Maps of xRootD URL prefixes to local path prefixes
+        "US_FNAL-FermiGrid":              # FNAL xRootD prefixes
             "root://fndcadoor.fnal.gov:1094/pnfs/fnal.gov/usr/": "/pnfs/"
             "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/": "/pnfs/"
 
 method:
     method_name: auto             # Can be auto, a specific default method, or the path to a custom script
+    transform: <str>              # For transform jobs, specify "app_familly.app_name"
     cmd: <str>                    # Optionally specify merging command, eg. '{script} {cfg} {output} {inputs}'
     cfg: <str>                    # Optionally specify a config file for merging
     script: <str>                 # Optionally specify a custom merging script
-    transform: <str>              # For transform jobs, specify "app_familly.app_name"
-    outputs: <list(output_file)>  # List of output files produced by the merging method      
+    outputs: <list(output_file)>  # List of output files produced by the merging method
+    # - name: <str>               # Output file name, shoud contain '{NAME}' and '{UUID}'
+    #   metadata: <map>           # Per-file metadata overrides
+    #   tmp_metadata: <map>       # metadata for temporary files in multi-stage merges
+    #   rename: <str>             # File name produced by merging method, if different from spec
+    #   pass2: <str>              # Basic merging method for pass 2+ of a transform job
+    #   size: <size_spec> sum     # File size estimate. Can be sum, avg, or an explicit value
+    #   size_min: <size_spec> 0   # Minimum size for output file (for error checking)
+    #   checklist: <path>         # Optional checklist file to verify the output file contents
     dependencies: <set>           # Optionally specify additional files required for merging
     environment:
         dunesw_version: <str>     # DUNE software version, defaults to DUNESW_VERSION env var
