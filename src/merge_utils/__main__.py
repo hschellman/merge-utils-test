@@ -301,3 +301,47 @@ def main():
 
     logger.critical("Unknown output mode: %s", config.output.mode)
     sys.exit(1)
+
+def validate_inputs():
+    """Run the validation on the input files"""
+    parser = get_parser()
+    arguments = parser.parse_args()
+
+    # Convert command line arguments to a dict and remove any None values
+    args = {k: copy.deepcopy(v) for k, v in vars(arguments).items() if v}
+    print ("main arguments are:", args)
+
+    # Set up logging
+    io_utils.setup_log(log_file=args.pop("log", None), verbosity=args.pop("verbose", None))
+
+    if arguments.input_mode == 'resume':
+        args.pop("input_mode", None)
+        resume_job(args)
+    else:
+        start_job(args)
+
+    # Override relevant output settings
+    config.output.mode = 'validate'
+    config.output.grandparents = True
+
+    # Run metadata retriever
+    metadata = retriever.get()
+    metadata.run()
+    good_files = metadata.files.good_files
+    ngood = len(good_files)
+    nerrs = len(metadata.files) - ngood
+
+    # Print summary of validation results
+    if not nerrs:
+        if ngood == 0:
+            logger.error("No input files found!")
+        elif ngood == 1:
+            io_utils.log_print("The file passed validation!", logging.INFO)
+        else:
+            io_utils.log_print(f"All {ngood} files passed validation!", logging.INFO)
+        return
+
+    if ngood:
+        logger.error("%d files passed validation, but %d files failed!", ngood, nerrs)
+    else:
+        logger.error("All %d files failed validation!", nerrs)

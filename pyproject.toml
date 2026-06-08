@@ -31,6 +31,7 @@ test = ["pytest"]
 [project.scripts]
 merge = "merge_utils.__main__:main"
 provenance = "utilities.provenance:main"
+validate = "merge_utils.__main__:validate_inputs"
 
 [build-system]
 requires = ["hatchling"]
