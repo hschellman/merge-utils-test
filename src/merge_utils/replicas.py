@@ -7,6 +7,7 @@ import logging
 import enum
 import asyncio
 import collections
+import zlib
 from dataclasses import dataclass
 from typing import AsyncGenerator
 from abc import ABC, abstractmethod
@@ -282,6 +283,14 @@ class BaseRSE(ABC):
         logger.warning("Checksum failed for file %s", replica.path)
         return False
 
+    async def checksum_adler32(self, filename: str, chunk_size=8192) -> str:
+        """Calculate the Adler-32 checksum of a file, working in chunks"""
+        checksum = 1  # Adler-32 state must be initialized to 1 (not 0)
+        with open(filename, "rb") as f:
+            while chunk := f.read(chunk_size):
+                checksum = zlib.adler32(chunk, checksum)
+        return "%08x" % checksum
+
     async def checksum_local(self, path: str, cksums: dict) -> bool:
         """
         Check the checksums of a local file against expected values
@@ -302,12 +311,15 @@ class BaseRSE(ABC):
             if algo not in cksums:
                 continue
             expected = cksums[algo]
-            ret = await asyncio.to_thread(subprocess.run, [cmd, path],
-                                            capture_output=True, text=True, check=False)
-            if ret.returncode != 0:
-                logger.debug("Failed to run %s for file %s: %s", cmd, path, ret.stderr.strip())
-                continue
-            actual = ret.stdout.strip().split()[0]
+            if algo == 'adler32':
+                actual = await self.checksum_adler32(path)
+            else:
+                ret = await asyncio.to_thread(subprocess.run, [cmd, path],
+                                                capture_output=True, text=True, check=False)
+                if ret.returncode != 0:
+                    logger.debug("Failed to run %s for file %s: %s", cmd, path, ret.stderr.strip())
+                    continue
+                actual = ret.stdout.strip().split()[0]
             if actual == expected:
                 return True
             logger.warning("File %s has bad %s checksum: %s != %s",
