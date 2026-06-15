@@ -41,6 +41,7 @@ jobs:
         path: docs/build/html/
     - name: Deploy
       #uses: peaceiris/actions-gh-pages@v3
+      #uses: JamesIves/github-pages-deploy-action@v4
       uses: JamesIves/github-pages-deploy-action@v4
       if: github.ref == 'refs/heads/main'
       with:
