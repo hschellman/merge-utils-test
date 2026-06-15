@@ -77,7 +77,16 @@ Custom dictionary types:
 Sections
 ========
 
-The configuration keys are organized into sections based on their purpose.  The sections are somewhat fluid and may change as the code evolves, but currently include:
+The configuration keys are organized into sections based on their purpose. 
+
+See an annotated template at
+
+.. toctree::
+
+    template
+ 
+The sections are somewhat fluid and may change as the code evolves, but currently include:
+
 
 input
 -----
@@ -95,7 +104,7 @@ The rest of the keys in the output section are related to the final output files
 
 The output name specified in this section is just a base name for the job, do not include things like skip and limit values or file extensions.  Merge-utils will automatically append a suffix to the base name to create the final output file names.  This suffix includes the file extension, a unique ID composed of the job tag, timestamp, skip, and limit, and additional suffixes specific to individual output streams if multiple outputs are created.  These suffixes are defined in the method section of the config file, and the user should have little need to adjust them.
 
-The output name may simply be a literal string, but it may be a template including variables referring to other config keys, environment variables, or metadata keys from the output files.  This allows the user to create dynamic file names that automatically incorporate relevant information about the merge job and its inputs.  These variables are formatted using python's f-string syntax, see the naming page for more details.  
+The output `name` may simply be a literal string, but it may be a template including variables referring to other config keys, environment variables, or metadata keys from the output files.  This allows the user to create dynamic file names that automatically incorporate relevant information about the merge job and its inputs.  These variables are formatted using python's f-string syntax, see the naming page for more details.  
 
 The output file locations depend on whether the merge is run locally or as a batch job.  For local runs, the output files will be saved to the directory specified by the out_dir key.  For batch runs, the output files will be automatically added to MetaCat and Rucio, using the lifetime specified in the batch subsection.  The user may also force a specific output RSE for the output files.  For merges that require multiple passes, the lifetime and RSE for the intermediate files may be set separately using the scratch subsection.
 
