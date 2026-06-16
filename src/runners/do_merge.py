@@ -9,19 +9,17 @@ import shutil
 import socket
 from datetime import datetime, timezone
 import tarfile
+import zlib
 import h5py #type: ignore pylint: disable=import-error
 import ROOT #type: ignore pylint: disable=import-error
 
-def checksums(filename: str) -> dict:
-    """Calculate the checksum of a file"""
-    ret = subprocess.run(['xrdadler32', filename], capture_output=True, text=True, check=False)
-    if ret.returncode != 0:
-        print(f"ERROR: xrdadler32 failed with return code {ret.returncode}:")
-        print(ret.stderr)
-        sys.exit(1)
-    checksum = ret.stdout.split()[0]
-    results = {'adler32':checksum}
-    return results
+def checksums(filename: str, chunk_size=8192) -> dict:
+    """Calculate the Adler-32 checksum of a file, working in chunks"""
+    checksum = 1  # Adler-32 state must be initialized to 1 (not 0)
+    with open(filename, "rb") as f:
+        while chunk := f.read(chunk_size):
+            checksum = zlib.adler32(chunk, checksum)
+    return {'adler32': "%08x" % checksum}
 
 def list_root(folder, base="") -> list:
     """

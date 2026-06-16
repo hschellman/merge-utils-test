@@ -120,6 +120,7 @@ metadata:
           - "reco-recalibrated"
           - "root-tuple-virtual"
           - "trigprim"
+          - "caf"
           - "sliced"              # old script
           - "dc1input"            # old script
           - "binary-raw"          # old script
