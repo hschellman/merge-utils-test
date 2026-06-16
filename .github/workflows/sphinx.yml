@@ -43,9 +43,9 @@ jobs:
         name: html-docs
         path: docs/build/html/
     - name: Deploy
-      #uses: peaceiris/actions-gh-pages@v3
+      uses: peaceiris/actions-gh-pages@1ef5a1b1df4c63fe21a2242edbee6cac921ece01
       #uses: JamesIves/github-pages-deploy-action@v4
-      uses: JamesIves/github-pages-deploy-action@9d877eea73427180ae43cf98e8914934fe157a1a
+      #uses: JamesIves/github-pages-deploy-action@9d877eea73427180ae43cf98e8914934fe157a1a
       if: github.ref == 'refs/heads/main'
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
