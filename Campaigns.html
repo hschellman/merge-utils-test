@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Campaigns &#8212; merge-utils 1.0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="_static/nature.css?v=0f882399" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=fd3f3429" />
+    <script src="_static/documentation_options.js?v=292eb321"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="canonical" href="https://dune.github.io/merge-utils/Campaigns.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">merge-utils 1.0.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Campaigns</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="campaigns">
+<h1>Campaigns<a class="headerlink" href="#campaigns" title="Link to this heading">¶</a></h1>
+<p>You can set up and run campaigns with multiple datasets/configurations with one setup per campaign.</p>
+<p>Each campaign may have sub-campaigns that run different fcls over different datasets.</p>
+<p>There is a shift operation procedure defined after the main setup and explanations.</p>
+<p>There is also an example of this procedure in</p>
+<p><code class="docutils literal notranslate"><span class="pre">/exp/dune/data/users/schellma/merge/hd_atmos_202604</span></code></p>
+<section id="setup">
+<h2>Setup<a class="headerlink" href="#setup" title="Link to this heading">¶</a></h2>
+<p>To log in as a production role</p>
+<p><code class="docutils literal notranslate"><span class="pre">ssh</span> <span class="pre">-l</span> <span class="pre">duneproshift&#64;dunegpvmXX&#64;fnal.gov</span></code></p>
+<p>(general users can also run merge-utils but are restricted to writing output to usertests or a personal scope)</p>
+<p>We suggest that for each campaign you make a subdirectory:</p>
+<p>for example in production when you first log in.</p>
+<p>Get into an apptainer:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">cvmfs</span><span class="o">/</span><span class="n">oasis</span><span class="o">.</span><span class="n">opensciencegrid</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">mis</span><span class="o">/</span><span class="n">apptainer</span><span class="o">/</span><span class="n">current</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">apptainer</span> <span class="n">shell</span> <span class="o">--</span><span class="n">shell</span><span class="o">=/</span><span class="nb">bin</span><span class="o">/</span><span class="n">bash</span> \
+<span class="o">-</span><span class="n">B</span> <span class="o">/</span><span class="n">cvmfs</span><span class="p">,</span><span class="o">/</span><span class="n">exp</span><span class="p">,</span><span class="o">/</span><span class="n">nashome</span><span class="p">,</span><span class="o">/</span><span class="n">pnfs</span><span class="o">/</span><span class="n">dune</span><span class="p">,</span><span class="o">/</span><span class="n">opt</span><span class="p">,</span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">user</span><span class="p">,</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">hostname</span><span class="p">,</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">krb5</span><span class="o">.</span><span class="n">conf</span> <span class="o">--</span><span class="n">ipc</span> <span class="o">--</span><span class="n">pid</span> \
+<span class="o">/</span><span class="n">cvmfs</span><span class="o">/</span><span class="n">singularity</span><span class="o">.</span><span class="n">opensciencegrid</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">fermilab</span><span class="o">/</span><span class="n">fnal</span><span class="o">-</span><span class="n">dev</span><span class="o">-</span><span class="n">sl7</span><span class="p">:</span><span class="n">latest</span>
+</pre></div>
+</div>
+<p>Make an area that you use for merging projects - you can put several campaigns there.</p>
+<p>You need to set the <code class="docutils literal notranslate"><span class="pre">CAMPAIGN</span></code> environmentals to set up a unique campaign directory</p>
+<p><code class="docutils literal notranslate"><span class="pre">TOP_MERGE_DIR</span></code> is the place you use for any merging work. It could be <code class="docutils literal notranslate"><span class="pre">/exp/dune/data/user/$USER/merging</span></code>.  You then have subdirectories for particular projects named <code class="docutils literal notranslate"><span class="pre">$CAMPAIGN</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">export</span> <span class="n">TOP_MERGE_DIR</span><span class="o">=&lt;</span><span class="n">where</span> <span class="n">you</span> <span class="n">want</span> <span class="n">your</span> <span class="n">merge</span> <span class="n">stuff</span> <span class="n">to</span> <span class="n">go</span><span class="o">&gt;</span>
+<span class="n">export</span> <span class="n">CAMPAIGN</span><span class="o">=&lt;</span><span class="n">campaign_name</span> <span class="k">for</span> <span class="n">a</span> <span class="n">particular</span> <span class="n">campaign</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>mkdir $TOP_MERGE_DIR/$CAMPAIGN
+cd $TOP_MERGE_DIR/$CAMPAIGN
+git clone https://github.com/dune/merge-utils.git
+</pre></div>
+</div>
+<p>Then make a script called <code class="docutils literal notranslate"><span class="pre">setup.sh</span></code>, make certain it has the code version you want and put it in</p>
+<p><code class="docutils literal notranslate"><span class="pre">$TOP_MERGE_DIR/$CAMPAIGN</span></code></p>
+<p>Text of <code class="docutils literal notranslate"><span class="pre">setup.sh</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>echo &quot;this is setup.sh for $CAMPAIGN&quot;
+export RUCIO_ACCOUNT=justin_readonly # need this to access rucio
+export CAMPAIGN=&lt;campaign name&gt;
+export DUNE_VERSION=&lt;version&gt;
+export DUNE_QUALIFIER=&lt;qualifier&gt;
+cd $TOP_MERGE_DIR/$CAMPAIGN/merge-utils
+source setup_prod.sh
+cd campaigns
+mkdir -p $CAMPAIGN
+source setup_campaign.sh $CAMPAIGN
+cd $CAMPAIGN
+</pre></div>
+</div>
+<p>You need to run <code class="docutils literal notranslate"><span class="pre">setup.sh</span></code> every time you log in.</p>
+<p>ie, after the apptainer command</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>export TOP_MERGE_DIR=$HOME/merge # change to the location you want 
+source $TOP_MERGE_DIR/$CAMPAIGN/setup.sh
+</pre></div>
+</div>
+<p>this will set up merge-utils and put you into the subdirectory where you can configure your campaign.</p>
+<p>The full directory path to your $CAMPAIGN configuration will be in <code class="docutils literal notranslate"><span class="pre">$CAMPAIGN_DIR</span></code></p>
+<p>In that directory you need to make a csv file with the same name as the directory. <code class="docutils literal notranslate"><span class="pre">$CAMPAIGN.csv</span></code> that stores tagged rows for each dataset you want to run over.</p>
+<p><code class="docutils literal notranslate"><span class="pre">TAG,FCL,CONFIG,CAMPAIGN,NAMESPACE,BATCH,DATASET</span></code></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">TAG</span></code> is a unique tag for this run of the merger - if you put <code class="docutils literal notranslate"><span class="pre">TEST</span></code> in the tag, jobs will be set up to run interactively.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">FCL</span></code> is the name of the fcl file you want to use.  A single campaign can have differenc fcls.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">CONFIG</span></code> is the merge yaml or json override of defaults. Should have the same name as the fcl file if using lar. You may have to edit it to make certain that the <code class="docutils literal notranslate"><span class="pre">cfg</span></code> option points to  the correct fcl and the <code class="docutils literal notranslate"><span class="pre">metadata</span></code> field contains the correc <code class="docutils literal notranslate"><span class="pre">dune.campaign</span></code> field.  The <code class="docutils literal notranslate"><span class="pre">build_jobs</span></code> script will complain if these are not set consistently.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">CAMPAIGN</span></code> is the campaign - same as directory and cvs vfile</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">NAMESPACE</span></code> is the output namespace (default is ‘usertests’, for production you need to change it to the right namespace.)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">BATCH</span></code> is how many input files are sent to the merger at once - for large production batches of 2000-5000 are good. It generally corresponds to a justin workflow</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">DATASET</span></code> the metacat dataset you want to run over. Generally should be official</p></li>
+</ul>
+</section>
+<section id="production-scripts">
+<h2>production scripts<a class="headerlink" href="#production-scripts" title="Link to this heading">¶</a></h2>
+<p>The production scripts are in <code class="docutils literal notranslate"><span class="pre">src/prod_utils</span></code></p>
+<p>when you run the <code class="docutils literal notranslate"><span class="pre">setup_campaign.sh</span></code> script (called in the overall setup script) it should be added to your path.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">build_jobs.py</span></code> this takes the original csv file, figures out how many files you will be running over for each sub-campaign and produces <code class="docutils literal notranslate"><span class="pre">$CAMPAIGN_jobs.csv</span></code> and <code class="docutils literal notranslate"><span class="pre">$CAMPAIGN_checklist.csv</span></code>.  It checks that you are set up with the right larsoft version, campaign name and that your config files contain the right fcl file names.</p></li>
+</ul>
+<p>You generally only have to do this once if you don’t change the <code class="docutils literal notranslate"><span class="pre">$CAMPAIGN.csv</span></code> but if you have to rerun a sub-campaign you may decided to redo it.</p>
+<p>You copy the <code class="docutils literal notranslate"><span class="pre">$CAMPAIGN_checklist.csv</span></code> into a google doc and use it to keep track of your submissions.</p>
+<p>When you are ready to run some jobs:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">make_pass1.py</span> <span class="pre">&lt;tag&gt;</span></code> makes a script that submits the pass1 jobs for <code class="docutils literal notranslate"><span class="pre">&lt;tag&gt;</span></code>
+If you run it without a tag, it lists the available tags.</p></li>
+</ul>
+</section>
+<section id="directory-structure-for-campaign1">
+<h2>Directory structure for ‘campaign1’<a class="headerlink" href="#directory-structure-for-campaign1" title="Link to this heading">¶</a></h2>
+<p>‘’’
+top_merge_dir
+|____campaign1
+|    |____merge-utils
+|    |    |____config
+|    |    |    |____misc
+|    |    |    |____hdf5
+|    |    |    |____defaults
+|    |    |    |____examples
+|    |    |    |____lar
+|    |    |    |____trg_mc_2025a
+|    |    |____tests
+|    |    |____docs
+|    |    |    |____source
+|    |    |____logs
+|    |    |____campaigns
+|    |    |    |____test_campaign
+|    |    |    |____campaign1
+|    |    |____src
+|    |    |    |____prod_utils
+|    |    |    |____merge_utils
+|    |    |    |____runners
+‘’’</p>
+</section>
+<section id="shifter-instructions">
+<h2>Shifter instructions<a class="headerlink" href="#shifter-instructions" title="Link to this heading">¶</a></h2>
+<ol class="arabic simple" start="0">
+<li><p>Make your campaign directory</p></li>
+</ol>
+<p>Run the setup procedure described in detail above and setup up a campaign directory under merge-utils/campaigns</p>
+<p>Once that is done, every time you login, get an apptainer, set <code class="docutils literal notranslate"><span class="pre">TOP_MERGE_DIR</span></code>, go to <code class="docutils literal notranslate"><span class="pre">$TOP_MERGE_DIR/$CAMPAIGN</span></code> and run <code class="docutils literal notranslate"><span class="pre">setup.sh</span></code> and you should be ready to go.</p>
+<ol class="arabic simple">
+<li><p>Set up your base csv file <code class="docutils literal notranslate"><span class="pre">$CAMPAIGN.csv</span></code>.  Each row represents a sub-campaign which can have different fcl, yaml and datasets but not different code versions.
+Each sub-campaign needs a unique tag.  The yaml file needs to contain the correct fcl file. Rows can share yaml files if you are running the same config on different datasets.</p></li>
+</ol>
+<p>Each campaign directory should containe a unique <code class="docutils literal notranslate"><span class="pre">$CAMPAIGN.csv</span></code> with the same suffix as the directory name.</p>
+<p>Reminder from above - fields are:</p>
+<p><code class="docutils literal notranslate"><span class="pre">TAG,DUNESW,FCL,CONFIG,CAMPAIGN,NAMESPACE,BATCH,DATASET</span></code></p>
+<ol class="arabic simple" start="2">
+<li><p>use <code class="docutils literal notranslate"><span class="pre">build_jobs</span></code>  to build the <code class="docutils literal notranslate"><span class="pre">$CAMPAIGN_jobs.csv</span></code> and <code class="docutils literal notranslate"><span class="pre">$CAMPAIGN_checklist.csv</span></code></p></li>
+</ol>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">build_jobs</span> 
+</pre></div>
+</div>
+<p>makes <code class="docutils literal notranslate"><span class="pre">$CAMPAIGN_jobs.csv</span></code> and <code class="docutils literal notranslate"><span class="pre">$CAMPAIGN_checklist.csv</span></code></p>
+<p>It will complain if you have not set up the right DUNESW version or if your yaml files are inconsistent with the fcl and campaign names.</p>
+<ol class="arabic simple" start="3">
+<li><p>When you are ready to run jobs you can then use this to generate sub-campaigns for each <code class="docutils literal notranslate"><span class="pre">fcl</span></code> file/dataset</p></li>
+</ol>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">make_pass1</span> <span class="o">&lt;</span><span class="n">tag</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>will make a long list of potential merge submissions, each of which has length <code class="docutils literal notranslate"><span class="pre">--limit</span></code> and skips by <code class="docutils literal notranslate"><span class="pre">--skip</span></code></p>
+<p>those merge submission commands are stored in <code class="docutils literal notranslate"><span class="pre">&lt;TAG.sh&gt;</span></code> so you can use them later.</p>
+<p>This is what they look like:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">merge</span>  <span class="o">-</span><span class="n">vv</span> <span class="o">-</span><span class="n">c</span> <span class="o">/</span><span class="n">Users</span><span class="o">/</span><span class="n">schellma</span><span class="o">/</span><span class="n">Dropbox</span><span class="o">/</span><span class="n">merge</span><span class="o">-</span><span class="n">utils</span><span class="o">/</span><span class="n">campaigns</span><span class="o">/</span><span class="n">trigprim</span><span class="o">-</span><span class="mi">2026</span><span class="o">-</span><span class="mi">03</span><span class="o">/</span><span class="n">triggerana_tree_1x2x2_simpleThr_production</span><span class="o">.</span><span class="n">yaml</span> <span class="o">--</span><span class="n">skip</span><span class="o">=</span><span class="mi">0</span> <span class="o">--</span><span class="n">limit</span><span class="o">=</span><span class="mi">2</span>  <span class="o">--</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;TEST-TRGSIM_CC_v1&quot;</span> <span class="n">dataset</span> 
+</pre></div>
+</div>
+<p>produces:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fardet</span><span class="o">-</span><span class="n">hd</span><span class="p">:</span><span class="n">fardet</span><span class="o">-</span><span class="n">hd__trg_mc_2025a__detector</span><span class="o">-</span><span class="n">simulated__v10_06_00d01__detsim_dune10kt_1x2x2_notpcsigproc__prodmarley_nue_flat_cc_dune10kt_1x2x2__out1__v1_official</span> <span class="o">&gt;</span> <span class="n">TEST</span><span class="o">-</span><span class="n">TRGSIM_CC_v1_20260321T161849_0</span><span class="o">.</span><span class="n">log</span> <span class="mi">2</span><span class="o">&gt;&amp;</span><span class="mi">1</span> 
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">-l</span></code> means run locally (remove to run as batch)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--retry</span></code> this checks every single file to see if it is a duplicate.  Not done by default</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-vv</span></code> means run verbose</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-c</span></code> points to the config gile</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--skip</span></code> skips n input files</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--limit</span></code> limits the # of files</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--tag</span></code> should be a unique tag for this workflow - you use this to check for duplicates and make the final merged file dataset</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">dataset</span></code> (could also be <code class="docutils literal notranslate"><span class="pre">query</span></code> or <code class="docutils literal notranslate"><span class="pre">list</span></code>) specifies what you will run over</p></li>
+</ul>
+<p>I have set this up to write to log files.</p>
+<ol class="arabic simple" start="4">
+<li><p>run some of those merge scripts.  You likely have to get a new token</p></li>
+</ol>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">justin</span> <span class="n">time</span>
+<span class="n">justin</span> <span class="n">get</span><span class="o">-</span><span class="n">token</span>
+</pre></div>
+</div>
+<p>the merge scripts will check your metadata for validity and set up jobscripts to run locally or through justIn.</p>
+<p>The last 2-3 lines of the merge scripts have the actual submission commands which look like:</p>
+<ul>
+<li><p>interactive
+‘/exp/dune/data/users/schellma/prod/merge-utils/tmp/TEST_hd_atmos_l000002_20260408T235613/run.sh’</p></li>
+<li><p>batch
+<code class="docutils literal notranslate"><span class="pre">/exp/dune/data/users/schellma/prod/merge-utils/tmp/TEST_hd_atmos_v4_l000500_20260417T174112/submit.sh</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">/exp/dune/data/users/schellma/prod/merge-utils/tmp/TEST_hd_atmos_v4_s000500_l000500_20260417T174145/submit.sh</span></code></p>
+</li>
+</ul>
+<p>note the timestamp <code class="docutils literal notranslate"><span class="pre">20260417T174145</span></code>, you will need to use it.</p>
+<p>You can pull them out by doing</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">grep</span> <span class="n">submit</span> <span class="o">*&lt;</span><span class="n">timestamp</span><span class="o">&gt;*.</span><span class="n">log</span>
+</pre></div>
+</div>
+<p>and then issue those commands and record the workflow numbers that come back from each one.</p>
+<ol class="arabic simple" start="5">
+<li><p>track your jobs.  Each campaign has a spreadsheet `$CAMPAIGN_checklist.csv$ which was generated when you run build_jobs</p></li>
+</ol>
+<p>upload the partially filled spreadsheet into google sheets.  It should have a line for every workflow you submitted.</p>
+<p>Fill in</p>
+<ul>
+<li><p>TAG - the sub-campaign, already filled</p></li>
+<li><p>SKIP - already filled, index within the group of sub-campaigns - you can get it from the submit command:
+<code class="docutils literal notranslate"><span class="pre">TEST_hd_atmos_v4_</span></code><em>s000500</em><code class="docutils literal notranslate"><span class="pre">_l000500_20260417T174145/submit.sh</span></code></p></li>
+<li><p>TIMESTAMP - the timestamp for the sumbit commands - from the submit command:
+TEST_hd_atmos_v4_s000500_l000500_<em>20260417T174145</em>/submit.sh</p></li>
+<li><p>PASS - pass1 or 2</p></li>
+<li><p>WORKFLOW iD - returned when you submit</p></li>
+<li><h1 class="rubric" id="of-jobs-look-in-justin-workflow-to-see-of-jobs">of jobs - look in justin workflow to see # of jobs</h1>
+</li>
+<li><p>status - once jobs runs</p></li>
+<li><p>#event/job</p></li>
+<li><p>#files</p></li>
+<li><p>success fraction</p></li>
+<li><p>total # of events</p></li>
+<li><p>volume (GB)</p></li>
+<li><p>comments</p></li>
+<li><p>DUNESW - already filled</p></li>
+<li><p>NFILES - already filled</p></li>
+<li><p>SIZE_GB - already filled</p></li>
+<li><p>BATCH - already filled</p></li>
+<li><p>FCL - already filled</p></li>
+<li><p>CONFIG - already filled</p></li>
+<li><p>CAMPAIGN - already filled</p></li>
+<li><p>NAMESPACE - already filled</p></li>
+<li><p>DATASET - already filled</p></li>
+</ul>
+<ol class="arabic simple" start="6">
+<li><p>What if I made a mistake or things went very badly.</p></li>
+</ol>
+<p>You can track your jobs at <a class="reference external" href="https://dunejustin.fnal.gov/dashboard/?method=list-workflows">the justin workflow page</a></p>
+<p>You can check pass1 by using:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">pass1_check</span> <span class="o">&lt;</span><span class="n">tag</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>You should see something like this if you check midway.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">pass1_check</span> <span class="n">TEST_hd_atmos_v3</span>
+<span class="n">nfiles</span> <span class="mi">980</span>
+<span class="n">pass1</span> <span class="n">this</span> <span class="n">tag</span> <span class="n">had</span>  <span class="mi">600</span> <span class="n">parents</span> <span class="ow">and</span>  <span class="mi">63500</span> <span class="n">events</span><span class="p">,</span> <span class="n">spread</span> <span class="n">across</span> <span class="mi">62</span> <span class="n">pass1</span> <span class="n">files</span>
+<span class="mi">600</span> <span class="mi">980</span>
+<span class="n">ERROR</span><span class="p">:</span> <span class="n">final</span> <span class="n">number</span> <span class="n">of</span> <span class="n">files</span> <span class="mi">600</span> <span class="ow">is</span> <span class="ow">not</span> <span class="o">=</span> <span class="n">the</span> <span class="nb">input</span> <span class="mi">980</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>if a workflow got paused, you can</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">justin</span> <span class="n">restart</span><span class="o">-</span><span class="n">workflow</span> <span class="n">workflow</span><span class="o">-</span><span class="nb">id</span><span class="o">=&lt;</span><span class="n">workflow</span><span class="o">-</span><span class="nb">id</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>if it still doesn’t complete properly, wait a few hours and do a rerun of <code class="docutils literal notranslate"><span class="pre">make_pass1</span></code> for the workflows that did not finish.</p></li>
+</ul>
+<p>The scripts have a –retry option that will ignore files that are already processed.</p>
+<ul class="simple">
+<li><p>if all else fails, you can increment the tag version and rerun the whole sub-campaign again.  Generally it is a better idea to copy the relevant lines in the jobs and checklist files and increment the version rather than replace the tag.</p></li>
+</ul>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">Campaigns</a><ul>
+<li><a class="reference internal" href="#setup">Setup</a></li>
+<li><a class="reference internal" href="#production-scripts">production scripts</a></li>
+<li><a class="reference internal" href="#directory-structure-for-campaign1">Directory structure for ‘campaign1’</a></li>
+<li><a class="reference internal" href="#shifter-instructions">Shifter instructions</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/Campaigns.md.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">merge-utils 1.0.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Campaigns</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Fermi National Accelerator Laboratory.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
+    </div>
+  </body>
+</html>

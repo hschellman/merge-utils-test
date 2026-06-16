@@ -5,18 +5,18 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>io_utils &#8212; merge-utils 0.0 documentation</title>
+    <title>io_utils &#8212; merge-utils 1.0.1 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="_static/nature.css?v=0f882399" />
     <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=fd3f3429" />
-    <script src="_static/documentation_options.js?v=837179f8"></script>
+    <script src="_static/documentation_options.js?v=292eb321"></script>
     <script src="_static/doctools.js?v=9a2dae69"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
-    <link rel="canonical" href="https://hschellman.github.io/merge-utils-test/io_utils.html" />
+    <link rel="canonical" href="https://dune.github.io/merge-utils/io_utils.html" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="metacat_utils" href="metacat_utils.html" />
-    <link rel="prev" title="local" href="local.html" /> 
+    <link rel="next" title="justin_utils" href="justin_utils.html" />
+    <link rel="prev" title="config" href="config.html" /> 
   </head><body>
     <div class="related" role="navigation" aria-label="Related">
       <h3>Navigation</h3>
@@ -28,12 +28,12 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="metacat_utils.html" title="metacat_utils"
+          <a href="justin_utils.html" title="justin_utils"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="local.html" title="local"
+          <a href="config.html" title="config"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">merge-utils 0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">merge-utils 1.0.1 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">io_utils</a></li> 
       </ul>
     </div>  
@@ -47,15 +47,34 @@
 <span id="id1"></span><h1>io_utils<a class="headerlink" href="#io-utils" title="Link to this heading">¶</a></h1>
 <p id="module-merge_utils.io_utils">Utilites for reading and writing files and other I/O operations</p>
 <dl class="py function">
-<dt class="sig sig-object py" id="merge_utils.io_utils.find_fcl">
-<span class="sig-prename descclassname"><span class="pre">merge_utils.io_utils.</span></span><span class="sig-name descname"><span class="pre">find_fcl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/merge_utils/io_utils.html#find_fcl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merge_utils.io_utils.find_fcl" title="Link to this definition">¶</a></dt>
-<dd><p>Find the full path to a FCL file</p>
+<dt class="sig sig-object py" id="merge_utils.io_utils.expand_path">
+<span class="sig-prename descclassname"><span class="pre">merge_utils.io_utils.</span></span><span class="sig-name descname"><span class="pre">expand_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/merge_utils/io_utils.html#expand_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merge_utils.io_utils.expand_path" title="Link to this definition">¶</a></dt>
+<dd><p>Expand environment variables and user home in a path.
+If the path is relative and a base directory is provided,
+make the path absolute using the base directory.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>name</strong> – Name of the FCL file</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> – Path to expand</p></li>
+<li><p><strong>base_dir</strong> – Base directory for relative paths</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Full path to the FCL file</p>
+<dd class="field-even"><p>Expanded path</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="merge_utils.io_utils.find_cfg">
+<span class="sig-prename descclassname"><span class="pre">merge_utils.io_utils.</span></span><span class="sig-name descname"><span class="pre">find_cfg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/merge_utils/io_utils.html#find_cfg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merge_utils.io_utils.find_cfg" title="Link to this definition">¶</a></dt>
+<dd><p>Find the full path to a configuration file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> – Name of the configuration file</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Full path to the configuration file</p>
 </dd>
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>FileNotFoundError</strong> – If the file does not exist</p>
@@ -64,23 +83,41 @@
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="merge_utils.io_utils.get_inputs">
-<span class="sig-prename descclassname"><span class="pre">merge_utils.io_utils.</span></span><span class="sig-name descname"><span class="pre">get_inputs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filelists</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/merge_utils/io_utils.html#get_inputs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merge_utils.io_utils.get_inputs" title="Link to this definition">¶</a></dt>
-<dd><p>Get a list of inputs from the the file lists and standard input</p>
+<dt class="sig sig-object py" id="merge_utils.io_utils.find_file">
+<span class="sig-prename descclassname"><span class="pre">merge_utils.io_utils.</span></span><span class="sig-name descname"><span class="pre">find_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dirs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recursive</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/merge_utils/io_utils.html#find_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merge_utils.io_utils.find_file" title="Link to this definition">¶</a></dt>
+<dd><p>Locate a file by name in a list of directories</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>filelists</strong> – full paths to files containing lists of entries</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> – File name or path to locate</p></li>
+<li><p><strong>dirs</strong> – List of directories to search</p></li>
+<li><p><strong>recursive</strong> – Check sub-directories recursively</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>combined list of entries</p>
+<dd class="field-even"><p>Full path to the located file</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>FileNotFoundError</strong> – If the file does not exist</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="merge_utils.io_utils.get_timestamp">
-<span class="sig-prename descclassname"><span class="pre">merge_utils.io_utils.</span></span><span class="sig-name descname"><span class="pre">get_timestamp</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/merge_utils/io_utils.html#get_timestamp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merge_utils.io_utils.get_timestamp" title="Link to this definition">¶</a></dt>
-<dd><p>Get the current timestamp as a string</p>
+<dt class="sig sig-object py" id="merge_utils.io_utils.find_runner">
+<span class="sig-prename descclassname"><span class="pre">merge_utils.io_utils.</span></span><span class="sig-name descname"><span class="pre">find_runner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/merge_utils/io_utils.html#find_runner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merge_utils.io_utils.find_runner" title="Link to this definition">¶</a></dt>
+<dd><p>Find the full path to a runner script</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> – Name of the runner script</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Full path to the runner script</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>FileNotFoundError</strong> – If the file does not exist</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -115,11 +152,11 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="merge_utils.io_utils.read_config_file">
-<span class="sig-prename descclassname"><span class="pre">merge_utils.io_utils.</span></span><span class="sig-name descname"><span class="pre">read_config_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="_modules/merge_utils/io_utils.html#read_config_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merge_utils.io_utils.read_config_file" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">merge_utils.io_utils.</span></span><span class="sig-name descname"><span class="pre">read_config_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="_modules/merge_utils/io_utils.html#read_config_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merge_utils.io_utils.read_config_file" title="Link to this definition">¶</a></dt>
 <dd><p>Read a configuration file in JSON, TOML, or YAML format</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>file_path</strong> – Path to the configuration file</p>
+<dd class="field-odd"><p><strong>name</strong> – Name of the configuration file</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Dictionary containing the configuration settings</p>
@@ -134,14 +171,34 @@
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="merge_utils.io_utils.read_json">
+<span class="sig-prename descclassname"><span class="pre">merge_utils.io_utils.</span></span><span class="sig-name descname"><span class="pre">read_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="_modules/merge_utils/io_utils.html#read_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merge_utils.io_utils.read_json" title="Link to this definition">¶</a></dt>
+<dd><p>Read a JSON file and return its contents as a dictionary</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> – Path to the JSON file</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Dictionary containing the JSON data</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="merge_utils.io_utils.set_log_level">
 <span class="sig-prename descclassname"><span class="pre">merge_utils.io_utils.</span></span><span class="sig-name descname"><span class="pre">set_log_level</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/merge_utils/io_utils.html#set_log_level"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merge_utils.io_utils.set_log_level" title="Link to this definition">¶</a></dt>
 <dd><p>Override the logging level for the console</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="merge_utils.io_utils.setup_job_dir">
+<span class="sig-prename descclassname"><span class="pre">merge_utils.io_utils.</span></span><span class="sig-name descname"><span class="pre">setup_job_dir</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/merge_utils/io_utils.html#setup_job_dir"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merge_utils.io_utils.setup_job_dir" title="Link to this definition">¶</a></dt>
+<dd><p>Setup the tmp directory for this job</p>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="merge_utils.io_utils.setup_log">
-<span class="sig-prename descclassname"><span class="pre">merge_utils.io_utils.</span></span><span class="sig-name descname"><span class="pre">setup_log</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbosity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/merge_utils/io_utils.html#setup_log"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merge_utils.io_utils.setup_log" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">merge_utils.io_utils.</span></span><span class="sig-name descname"><span class="pre">setup_log</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbosity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/merge_utils/io_utils.html#setup_log"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merge_utils.io_utils.setup_log" title="Link to this definition">¶</a></dt>
 <dd><p>Configure logging</p>
 </dd></dl>
 
@@ -164,16 +221,19 @@
     <h3><a href="index.html">Table of Contents</a></h3>
     <ul>
 <li><a class="reference internal" href="#">io_utils</a><ul>
-<li><a class="reference internal" href="#merge_utils.io_utils.find_fcl"><code class="docutils literal notranslate"><span class="pre">find_fcl()</span></code></a></li>
-<li><a class="reference internal" href="#merge_utils.io_utils.get_inputs"><code class="docutils literal notranslate"><span class="pre">get_inputs()</span></code></a></li>
-<li><a class="reference internal" href="#merge_utils.io_utils.get_timestamp"><code class="docutils literal notranslate"><span class="pre">get_timestamp()</span></code></a></li>
+<li><a class="reference internal" href="#merge_utils.io_utils.expand_path"><code class="docutils literal notranslate"><span class="pre">expand_path()</span></code></a></li>
+<li><a class="reference internal" href="#merge_utils.io_utils.find_cfg"><code class="docutils literal notranslate"><span class="pre">find_cfg()</span></code></a></li>
+<li><a class="reference internal" href="#merge_utils.io_utils.find_file"><code class="docutils literal notranslate"><span class="pre">find_file()</span></code></a></li>
+<li><a class="reference internal" href="#merge_utils.io_utils.find_runner"><code class="docutils literal notranslate"><span class="pre">find_runner()</span></code></a></li>
 <li><a class="reference internal" href="#merge_utils.io_utils.log_dict"><code class="docutils literal notranslate"><span class="pre">log_dict()</span></code></a></li>
 <li><a class="reference internal" href="#merge_utils.io_utils.log_list"><code class="docutils literal notranslate"><span class="pre">log_list()</span></code></a></li>
 <li><a class="reference internal" href="#merge_utils.io_utils.log_nonzero"><code class="docutils literal notranslate"><span class="pre">log_nonzero()</span></code></a></li>
 <li><a class="reference internal" href="#merge_utils.io_utils.log_print"><code class="docutils literal notranslate"><span class="pre">log_print()</span></code></a></li>
 <li><a class="reference internal" href="#merge_utils.io_utils.pkg_dir"><code class="docutils literal notranslate"><span class="pre">pkg_dir()</span></code></a></li>
 <li><a class="reference internal" href="#merge_utils.io_utils.read_config_file"><code class="docutils literal notranslate"><span class="pre">read_config_file()</span></code></a></li>
+<li><a class="reference internal" href="#merge_utils.io_utils.read_json"><code class="docutils literal notranslate"><span class="pre">read_json()</span></code></a></li>
 <li><a class="reference internal" href="#merge_utils.io_utils.set_log_level"><code class="docutils literal notranslate"><span class="pre">set_log_level()</span></code></a></li>
+<li><a class="reference internal" href="#merge_utils.io_utils.setup_job_dir"><code class="docutils literal notranslate"><span class="pre">setup_job_dir()</span></code></a></li>
 <li><a class="reference internal" href="#merge_utils.io_utils.setup_log"><code class="docutils literal notranslate"><span class="pre">setup_log()</span></code></a></li>
 <li><a class="reference internal" href="#merge_utils.io_utils.src_dir"><code class="docutils literal notranslate"><span class="pre">src_dir()</span></code></a></li>
 </ul>
@@ -183,13 +243,13 @@
   </div>
   <div>
     <h4>Previous topic</h4>
-    <p class="topless"><a href="local.html"
-                          title="previous chapter">local</a></p>
+    <p class="topless"><a href="config.html"
+                          title="previous chapter">config</a></p>
   </div>
   <div>
     <h4>Next topic</h4>
-    <p class="topless"><a href="metacat_utils.html"
-                          title="next chapter">metacat_utils</a></p>
+    <p class="topless"><a href="justin_utils.html"
+                          title="next chapter">justin_utils</a></p>
   </div>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
@@ -222,12 +282,12 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="metacat_utils.html" title="metacat_utils"
+          <a href="justin_utils.html" title="justin_utils"
              >next</a> |</li>
         <li class="right" >
-          <a href="local.html" title="local"
+          <a href="config.html" title="config"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">merge-utils 0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">merge-utils 1.0.1 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">io_utils</a></li> 
       </ul>
     </div>

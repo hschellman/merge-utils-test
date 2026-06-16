@@ -5,18 +5,16 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>do_merge &#8212; merge-utils 0.0 documentation</title>
+    <title>do_merge &#8212; merge-utils 1.0.1 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="_static/nature.css?v=0f882399" />
     <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=fd3f3429" />
-    <script src="_static/documentation_options.js?v=837179f8"></script>
+    <script src="_static/documentation_options.js?v=292eb321"></script>
     <script src="_static/doctools.js?v=9a2dae69"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
-    <link rel="canonical" href="https://hschellman.github.io/merge-utils-test/do_merge.html" />
+    <link rel="canonical" href="https://dune.github.io/merge-utils/do_merge.html" />
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="config" href="config.html" />
-    <link rel="prev" title="valid_values.json" href="valid_values.html" /> 
+    <link rel="search" title="Search" href="search.html" /> 
   </head><body>
     <div class="related" role="navigation" aria-label="Related">
       <h3>Navigation</h3>
@@ -27,13 +25,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="right" >
-          <a href="config.html" title="config"
-             accesskey="N">next</a> |</li>
-        <li class="right" >
-          <a href="valid_values.html" title="valid_values.json"
-             accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">merge-utils 0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">merge-utils 1.0.1 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">do_merge</a></li> 
       </ul>
     </div>  
@@ -43,57 +35,8 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <section id="module-do_merge">
-<span id="do-merge"></span><h1>do_merge<a class="headerlink" href="#module-do_merge" title="Link to this heading">¶</a></h1>
-<p>Actually perform the merging</p>
-<dl class="py function">
-<dt class="sig sig-object py" id="do_merge.checksums">
-<span class="sig-prename descclassname"><span class="pre">do_merge.</span></span><span class="sig-name descname"><span class="pre">checksums</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="_modules/do_merge.html#checksums"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#do_merge.checksums" title="Link to this definition">¶</a></dt>
-<dd><p>Calculate the checksum of a file</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="do_merge.local_copy">
-<span class="sig-prename descclassname"><span class="pre">do_merge.</span></span><span class="sig-name descname"><span class="pre">local_copy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outdir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/do_merge.html#local_copy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#do_merge.local_copy" title="Link to this definition">¶</a></dt>
-<dd><p>Make a local copy of the input files</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="do_merge.main">
-<span class="sig-prename descclassname"><span class="pre">do_merge.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/do_merge.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#do_merge.main" title="Link to this definition">¶</a></dt>
-<dd><p>Main function for command line execution</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="do_merge.merge">
-<span class="sig-prename descclassname"><span class="pre">do_merge.</span></span><span class="sig-name descname"><span class="pre">merge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outdir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/do_merge.html#merge"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#do_merge.merge" title="Link to this definition">¶</a></dt>
-<dd><p>Merge the input files into a single output file</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="do_merge.merge_hadd">
-<span class="sig-prename descclassname"><span class="pre">do_merge.</span></span><span class="sig-name descname"><span class="pre">merge_hadd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inputs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/do_merge.html#merge_hadd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#do_merge.merge_hadd" title="Link to this definition">¶</a></dt>
-<dd><p>Merge the input files using hadd</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="do_merge.merge_hdf5">
-<span class="sig-prename descclassname"><span class="pre">do_merge.</span></span><span class="sig-name descname"><span class="pre">merge_hdf5</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inputs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cfg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/do_merge.html#merge_hdf5"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#do_merge.merge_hdf5" title="Link to this definition">¶</a></dt>
-<dd><p>Merge the input files into an HDF5 file</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="do_merge.merge_lar">
-<span class="sig-prename descclassname"><span class="pre">do_merge.</span></span><span class="sig-name descname"><span class="pre">merge_lar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inputs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cfg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/do_merge.html#merge_lar"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#do_merge.merge_lar" title="Link to this definition">¶</a></dt>
-<dd><p>Merge the input files using lar</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="do_merge.merge_tar">
-<span class="sig-prename descclassname"><span class="pre">do_merge.</span></span><span class="sig-name descname"><span class="pre">merge_tar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inputs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/do_merge.html#merge_tar"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#do_merge.merge_tar" title="Link to this definition">¶</a></dt>
-<dd><p>Merge the input files into a tar.gz archive</p>
-</dd></dl>
-
+  <section id="do-merge">
+<h1>do_merge<a class="headerlink" href="#do-merge" title="Link to this heading">¶</a></h1>
 </section>
 
 
@@ -103,33 +46,6 @@
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper">
-  <div>
-    <h3><a href="index.html">Table of Contents</a></h3>
-    <ul>
-<li><a class="reference internal" href="#">do_merge</a><ul>
-<li><a class="reference internal" href="#do_merge.checksums"><code class="docutils literal notranslate"><span class="pre">checksums()</span></code></a></li>
-<li><a class="reference internal" href="#do_merge.local_copy"><code class="docutils literal notranslate"><span class="pre">local_copy()</span></code></a></li>
-<li><a class="reference internal" href="#do_merge.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
-<li><a class="reference internal" href="#do_merge.merge"><code class="docutils literal notranslate"><span class="pre">merge()</span></code></a></li>
-<li><a class="reference internal" href="#do_merge.merge_hadd"><code class="docutils literal notranslate"><span class="pre">merge_hadd()</span></code></a></li>
-<li><a class="reference internal" href="#do_merge.merge_hdf5"><code class="docutils literal notranslate"><span class="pre">merge_hdf5()</span></code></a></li>
-<li><a class="reference internal" href="#do_merge.merge_lar"><code class="docutils literal notranslate"><span class="pre">merge_lar()</span></code></a></li>
-<li><a class="reference internal" href="#do_merge.merge_tar"><code class="docutils literal notranslate"><span class="pre">merge_tar()</span></code></a></li>
-</ul>
-</li>
-</ul>
-
-  </div>
-  <div>
-    <h4>Previous topic</h4>
-    <p class="topless"><a href="valid_values.html"
-                          title="previous chapter">valid_values.json</a></p>
-  </div>
-  <div>
-    <h4>Next topic</h4>
-    <p class="topless"><a href="config.html"
-                          title="next chapter">config</a></p>
-  </div>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -160,13 +76,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="right" >
-          <a href="config.html" title="config"
-             >next</a> |</li>
-        <li class="right" >
-          <a href="valid_values.html" title="valid_values.json"
-             >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">merge-utils 0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">merge-utils 1.0.1 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">do_merge</a></li> 
       </ul>
     </div>

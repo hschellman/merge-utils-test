@@ -5,18 +5,18 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>justin_utils &#8212; merge-utils 0.0 documentation</title>
+    <title>justin_utils &#8212; merge-utils 1.0.1 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="_static/nature.css?v=0f882399" />
     <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=fd3f3429" />
-    <script src="_static/documentation_options.js?v=837179f8"></script>
+    <script src="_static/documentation_options.js?v=292eb321"></script>
     <script src="_static/doctools.js?v=9a2dae69"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
-    <link rel="canonical" href="https://hschellman.github.io/merge-utils-test/justin_utils.html" />
+    <link rel="canonical" href="https://dune.github.io/merge-utils/justin_utils.html" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="merge_rse" href="merge_rse.html" />
-    <link rel="prev" title="rucio_utils" href="rucio_utils.html" /> 
+    <link rel="next" title="merge_set" href="merge_set.html" />
+    <link rel="prev" title="io_utils" href="io_utils.html" /> 
   </head><body>
     <div class="related" role="navigation" aria-label="Related">
       <h3>Navigation</h3>
@@ -28,12 +28,12 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="merge_rse.html" title="merge_rse"
+          <a href="merge_set.html" title="merge_set"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="rucio_utils.html" title="rucio_utils"
+          <a href="io_utils.html" title="io_utils"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">merge-utils 0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">merge-utils 1.0.1 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">justin_utils</a></li> 
       </ul>
     </div>  
@@ -45,11 +45,18 @@
             
   <section id="module-merge_utils.justin_utils">
 <span id="justin-utils"></span><h1>justin_utils<a class="headerlink" href="#module-merge_utils.justin_utils" title="Link to this heading">¶</a></h1>
-<p>Utilities for running justin jobs</p>
+<p>Utility functions for interacting with the JustIN web API.</p>
 <dl class="py function">
-<dt class="sig sig-object py" id="merge_utils.justin_utils.get_distances">
-<span class="sig-prename descclassname"><span class="pre">merge_utils.justin_utils.</span></span><span class="sig-name descname"><span class="pre">get_distances</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sites</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rses</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="_modules/merge_utils/justin_utils.html#get_distances"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merge_utils.justin_utils.get_distances" title="Link to this definition">¶</a></dt>
-<dd><p>Get the distances between sites and storage elements</p>
+<dt class="sig sig-object py" id="merge_utils.justin_utils.get_site_rse_distances">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">merge_utils.justin_utils.</span></span><span class="sig-name descname"><span class="pre">get_site_rse_distances</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="_modules/merge_utils/justin_utils.html#get_site_rse_distances"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merge_utils.justin_utils.get_site_rse_distances" title="Link to this definition">¶</a></dt>
+<dd><p>Retrieve site-RSE distances from the JustIN web API.
+Adds site distance offsets from the config
+Does NOT add RSE distance offsets, since those are already accounted for by the PathFinder</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dictionary of {rse: {site: distance}} for all reachable site-RSE pairs</p>
+</dd>
+</dl>
 </dd></dl>
 
 </section>
@@ -65,7 +72,7 @@
     <h3><a href="index.html">Table of Contents</a></h3>
     <ul>
 <li><a class="reference internal" href="#">justin_utils</a><ul>
-<li><a class="reference internal" href="#merge_utils.justin_utils.get_distances"><code class="docutils literal notranslate"><span class="pre">get_distances()</span></code></a></li>
+<li><a class="reference internal" href="#merge_utils.justin_utils.get_site_rse_distances"><code class="docutils literal notranslate"><span class="pre">get_site_rse_distances()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -73,13 +80,13 @@
   </div>
   <div>
     <h4>Previous topic</h4>
-    <p class="topless"><a href="rucio_utils.html"
-                          title="previous chapter">rucio_utils</a></p>
+    <p class="topless"><a href="io_utils.html"
+                          title="previous chapter">io_utils</a></p>
   </div>
   <div>
     <h4>Next topic</h4>
-    <p class="topless"><a href="merge_rse.html"
-                          title="next chapter">merge_rse</a></p>
+    <p class="topless"><a href="merge_set.html"
+                          title="next chapter">merge_set</a></p>
   </div>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
@@ -112,12 +119,12 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="merge_rse.html" title="merge_rse"
+          <a href="merge_set.html" title="merge_set"
              >next</a> |</li>
         <li class="right" >
-          <a href="rucio_utils.html" title="rucio_utils"
+          <a href="io_utils.html" title="io_utils"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">merge-utils 0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">merge-utils 1.0.1 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">justin_utils</a></li> 
       </ul>
     </div>

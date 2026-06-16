@@ -5,17 +5,17 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>metadata.yaml &#8212; merge-utils 0.0 documentation</title>
+    <title>metadata.yaml &#8212; merge-utils 1.0.1 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="_static/nature.css?v=0f882399" />
     <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=fd3f3429" />
-    <script src="_static/documentation_options.js?v=837179f8"></script>
+    <script src="_static/documentation_options.js?v=292eb321"></script>
     <script src="_static/doctools.js?v=9a2dae69"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
-    <link rel="canonical" href="https://hschellman.github.io/merge-utils-test/metadata.html" />
+    <link rel="canonical" href="https://dune.github.io/merge-utils/metadata.html" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="logging.json" href="logging.html" />
+    <link rel="next" title="merge" href="scripts.html" />
     <link rel="prev" title="defaults.yaml" href="defaults.html" /> 
   </head><body>
     <div class="related" role="navigation" aria-label="Related">
@@ -28,12 +28,12 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="logging.html" title="logging.json"
+          <a href="scripts.html" title="merge"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="defaults.html" title="defaults.yaml"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">merge-utils 0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">merge-utils 1.0.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="configuration.html" accesskey="U">Configuration</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">metadata.yaml</a></li> 
       </ul>
@@ -47,6 +47,309 @@
   <section id="metadata-yaml">
 <span id="metadata"></span><h1>metadata.yaml<a class="headerlink" href="#metadata-yaml" title="Link to this heading">¶</a></h1>
 <p>set in <a class="reference internal" href="config.html#config"><span class="std std-ref">config</span></a></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">metadata</span><span class="p">:</span>
+    <span class="n">fixes</span><span class="p">:</span>  <span class="c1"># Fix common issues with the metadata</span>
+        <span class="n">bad_keys</span><span class="p">:</span>       <span class="c1"># Misspelled keys</span>
+            <span class="s2">&quot;DUNE.requestid&quot;</span><span class="p">:</span> <span class="s2">&quot;dune.requestid&quot;</span>
+        <span class="n">missing_keys</span><span class="p">:</span>   <span class="c1"># Default values for missing keys</span>
+            <span class="s2">&quot;core.file_content_status&quot;</span><span class="p">:</span> <span class="s2">&quot;good&quot;</span>
+            <span class="s2">&quot;retention.status&quot;</span><span class="p">:</span> <span class="s2">&quot;active&quot;</span>
+            <span class="s2">&quot;retention.class&quot;</span><span class="p">:</span> <span class="s2">&quot;unknown&quot;</span>
+        <span class="n">bad_values</span><span class="p">:</span>     <span class="c1"># Misspelled values</span>
+            <span class="s2">&quot;core.data_tier&quot;</span><span class="p">:</span>
+                <span class="s2">&quot;pandora_info&quot;</span><span class="p">:</span> <span class="s2">&quot;pandora-info&quot;</span>
+                <span class="s2">&quot;trigger-primitives&quot;</span><span class="p">:</span> <span class="s2">&quot;trigprim&quot;</span>
+            <span class="s2">&quot;core.data_stream&quot;</span><span class="p">:</span>
+                <span class="s2">&quot;Test&quot;</span><span class="p">:</span> <span class="s2">&quot;test&quot;</span>
+                <span class="s2">&quot;Cosmics&quot;</span><span class="p">:</span> <span class="s2">&quot;cosmics&quot;</span>
+                <span class="s2">&quot;pdstl&quot;</span><span class="p">:</span> <span class="s2">&quot;pedestal&quot;</span> <span class="c1"># Not completely sure about this one</span>
+            <span class="s2">&quot;core.file_format&quot;</span><span class="p">:</span>
+                <span class="s2">&quot;tfile&quot;</span><span class="p">:</span> <span class="s2">&quot;root&quot;</span>     <span class="c1"># </span>
+    <span class="n">types</span><span class="p">:</span>   <span class="c1"># These keys must have the correct types</span>
+        <span class="s2">&quot;core.application.family&quot;</span><span class="p">:</span>  <span class="s1">&#39;str&#39;</span>
+        <span class="s2">&quot;core.application.name&quot;</span><span class="p">:</span>    <span class="s1">&#39;str&#39;</span>
+        <span class="s2">&quot;core.application.version&quot;</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span>
+        <span class="s2">&quot;core.data_stream&quot;</span><span class="p">:</span>         <span class="s1">&#39;str&#39;</span>
+        <span class="s2">&quot;core.data_tier&quot;</span><span class="p">:</span>           <span class="s1">&#39;str&#39;</span>
+        <span class="s2">&quot;core.end_time&quot;</span><span class="p">:</span>            <span class="s1">&#39;float&#39;</span>
+        <span class="s2">&quot;core.event_count&quot;</span><span class="p">:</span>         <span class="s1">&#39;int&#39;</span>
+        <span class="s2">&quot;core.events&quot;</span><span class="p">:</span>              <span class="s1">&#39;list&#39;</span>
+        <span class="s2">&quot;core.file_content_status&quot;</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span>
+        <span class="s2">&quot;core.file_format&quot;</span><span class="p">:</span>         <span class="s1">&#39;str&#39;</span>
+        <span class="s2">&quot;core.file_type&quot;</span><span class="p">:</span>           <span class="s1">&#39;str&#39;</span>
+        <span class="s2">&quot;core.first_event_number&quot;</span><span class="p">:</span>  <span class="s1">&#39;int&#39;</span>
+        <span class="s2">&quot;core.last_event_number&quot;</span><span class="p">:</span>   <span class="s1">&#39;int&#39;</span>
+        <span class="s2">&quot;core.run_type&quot;</span><span class="p">:</span>            <span class="s1">&#39;str&#39;</span>
+        <span class="s2">&quot;core.runs&quot;</span><span class="p">:</span>                <span class="s1">&#39;list&#39;</span>
+        <span class="s2">&quot;core.runs_subruns&quot;</span><span class="p">:</span>        <span class="s1">&#39;list&#39;</span>
+        <span class="s2">&quot;core.start_time&quot;</span><span class="p">:</span>          <span class="s1">&#39;float&#39;</span>
+        <span class="s2">&quot;dune.daq_test&quot;</span><span class="p">:</span>            <span class="s1">&#39;bool&#39;</span>
+        <span class="s2">&quot;dune.config_file&quot;</span><span class="p">:</span>         <span class="s1">&#39;str&#39;</span>
+        <span class="s2">&quot;dune_mc.gen_fcl_filename&quot;</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span>
+        <span class="s2">&quot;dune_mc.geometry_version&quot;</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span>
+        <span class="s2">&quot;retention.status&quot;</span><span class="p">:</span>         <span class="s1">&#39;str&#39;</span>
+        <span class="s2">&quot;retention.class&quot;</span><span class="p">:</span>          <span class="s1">&#39;str&#39;</span>
+    <span class="n">restricted</span><span class="p">:</span>   <span class="c1"># These keys must have a valid value</span>
+        <span class="s2">&quot;core.run_type&quot;</span><span class="p">:</span>
+          <span class="o">-</span> <span class="s2">&quot;test&quot;</span>
+          <span class="o">-</span> <span class="s2">&quot;protodune-sp&quot;</span>
+          <span class="o">-</span> <span class="s2">&quot;protodune-dp&quot;</span>
+          <span class="o">-</span> <span class="s2">&quot;iceberg&quot;</span>
+          <span class="o">-</span> <span class="s2">&quot;np04_vst&quot;</span>
+          <span class="o">-</span> <span class="s2">&quot;hd-coldbox&quot;</span>
+          <span class="o">-</span> <span class="s2">&quot;vd-coldbox&quot;</span>
+          <span class="o">-</span> <span class="s2">&quot;vd-coldbox-bottom&quot;</span>
+          <span class="o">-</span> <span class="s2">&quot;vd-coldbox-top&quot;</span>
+          <span class="o">-</span> <span class="s2">&quot;protodune-hd&quot;</span>          <span class="c1"># old script</span>
+          <span class="o">-</span> <span class="s2">&quot;hd-protodune&quot;</span>
+          <span class="o">-</span> <span class="s2">&quot;vd-protodune&quot;</span>
+          <span class="o">-</span> <span class="s2">&quot;vd-protodune-pds&quot;</span>
+          <span class="o">-</span> <span class="s2">&quot;dc4-vd-coldbox-bottom&quot;</span>
+          <span class="o">-</span> <span class="s2">&quot;dc4-vd-coldbox-top&quot;</span>
+          <span class="o">-</span> <span class="s2">&quot;dc4-hd-protodune&quot;</span>      <span class="c1"># old script</span>
+          <span class="o">-</span> <span class="s2">&quot;neardet&quot;</span>
+          <span class="o">-</span> <span class="s2">&quot;neardet-lar&quot;</span>
+          <span class="o">-</span> <span class="s2">&quot;neardet-2x2&quot;</span>           <span class="c1"># old script</span>
+          <span class="o">-</span> <span class="s2">&quot;neardet-2x2-lar&quot;</span>       <span class="c1"># old script</span>
+          <span class="o">-</span> <span class="s2">&quot;neardet-2x2-lar-charge&quot;</span>
+          <span class="o">-</span> <span class="s2">&quot;neardet-2x2-lar-light&quot;</span>
+          <span class="o">-</span> <span class="s2">&quot;neardet-2x2-minerva&quot;</span>   <span class="c1"># old script</span>
+          <span class="o">-</span> <span class="s2">&quot;fardet&quot;</span>                <span class="c1"># old script</span>
+          <span class="o">-</span> <span class="s2">&quot;fardet-sp&quot;</span>             <span class="c1"># old script</span>
+          <span class="o">-</span> <span class="s2">&quot;fardet-hd&quot;</span>             <span class="c1"># old script</span>
+          <span class="o">-</span> <span class="s2">&quot;fardet-vd&quot;</span>             <span class="c1"># old script</span>
+          <span class="o">-</span> <span class="s2">&quot;311&quot;</span>                   <span class="c1"># old script</span>
+          <span class="o">-</span> <span class="s2">&quot;311_dp_light&quot;</span>          <span class="c1"># old script</span>
+        <span class="c1"># Other keys from metacat</span>
+          <span class="o">-</span> <span class="s2">&quot;physics&quot;</span>
+          <span class="o">-</span> <span class="s2">&quot;ehn1-beam-np04&quot;</span>
+        <span class="c1"># - &quot;justin-tutorial&quot;</span>
+        <span class="s2">&quot;core.file_type&quot;</span><span class="p">:</span>
+          <span class="o">-</span> <span class="s2">&quot;mc&quot;</span>
+          <span class="o">-</span> <span class="s2">&quot;detector&quot;</span>
+          <span class="o">-</span> <span class="s2">&quot;importedDetector&quot;</span>      <span class="c1"># old script, minerva</span>
+        <span class="c1"># Other keys from metacat</span>
+        <span class="c1"># - &quot;unknown&quot;</span>
+        <span class="c1"># - &quot;test-data&quot;</span>
+        <span class="c1"># - &quot;binary&quot;</span>
+        <span class="c1"># - &quot;photon_detector&quot;</span>
+        <span class="c1"># - &quot;test&quot;</span>
+        <span class="c1"># - &quot;dc1simdaq&quot;</span>
+        <span class="c1"># - &quot;data&quot;</span>
+        <span class="s2">&quot;core.data_stream&quot;</span><span class="p">:</span>
+          <span class="o">-</span> <span class="s2">&quot;test&quot;</span>
+          <span class="o">-</span> <span class="s2">&quot;out1&quot;</span>
+          <span class="o">-</span> <span class="s2">&quot;out2&quot;</span>
+          <span class="o">-</span> <span class="s2">&quot;noise&quot;</span>
+          <span class="o">-</span> <span class="s2">&quot;cosmics&quot;</span>
+          <span class="o">-</span> <span class="s2">&quot;calibration&quot;</span>
+          <span class="o">-</span> <span class="s2">&quot;physics&quot;</span>
+          <span class="o">-</span> <span class="s2">&quot;commissioning&quot;</span>
+          <span class="o">-</span> <span class="s2">&quot;pedestal&quot;</span>
+          <span class="o">-</span> <span class="s2">&quot;study&quot;</span>
+          <span class="o">-</span> <span class="s2">&quot;trigprim&quot;</span>
+          <span class="o">-</span> <span class="s2">&quot;pdstl&quot;</span>
+          <span class="o">-</span> <span class="s2">&quot;linjc&quot;</span>
+          <span class="o">-</span> <span class="s2">&quot;numib&quot;</span>
+          <span class="o">-</span> <span class="s2">&quot;numip&quot;</span>
+          <span class="o">-</span> <span class="s2">&quot;numil&quot;</span>
+        <span class="c1"># Other keys from metacat</span>
+          <span class="o">-</span> <span class="s2">&quot;g4beamline&quot;</span>
+        <span class="s2">&quot;core.data_tier&quot;</span><span class="p">:</span>
+          <span class="o">-</span> <span class="s2">&quot;simulated&quot;</span>
+          <span class="o">-</span> <span class="s2">&quot;raw&quot;</span>
+          <span class="o">-</span> <span class="s2">&quot;hit-reconstructed&quot;</span>
+          <span class="o">-</span> <span class="s2">&quot;full-reconstructed&quot;</span>
+          <span class="o">-</span> <span class="s2">&quot;generated&quot;</span>
+          <span class="o">-</span> <span class="s2">&quot;detector-simulated&quot;</span>
+          <span class="o">-</span> <span class="s2">&quot;root-tuple&quot;</span>
+          <span class="o">-</span> <span class="s2">&quot;root-hist&quot;</span>
+          <span class="o">-</span> <span class="s2">&quot;decoded-raw&quot;</span>
+          <span class="o">-</span> <span class="s2">&quot;pandora-info&quot;</span>
+          <span class="o">-</span> <span class="s2">&quot;reco-recalibrated&quot;</span>
+          <span class="o">-</span> <span class="s2">&quot;root-tuple-virtual&quot;</span>
+          <span class="o">-</span> <span class="s2">&quot;trigprim&quot;</span>
+          <span class="o">-</span> <span class="s2">&quot;caf&quot;</span>
+          <span class="o">-</span> <span class="s2">&quot;sliced&quot;</span>              <span class="c1"># old script</span>
+          <span class="o">-</span> <span class="s2">&quot;dc1input&quot;</span>            <span class="c1"># old script</span>
+          <span class="o">-</span> <span class="s2">&quot;binary-raw&quot;</span>          <span class="c1"># old script</span>
+          <span class="o">-</span> <span class="s2">&quot;sam-user&quot;</span>            <span class="c1"># old script</span>
+        <span class="c1"># Other keys from metacat</span>
+        <span class="c1"># - &quot;test&quot;</span>
+        <span class="c1"># - &quot;stage1&quot;</span>
+        <span class="c1"># - &quot;stage2&quot;</span>
+        <span class="s2">&quot;core.file_format&quot;</span><span class="p">:</span>
+          <span class="o">-</span> <span class="s2">&quot;root&quot;</span>
+          <span class="o">-</span> <span class="s2">&quot;artroot&quot;</span>
+          <span class="o">-</span> <span class="s2">&quot;binary&quot;</span>
+          <span class="o">-</span> <span class="s2">&quot;rootntuple&quot;</span>
+          <span class="o">-</span> <span class="s2">&quot;hdf5&quot;</span>
+          <span class="o">-</span> <span class="s2">&quot;tar&quot;</span>
+        <span class="c1"># - &quot;unknown&quot;</span>
+        <span class="s2">&quot;dune.output_status&quot;</span><span class="p">:</span>
+          <span class="o">-</span> <span class="s2">&quot;confirmed&quot;</span>
+    <span class="n">required</span><span class="p">:</span>     <span class="c1"># These keys are required for all files</span>
+      <span class="o">-</span> <span class="s2">&quot;core.data_stream&quot;</span>
+      <span class="o">-</span> <span class="s2">&quot;core.data_tier&quot;</span>
+    <span class="c1"># - &quot;core.end_time&quot;</span>
+      <span class="o">-</span> <span class="s2">&quot;core.file_content_status&quot;</span>
+      <span class="o">-</span> <span class="s2">&quot;core.file_format&quot;</span>
+      <span class="o">-</span> <span class="s2">&quot;core.file_type&quot;</span>
+      <span class="o">-</span> <span class="s2">&quot;core.run_type&quot;</span>
+      <span class="o">-</span> <span class="s2">&quot;core.runs&quot;</span>
+    <span class="c1"># - &quot;core.start_time&quot;</span>
+      <span class="o">-</span> <span class="s2">&quot;retention.status&quot;</span>
+      <span class="o">-</span> <span class="s2">&quot;retention.class&quot;</span>
+    <span class="n">conditional</span><span class="p">:</span>  <span class="c1"># These keys are required for some file types</span>
+      <span class="o">-</span> <span class="n">cond</span><span class="p">:</span> <span class="s2">&quot;&#39;</span><span class="si">{core.file_type}</span><span class="s2">&#39; == &#39;mc&#39;&quot;</span>
+        <span class="n">required</span><span class="p">:</span>
+          <span class="o">-</span> <span class="s2">&quot;dune_mc.gen_fcl_filename&quot;</span>
+          <span class="o">-</span> <span class="s2">&quot;dune_mc.geometry_version&quot;</span>
+      <span class="o">-</span> <span class="n">cond</span><span class="p">:</span> <span class="s2">&quot;&#39;</span><span class="si">{core.data_tier}</span><span class="s2">&#39; in [&#39;raw&#39;, &#39;binary-raw&#39;, &#39;trigprim&#39;]&quot;</span>
+        <span class="n">required</span><span class="p">:</span>
+          <span class="o">-</span> <span class="s2">&quot;core.event_count&quot;</span>
+          <span class="o">-</span> <span class="s2">&quot;core.first_event_number&quot;</span>
+          <span class="o">-</span> <span class="s2">&quot;core.last_event_number&quot;</span>
+      <span class="o">-</span> <span class="n">cond</span><span class="p">:</span> <span class="s2">&quot;&#39;</span><span class="si">{core.data_tier}</span><span class="s2">&#39; in [&#39;root-tuple&#39;, &#39;root-tuple-virtual&#39;]&quot;</span>
+        <span class="n">required</span><span class="p">:</span>
+          <span class="o">-</span> <span class="s2">&quot;dune.config_file&quot;</span>
+          <span class="o">-</span> <span class="s2">&quot;core.application.family&quot;</span>
+          <span class="o">-</span> <span class="s2">&quot;core.application.name&quot;</span>
+          <span class="o">-</span> <span class="s2">&quot;core.application.version&quot;</span>
+    <span class="n">optional</span><span class="p">:</span> <span class="o">&lt;</span><span class="nb">set</span><span class="o">&gt;</span> <span class="c1"># These metadata keys are optional (overrides required and conditional keys)</span>
+    <span class="n">consistent</span><span class="p">:</span>     <span class="c1"># These metadata keys must be the same for all input files</span>
+      <span class="o">-</span> <span class="s2">&quot;core.run_type&quot;</span>
+      <span class="o">-</span> <span class="s2">&quot;core.file_type&quot;</span>
+      <span class="o">-</span> <span class="s2">&quot;core.file_format&quot;</span>
+      <span class="o">-</span> <span class="s2">&quot;core.data_tier&quot;</span>
+      <span class="o">-</span> <span class="s2">&quot;core.data_stream&quot;</span>
+      <span class="o">-</span> <span class="s2">&quot;core.application.name&quot;</span>
+      <span class="o">-</span> <span class="s2">&quot;dune.campaign&quot;</span>
+      <span class="o">-</span> <span class="s2">&quot;dune.requestid&quot;</span>
+      <span class="o">-</span> <span class="s2">&quot;dune.config_file&quot;</span>          <span class="c1"># Not checked in old merging</span>
+      <span class="o">-</span> <span class="s2">&quot;core.application.version&quot;</span>  <span class="c1"># Not checked in old merging</span>
+      <span class="o">-</span> <span class="s2">&quot;dune.output_status&quot;</span>
+    <span class="c1"># - &quot;core.runs&quot;</span>
+    <span class="n">merging</span><span class="p">:</span>   <span class="c1"># Special merging behavior for metadata keys, options are:</span>
+        <span class="c1"># unique   only save key if all values are the same</span>
+        <span class="c1"># all      save a list of all values</span>
+        <span class="c1"># min      save the minimum value</span>
+        <span class="c1"># max      save the maximum value</span>
+        <span class="c1"># sum      save the sum of all values</span>
+        <span class="c1"># union    save the union of all values</span>
+        <span class="c1"># skip     ignore the key</span>
+        <span class="n">default</span><span class="p">:</span>                    <span class="n">unique</span>
+        <span class="s2">&quot;core.first_event_number&quot;</span><span class="p">:</span>  <span class="nb">min</span>
+        <span class="s2">&quot;core.last_event_number&quot;</span><span class="p">:</span>   <span class="nb">max</span>
+        <span class="s2">&quot;core.event_count&quot;</span><span class="p">:</span>         <span class="nb">sum</span>
+        <span class="s2">&quot;core.events&quot;</span><span class="p">:</span>              <span class="n">union</span>
+        <span class="s2">&quot;core.runs&quot;</span><span class="p">:</span>                <span class="n">union</span>
+        <span class="s2">&quot;core.runs_subruns&quot;</span><span class="p">:</span>        <span class="n">union</span>
+        <span class="s2">&quot;art.first_event&quot;</span><span class="p">:</span>          <span class="nb">min</span>
+        <span class="s2">&quot;art.last_event&quot;</span><span class="p">:</span>           <span class="nb">max</span>
+        <span class="s2">&quot;dune.workflow&quot;</span><span class="p">:</span>            <span class="n">subset</span>
+        <span class="c1"># Skip values that don&#39;t make sense to merge</span>
+        <span class="s2">&quot;core.start_time&quot;</span><span class="p">:</span>          <span class="n">skip</span>
+        <span class="s2">&quot;core.end_time&quot;</span><span class="p">:</span>            <span class="n">skip</span>
+        <span class="s2">&quot;Offline.options&quot;</span><span class="p">:</span>          <span class="n">skip</span>
+        <span class="s2">&quot;Offline.machine&quot;</span><span class="p">:</span>          <span class="n">skip</span>
+    <span class="n">overrides</span><span class="p">:</span> <span class="c1"># Set keys to specific values</span>
+        <span class="s2">&quot;retention.status&quot;</span><span class="p">:</span>         <span class="s2">&quot;active&quot;</span>
+
+<span class="n">naming</span><span class="p">:</span>  <span class="c1"># Settings for generating name components from metadata</span>
+    <span class="n">extensions</span><span class="p">:</span>     <span class="c1"># Automatically remove these extensions from all keys</span>
+      <span class="o">-</span> <span class="s2">&quot;fcl&quot;</span>
+      <span class="o">-</span> <span class="s2">&quot;json&quot;</span>
+      <span class="o">-</span> <span class="s2">&quot;yaml&quot;</span>
+      <span class="o">-</span> <span class="s2">&quot;root&quot;</span>
+    <span class="n">substitutions</span><span class="p">:</span>  <span class="c1"># Substitute these values in all keys</span>
+        <span class="s2">&quot;, &quot;</span><span class="p">:</span> <span class="s2">&quot;,&quot;</span>
+        <span class="s2">&quot;.&quot;</span><span class="p">:</span> <span class="s2">&quot;-&quot;</span>
+        <span class="s2">&quot; &quot;</span><span class="p">:</span> <span class="s2">&quot;_&quot;</span>
+    <span class="n">abbreviations</span><span class="p">:</span>  <span class="c1"># Per-key abbreviations for specific values</span>
+        <span class="s2">&quot;core.run_type&quot;</span><span class="p">:</span>
+            <span class="s2">&quot;protodune-sp&quot;</span><span class="p">:</span>             <span class="s2">&quot;pd-sp&quot;</span>
+            <span class="s2">&quot;protodune-dp&quot;</span><span class="p">:</span>             <span class="s2">&quot;pd-dp&quot;</span>
+            <span class="s2">&quot;hd-coldbox&quot;</span><span class="p">:</span>               <span class="s2">&quot;cb-hd&quot;</span>
+            <span class="s2">&quot;vd-coldbox&quot;</span><span class="p">:</span>               <span class="s2">&quot;cb-vd&quot;</span>
+            <span class="s2">&quot;vd-coldbox-bottom&quot;</span><span class="p">:</span>        <span class="s2">&quot;cb-vd-b&quot;</span>
+            <span class="s2">&quot;vd-coldbox-top&quot;</span><span class="p">:</span>           <span class="s2">&quot;cb-vd-t&quot;</span>
+            <span class="s2">&quot;protodune-hd&quot;</span><span class="p">:</span>             <span class="s2">&quot;pd-hd&quot;</span>
+            <span class="s2">&quot;hd-protodune&quot;</span><span class="p">:</span>             <span class="s2">&quot;pd-hd&quot;</span>
+            <span class="s2">&quot;vd-protodune&quot;</span><span class="p">:</span>             <span class="s2">&quot;pd-vd&quot;</span>
+            <span class="s2">&quot;vd-protodune-pds&quot;</span><span class="p">:</span>         <span class="s2">&quot;pd-vd-pds&quot;</span>
+            <span class="s2">&quot;vd-protodune-arapucas&quot;</span><span class="p">:</span>    <span class="s2">&quot;pd-vd-arapucas&quot;</span>
+            <span class="s2">&quot;dc4-vd-coldbox-bottom&quot;</span><span class="p">:</span>    <span class="s2">&quot;cb-dc4-vd-b&quot;</span>
+            <span class="s2">&quot;dc4-vd-coldbox-top&quot;</span><span class="p">:</span>       <span class="s2">&quot;cb-dc4-vd-t&quot;</span>
+            <span class="s2">&quot;dc4-hd-protodune&quot;</span><span class="p">:</span>         <span class="s2">&quot;pd-dc4-hd&quot;</span>
+            <span class="s2">&quot;neardet&quot;</span><span class="p">:</span>                  <span class="s2">&quot;nd&quot;</span>
+            <span class="s2">&quot;neardet-lar&quot;</span><span class="p">:</span>              <span class="s2">&quot;nd-lar&quot;</span>
+            <span class="s2">&quot;neardet-2x2&quot;</span><span class="p">:</span>              <span class="s2">&quot;nd-2x2&quot;</span>
+            <span class="s2">&quot;neardet-2x2-lar&quot;</span><span class="p">:</span>          <span class="s2">&quot;nd-2x2-lar&quot;</span>
+            <span class="s2">&quot;neardet-2x2-lar-charge&quot;</span><span class="p">:</span>   <span class="s2">&quot;nd-2x2-lar-charge&quot;</span>
+            <span class="s2">&quot;neardet-2x2-lar-light&quot;</span><span class="p">:</span>    <span class="s2">&quot;nd-2x2-lar-light&quot;</span>
+            <span class="s2">&quot;neardet-2x2-minerva&quot;</span><span class="p">:</span>      <span class="s2">&quot;nd-2x2-minerva&quot;</span>
+            <span class="s2">&quot;fardet&quot;</span><span class="p">:</span>                   <span class="s2">&quot;fd&quot;</span>
+            <span class="s2">&quot;fardet-sp&quot;</span><span class="p">:</span>                <span class="s2">&quot;fd-sp&quot;</span>
+            <span class="s2">&quot;fardet-hd&quot;</span><span class="p">:</span>                <span class="s2">&quot;fd-hd&quot;</span>
+            <span class="s2">&quot;fardet-vd&quot;</span><span class="p">:</span>                <span class="s2">&quot;fd-vd&quot;</span>
+            <span class="s2">&quot;fardet-dp&quot;</span><span class="p">:</span>                <span class="s2">&quot;fd-dp&quot;</span>
+            <span class="s2">&quot;fardet-moo&quot;</span><span class="p">:</span>               <span class="s2">&quot;fd-moo&quot;</span>
+            <span class="s2">&quot;311_dp_light&quot;</span><span class="p">:</span>             <span class="s2">&quot;311-dp-light&quot;</span>
+            <span class="s2">&quot;physics&quot;</span><span class="p">:</span>                  <span class="s2">&quot;phys&quot;</span>
+            <span class="s2">&quot;protodune&quot;</span><span class="p">:</span>                <span class="s2">&quot;pd&quot;</span>
+            <span class="s2">&quot;protodune-vst&quot;</span><span class="p">:</span>            <span class="s2">&quot;pd-vst&quot;</span>
+        <span class="s2">&quot;core.file_type&quot;</span><span class="p">:</span>
+            <span class="s2">&quot;detector&quot;</span><span class="p">:</span>                 <span class="s2">&quot;det&quot;</span>
+            <span class="s2">&quot;importedDetector&quot;</span><span class="p">:</span>         <span class="s2">&quot;imp-det&quot;</span>
+            <span class="s2">&quot;binary&quot;</span><span class="p">:</span>                   <span class="s2">&quot;bin&quot;</span>
+            <span class="s2">&quot;photon_detector&quot;</span><span class="p">:</span>          <span class="s2">&quot;photo-det&quot;</span>
+        <span class="s2">&quot;core.data_stream&quot;</span><span class="p">:</span>
+            <span class="s2">&quot;calibration&quot;</span><span class="p">:</span>              <span class="s2">&quot;calib&quot;</span>
+            <span class="s2">&quot;physics&quot;</span><span class="p">:</span>                  <span class="s2">&quot;phys&quot;</span>
+            <span class="s2">&quot;commissioning&quot;</span><span class="p">:</span>            <span class="s2">&quot;comm&quot;</span>
+            <span class="s2">&quot;pedestal&quot;</span><span class="p">:</span>                 <span class="s2">&quot;pdstl&quot;</span>
+            <span class="s2">&quot;g4beamline&quot;</span><span class="p">:</span>               <span class="s2">&quot;g4beam&quot;</span>
+        <span class="s2">&quot;core.data_tier&quot;</span><span class="p">:</span>
+            <span class="s2">&quot;simulated&quot;</span><span class="p">:</span>                <span class="s2">&quot;sim&quot;</span>
+            <span class="s2">&quot;hit-reconstructed&quot;</span><span class="p">:</span>        <span class="s2">&quot;hit-reco&quot;</span>
+            <span class="s2">&quot;full-reconstructed&quot;</span><span class="p">:</span>       <span class="s2">&quot;full-reco&quot;</span>
+            <span class="s2">&quot;generated&quot;</span><span class="p">:</span>                <span class="s2">&quot;gen&quot;</span>
+            <span class="s2">&quot;detector-simulated&quot;</span><span class="p">:</span>       <span class="s2">&quot;det-sim&quot;</span>
+            <span class="s2">&quot;root-tuple&quot;</span><span class="p">:</span>               <span class="s2">&quot;tuple&quot;</span>
+            <span class="s2">&quot;root-hist&quot;</span><span class="p">:</span>                <span class="s2">&quot;hist&quot;</span>
+            <span class="s2">&quot;decoded-raw&quot;</span><span class="p">:</span>              <span class="s2">&quot;dec-raw&quot;</span>
+            <span class="s2">&quot;pandora-info&quot;</span><span class="p">:</span>             <span class="s2">&quot;pandora&quot;</span>
+            <span class="s2">&quot;reco-recalibrated&quot;</span><span class="p">:</span>        <span class="s2">&quot;reco-recal&quot;</span>
+            <span class="s2">&quot;root-tuple-virtual&quot;</span><span class="p">:</span>       <span class="s2">&quot;tuple-v&quot;</span>
+            <span class="s2">&quot;binary-raw&quot;</span><span class="p">:</span>               <span class="s2">&quot;binary&quot;</span>
+            <span class="s2">&quot;sam-user&quot;</span><span class="p">:</span>                 <span class="s2">&quot;sam&quot;</span>
+      <span class="c1"># &quot;core.file_format&quot;:</span>
+      <span class="c1">#     &quot;artroot&quot;:                  &quot;art&quot;</span>
+      <span class="c1">#     &quot;binary&quot;:                   &quot;bin&quot;</span>
+      <span class="c1">#     &quot;rootntuple&quot;:               &quot;tuple&quot;</span>
+
+<span class="n">schema</span><span class="p">:</span>
+    <span class="n">type_defs</span><span class="p">:</span>
+        <span class="n">cond_metadata</span><span class="p">:</span>
+            <span class="n">cond</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">cond</span><span class="o">&gt;</span>
+            <span class="n">required</span><span class="p">:</span> <span class="o">&lt;</span><span class="nb">set</span><span class="o">&gt;</span>
+    <span class="n">key_defs</span><span class="p">:</span>
+        <span class="n">metadata</span><span class="o">.</span><span class="n">required</span><span class="p">:</span> <span class="o">&lt;</span><span class="nb">set</span><span class="o">&gt;</span>
+        <span class="n">metadata</span><span class="o">.</span><span class="n">consistent</span><span class="p">:</span> <span class="o">&lt;</span><span class="nb">set</span><span class="o">&gt;</span>
+        <span class="n">metadata</span><span class="o">.</span><span class="n">overrides</span><span class="p">:</span> <span class="o">&lt;</span><span class="nb">map</span><span class="o">&gt;</span>
+        <span class="n">metadata</span><span class="o">.</span><span class="n">types</span><span class="p">:</span> <span class="o">&lt;</span><span class="nb">map</span><span class="o">&gt;</span>
+        <span class="n">metadata</span><span class="o">.</span><span class="n">restricted</span><span class="p">:</span> <span class="o">&lt;</span><span class="nb">map</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span><span class="o">&gt;</span>
+        <span class="n">metadata</span><span class="o">.</span><span class="n">conditional</span><span class="p">:</span> <span class="o">&lt;</span><span class="nb">list</span><span class="p">(</span><span class="n">cond_metadata</span><span class="p">)</span><span class="o">&gt;</span>
+        <span class="n">metadata</span><span class="o">.</span><span class="n">fixes</span><span class="o">.</span><span class="n">bad_keys</span><span class="p">:</span> <span class="o">&lt;</span><span class="nb">map</span><span class="o">&gt;</span>
+        <span class="n">metadata</span><span class="o">.</span><span class="n">fixes</span><span class="o">.</span><span class="n">missing_keys</span><span class="p">:</span> <span class="o">&lt;</span><span class="nb">map</span><span class="o">&gt;</span>
+        <span class="n">metadata</span><span class="o">.</span><span class="n">fixes</span><span class="o">.</span><span class="n">bad_values</span><span class="p">:</span> <span class="o">&lt;</span><span class="nb">map</span><span class="p">(</span><span class="nb">map</span><span class="p">)</span><span class="o">&gt;</span>
+        <span class="n">metadata</span><span class="o">.</span><span class="n">merging</span><span class="p">:</span> <span class="o">&lt;</span><span class="nb">map</span><span class="p">(</span><span class="n">opt</span><span class="p">(</span><span class="n">unique</span><span class="p">,</span><span class="nb">all</span><span class="p">,</span><span class="nb">min</span><span class="p">,</span><span class="nb">max</span><span class="p">,</span><span class="nb">sum</span><span class="p">,</span><span class="n">union</span><span class="p">,</span><span class="n">subset</span><span class="p">,</span><span class="n">skip</span><span class="p">))</span><span class="o">&gt;</span>
+        <span class="n">naming</span><span class="o">.</span><span class="n">extensions</span><span class="p">:</span> <span class="o">&lt;</span><span class="nb">set</span><span class="o">&gt;</span>
+        <span class="n">naming</span><span class="o">.</span><span class="n">substitutions</span><span class="p">:</span> <span class="o">&lt;</span><span class="nb">map</span><span class="o">&gt;</span>
+        <span class="n">naming</span><span class="o">.</span><span class="n">abbreviations</span><span class="p">:</span> <span class="o">&lt;</span><span class="nb">map</span><span class="p">(</span><span class="nb">map</span><span class="p">)</span><span class="o">&gt;</span>
+</pre></div>
+</div>
 </section>
 
 
@@ -63,8 +366,8 @@
   </div>
   <div>
     <h4>Next topic</h4>
-    <p class="topless"><a href="logging.html"
-                          title="next chapter">logging.json</a></p>
+    <p class="topless"><a href="scripts.html"
+                          title="next chapter">merge</a></p>
   </div>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
@@ -97,12 +400,12 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="logging.html" title="logging.json"
+          <a href="scripts.html" title="merge"
              >next</a> |</li>
         <li class="right" >
           <a href="defaults.html" title="defaults.yaml"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">merge-utils 0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">merge-utils 1.0.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="configuration.html" >Configuration</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">metadata.yaml</a></li> 
       </ul>
