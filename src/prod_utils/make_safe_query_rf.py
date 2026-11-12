@@ -15,7 +15,7 @@ import sys
 
 from metacat.webapi import MetaCatClient
 
-from get_tasks import get_tasks
+from get_tasks_rf import get_tasks
 
 
 def make_safe_query(tasks, tag):

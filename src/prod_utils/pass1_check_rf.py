@@ -4,6 +4,8 @@ Counts the parent files and events across the confirmed merged output for a
 task and compares the parent count against the expected NFILES.
 '''
 
+# This code was refactored by Heidi Schellman using Claude Opus 4.8 on 2026-11-12
+
 import os
 import sys
 

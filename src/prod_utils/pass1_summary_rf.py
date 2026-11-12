@@ -5,6 +5,9 @@ tallies parent files, events and average file size, checks the parent count
 against the expected NFILES, and writes a per-task summary CSV.
 '''
 
+# This code was refactored by Heidi Schellman using Claude Opus 4.8 on 2026-11-12
+
+
 import os
 
 from metacat.webapi import MetaCatClient

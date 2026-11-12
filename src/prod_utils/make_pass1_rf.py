@@ -6,6 +6,9 @@ already exist (so a --retry is added when needed), and writes the merge
 command(s) to <task>.sh.
 '''
 
+# This code was refactored by Heidi Schellman using Claude Opus 4.8 on 2026-11-12
+
+
 import os
 import sys
 from datetime import datetime, timezone
