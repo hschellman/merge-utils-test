@@ -5,6 +5,8 @@ Reads $CAMPAIGN_DIR/$CAMPAIGN.csv and writes:
   - $CAMPAIGN_checklist.csv  one row per workflow (batch of files) for tracking
 '''
 
+# This code was refactored by Heidi Schellman using Claude Opus 4.8 on 2026-11-12
+
 import csv
 import math
 import os
@@ -61,9 +63,11 @@ def check_config(config, fcl, campaign):
         sys.exit(f"config file {config} does not contain dune.campaign:{campaign} - please fix this")
 
 
-def count_files(mc_client, dataset):
+def count_files(mc_client, dataset, limit=None):
     '''Return (nfiles, total_size_bytes) for confirmed files in a dataset.'''
     query = f"files from {dataset} where dune.output_status=confirmed"
+    if limit is not None:
+        query += f" limit {limit}"
     if DEBUG:
         print(query)
     result = mc_client.query(query=query, summary="count")
@@ -104,12 +108,18 @@ def main():
         if DEBUG:
             print(reader.fieldnames)
         for row in reader:
+            if row['TAG'][0:1] == '#':
+                print("Skipping comment line:", row)
+                continue
+            limit = None
+            if "TEST" in row['TAG']:
+                limit = 10
             row['BATCH'] = int(row['BATCH'])
             check_config(row['CONFIG'], row['FCL'], row['CAMPAIGN'])
             if DEBUG:
                 print(row['TAG'], row['DATASET'])
 
-            nfiles, size = count_files(mc_client, row['DATASET'])
+            nfiles, size = count_files(mc_client, row['DATASET'], limit)
             print("Result for tag", row['TAG'],
                   ": #files=%d total size=%8.3f GB" % (nfiles, size / 1e9))
             row['NFILES'] = nfiles

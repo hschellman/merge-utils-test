@@ -1,92 +1,86 @@
-'''Check the status of individual workflows for a given task.
+'''Script to check the status of merge workflows for a given task.
 
-For each workflow id in a range, counts the parent files and events across
-the confirmed merged output and checks that the number of parent (input)
-files matches the expected count (batch / chunk).
+Usage:
+    python workflow_check_rf.py <TASK> <start_workflow_id> <end_workflow_id>
+
+Reads task definitions from $MERGE_UTILS_DIR/$CAMPAIGN_DIR/$CAMPAIGN_jobs.csv
+and, for each workflow id in the requested range, checks that the number of
+input (parent) files matches the expected batch/chunk size.
 '''
+
+# This code was refactored by Heidi Schellman using Claude Opus 4.8 on 2026-11-12
 
 import os
 import sys
 
 from metacat.webapi import MetaCatClient
 
-from get_tasks_rf import get_tasks
+from get_tasks import get_tasks
 
 CHUNK = 100
-
-USAGE = ("Usage: python -m workflow_check_rf "
-         "<TASK> <start_workflow_id> <end_workflow_id>")
+DEFAULT_BATCH = 2000
 
 
-def resolve_task(tasks):
-    '''Pick the task from argv, exiting with a helpful message if invalid.'''
-    if len(sys.argv) < 4:
-        print(USAGE)
-        sys.exit(1)
-
-    task = sys.argv[1]
-    if task not in tasks:
-        print(f"Task {task} not found")
-        print("Available tasks:", ', '.join(tasks))
-        sys.exit(1)
-    return task
+def get_tasklist_path():
+    '''Return the path to the <campaign>_jobs.csv task list from the environment.'''
+    return os.path.join(os.getenv("MERGE_UTILS_DIR"),
+                        os.getenv("CAMPAIGN_DIR"),
+                        os.getenv("CAMPAIGN") + "_jobs.csv")
 
 
-def summarize_workflow(files):
-    '''Sum parent and event counts over the queried merged files.
+def check_workflow(mc_client, task, workflow):
+    '''Query metacat for one workflow and return (nparents, event_count, filecount, skip).'''
+    query = ("files where merge.tag=%s and dune.output_status=confirmed "
+             "and dune.workflow['workflow_id']=%d" % (task, workflow))
+    files = mc_client.query(query=query, with_metadata=True, with_provenance=True)
 
-    Returns (parent_count, event_count, file_count, skip).
-    '''
-    parent_count = 0
     event_count = 0
-    file_count = 0
+    nparents = 0
+    filecount = 0
     skip = 0
     for file in files:
-        file_count += 1
+        filecount += 1
         metadata = file["metadata"]
         event_count += metadata["core.event_count"]
-        parent_count += len(file["parents"])
+        nparents += len(file["parents"])
         skip = metadata["merge.skip"]
-    return parent_count, event_count, file_count, skip
+    return nparents, event_count, filecount, skip
 
 
 def main():
-    tasklist = os.path.join(os.getenv("MERGE_UTILS_DIR"),
-                            os.getenv("CAMPAIGN_DIR"),
-                            os.getenv("CAMPAIGN") + "_jobs.csv")
-    tasks = get_tasks(tasklist)
+    tasks = get_tasks(get_tasklist_path())
 
-    task = resolve_task(tasks)
-    info = tasks[task]
+    if len(sys.argv) < 4:
+        print("Usage: python workflow_check_rf.py <TASK> <start_workflow_id> <end_workflow_id>")
+        sys.exit(1)
 
-    nfiles = int(info['NFILES'])
+    task = sys.argv[1]
+    start_workflow = int(sys.argv[2])
+    end_workflow = int(sys.argv[3])
+
+    if task not in tasks:
+        print(f"Task {task} not found")
+        print("Available tasks:", ', '.join(tasks.keys()))
+        sys.exit(1)
+
+    nfiles = int(tasks[task]['NFILES'])
     print("nfiles", nfiles)
 
-    batch = int(info.get("BATCH", 2000))
-    expected_parents = batch // CHUNK
+    # batch was referenced but never assigned in the original script; restored
+    # from the task's BATCH field per the commented-out intent (default 2000).
+    batch = int(tasks[task].get("BATCH", DEFAULT_BATCH))
 
     mc_client = MetaCatClient(os.environ["METACAT_SERVER_URL"])
 
-    start = int(sys.argv[2])
-    end = int(sys.argv[3])
-    for workflow in range(start, end + 1):
-        query = (f"files where merge.tag={task} and "
-                 f"dune.output_status=confirmed and "
-                 f"dune.workflow['workflow_id']={workflow}")
-        files = mc_client.query(query=query, with_metadata=True,
-                                with_provenance=True)
-
-        parent_count, event_count, file_count, skip = summarize_workflow(files)
-
-        if parent_count != expected_parents:
-            print(f"ERROR: final number of input files {parent_count} "
-                  f"is not = the input {expected_parents} "
-                  f"for workflow {workflow} skip {skip}")
+    for workflow in range(start_workflow, end_workflow + 1):
+        nparents, event_count, filecount, skip = check_workflow(mc_client, task, workflow)
+        if nparents != batch / CHUNK:
+            print("ERROR: final number of input files %d is not = the input %d "
+                  "for workflow %d skip %d" % (nparents, batch, workflow, skip))
         else:
-            print(f"This pass1 {task} workflow {workflow} with skip {skip} "
-                  f"is complete {parent_count} {file_count} "
-                  f"({event_count} events)")
+            print("This pass1 %s workflow %d with skip %d is complete %d %d"
+                  % (task, workflow, skip, nparents, filecount))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -1,5 +1,7 @@
 '''Read task definitions from a campaign CSV file.'''
 
+# This code was refactored by Heidi Schellman using Claude Opus 4.8 on 2026-11-12
+
 import csv
 import os
 import sys
